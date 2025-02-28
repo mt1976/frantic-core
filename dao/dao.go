@@ -18,6 +18,11 @@ var DBVersion = 1
 var DB *storm.DB
 var DBName string = "default"
 
+// StormBool is a boolean type that can be marshalled to and from a string, this has been created as Storm does not support boolean types properly
+type StormBool struct {
+	State string
+}
+
 func Initialise(cfg *commonConfig.Settings) error {
 	clock := timing.Start(name, "Initialise", "")
 	logHandler.InfoLogger.Printf("[%v] Initialising...", strings.ToUpper(name))
@@ -80,4 +85,28 @@ func GetStructType(data any) string {
 		rtnType = strings.Split(rtnType, ".")[1]
 	}
 	return rtnType
+}
+
+func (sb *StormBool) Set(b bool) {
+	if b {
+		sb.State = "true"
+	} else {
+		sb.State = "false"
+	}
+}
+
+func (sb *StormBool) Bool() bool {
+	return sb.State == "true"
+}
+
+func (sb *StormBool) String() string {
+	return sb.State
+}
+
+func (sb *StormBool) IsTrue() bool {
+	return sb.Bool()
+}
+
+func (sb *StormBool) IsFalse() bool {
+	return !sb.Bool()
 }
