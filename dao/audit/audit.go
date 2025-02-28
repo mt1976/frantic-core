@@ -82,6 +82,8 @@ var (
 	REPAIR       Action
 	audit        Action
 	BACKUP       Action
+	LOGIN        Action
+	LOGOUT       Action
 )
 
 func init() {
@@ -101,6 +103,8 @@ func init() {
 	REPAIR = Action{code: actions.REPAIR.GetCode(), description: actions.REPAIR.GetDescription("Data"), silent: false, short: actions.REPAIR.GetShortName()}
 	audit = Action{code: actions.AUDIT.GetCode(), description: actions.AUDIT.GetDescription("Audit"), silent: true, short: actions.AUDIT.GetShortName()}
 	BACKUP = Action{code: actions.BACKUP.GetCode(), description: actions.BACKUP.GetDescription("Data"), silent: true, short: actions.BACKUP.GetShortName()}
+	LOGIN = Action{code: actions.LOGIN.GetCode(), description: actions.LOGIN.GetDescription("User"), silent: false, short: actions.LOGIN.GetShortName()}
+	LOGOUT = Action{code: actions.LOGOUT.GetCode(), description: actions.LOGOUT.GetDescription("User"), silent: false, short: actions.LOGOUT.GetShortName()}
 }
 
 func (a *Action) WithMessage(in string) Action {
