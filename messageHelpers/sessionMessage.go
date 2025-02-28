@@ -1,10 +1,10 @@
-package messagehelper
+package messageHelpers
 
 import (
 	"time"
 )
 
-type Session struct {
+type SessionMessage struct {
 	SessionID    string
 	Expiry       time.Time
 	UserKey      string

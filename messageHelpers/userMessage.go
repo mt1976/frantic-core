@@ -1,4 +1,4 @@
-package messagehelper
+package messageHelpers
 
 type UserMessage struct {
 	Key  string
