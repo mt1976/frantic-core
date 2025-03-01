@@ -5,9 +5,24 @@ import (
 )
 
 type SessionMessage struct {
-	SessionID    string
-	Expiry       time.Time
-	UserKey      string
-	UserCode     string
-	SessionToken any
+	SessionID    string      `json:"SessionID"`
+	Expiry       time.Time   `json:"Expiry"`
+	UserKey      string      `json:"UserKey"`
+	UserCode     string      `json:"UserCode"`
+	SessionToken any         `json:"SessionToken"`
+	User         UserMessage `json:"User"`
+	Payload      any         `json:"Payload"`
+}
+
+func (m *SessionMessage) Request(sessionID string, expiry time.Time, user UserMessage) SessionMessage {
+	message := SessionMessage{}
+	message.SessionID = sessionID
+	message.Expiry = expiry
+	message.User = user
+	return message
+}
+
+func (m *SessionMessage) Response(payload any) SessionMessage {
+	m.Payload = payload
+	return *m
 }
