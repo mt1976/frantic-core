@@ -1,7 +1,7 @@
 package messageHelpers
 
 type AuthorityMessage struct {
-	Key       int              `json:"Key"`
+	Key       string           `json:"Key"`
 	User      UserMessage      `json:"User"`
 	Behaviour BehaviourMessage `json:"Behaviour"`
 	Payload   any              `json:"Payload"`

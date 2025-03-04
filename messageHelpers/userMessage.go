@@ -27,16 +27,15 @@ func (m *UserMessage) Response(payload any) UserMessage {
 
 func (m *UserMessage) Validate(log *log.Logger) error {
 	if m.Key == "" {
-		log.Println("user Key is required")
+		log.Printf("[%v] user Key is required", "frantic-core")
 		return fmt.Errorf("user Key is required")
 	}
 	if m.Code == "" {
-		log.Println("user Code is required")
+		log.Printf("[%v] user Code is required", "frantic-core")
 		return fmt.Errorf("user Code is required")
 	}
 	if m.Source == "" {
-		log.Println("user Source is required")
-		return fmt.Errorf("user Source is required")
+		log.Printf("[%v] user Source is required", "frantic-core")
 	}
 	return nil
 }

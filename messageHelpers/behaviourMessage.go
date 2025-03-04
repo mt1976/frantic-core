@@ -1,7 +1,13 @@
 package messageHelpers
 
+import (
+	"fmt"
+	"log"
+)
+
 type BehaviourMessage struct {
 	Key     string `json:"Key"`
+	Source  string `json:"Source"`
 	Payload any    `json:"Payload"`
 }
 
@@ -20,4 +26,17 @@ func (m *DeclareMessage) Request(domain string, behaviour string) DeclareMessage
 func (m *DeclareMessage) Response(payload any) DeclareMessage {
 	m.Behaviour.Payload = payload
 	return *m
+}
+
+func (m *BehaviourMessage) Validate(log *log.Logger) error {
+	if m.Key == "" {
+		log.Printf("[%v] Behaviour Key is required", "frantic-core")
+		return fmt.Errorf("behaviour Key is required")
+	}
+
+	if m.Source == "" {
+		log.Printf("[%v] Warning! Behaviour Source is not provided", "frantic-core")
+		return nil
+	}
+	return nil
 }
