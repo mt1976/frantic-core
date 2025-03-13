@@ -33,7 +33,7 @@ require (
 	github.com/gregdel/pushover v1.3.1
 	github.com/leodido/go-urn v1.4.0 // indirect
 	go.etcd.io/bbolt v1.4.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 )
 
@@ -42,7 +42,6 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/jsuar/go-cron-descriptor v0.1.0
-	github.com/mt1976/frantic-aegis v0.0.28
 	github.com/robfig/cron/v3 v3.0.1
 	golang.org/x/crypto v0.35.0
 	golang.org/x/sys v0.30.0 // indirect
