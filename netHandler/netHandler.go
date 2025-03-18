@@ -57,6 +57,14 @@ func isHostReachable(out []byte) bool {
 		return false
 	case strings.Contains(string(out), "cannot resolve"):
 		return false
+	case strings.Contains(string(out), "unknown host"):
+		return false
+	case strings.Contains(string(out), "Name or service not known"):
+		return false
+	case strings.Contains(string(out), "Temporary failure in name resolution"):
+		return false
+	case strings.Contains(string(out), "Ping request could not find host"):
+		return false
 	}
 	return true
 }
