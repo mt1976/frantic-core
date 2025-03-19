@@ -90,7 +90,7 @@ func pruneExpiredBackups(job *DatabaseBackupCleanerJob) {
 			return
 		}
 
-		logHandler.ServiceLogger.Printf("[%v] (%v/%v) Folder=[%v] Backup=[%v] DeleteBefore=[%v]", name, x, noFolders, folder, backupDate.Format(DMY), deleteBeforeDate.Format(DMY))
+		logHandler.ServiceLogger.Printf("[%v] (%v/%v) Folder=[%v] Backup=[%v] DeleteBefore=[%v]", name, x+1, noFolders, folder, backupDate.Format(DMY), deleteBeforeDate.Format(DMY))
 
 		// Check if the backupDate is before the deleteBeforeDate
 		if backupDate.Before(deleteBeforeDate) {
