@@ -2,6 +2,7 @@ package maintenance
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/mt1976/frantic-core/application"
@@ -50,7 +51,7 @@ func pruneExpiredBackups(job *DatabaseBackupCleanerJob) {
 	j := timing.Start(job.Name(), actions.MAINTENANCE.GetCode(), job.Description())
 	// Get Settings
 
-	retainBackupDays := settings.GetHistory_MaxHistoryEntries()
+	retainBackupDays := settings.GetBackup_RetainForDays()
 
 	logHandler.ServiceLogger.Printf("[%v] RetainBackupDays=[%v]", name, retainBackupDays)
 	today := jobs.StartOfDay(time.Now())
@@ -87,12 +88,16 @@ func pruneExpiredBackups(job *DatabaseBackupCleanerJob) {
 			logHandler.ServiceLogger.Panicf("[%v] Error=[%v]", name, err.Error())
 			return
 		}
+		logHandler.InfoLogger.Printf("[%v] BackupDate=[%v]", name, backupDate.Format(DMY))
+		logHandler.InfoLogger.Printf("[%v] DeleteBeforeDate=[%v]", name, deleteBeforeDate.Format(DMY))
 		// Check if the backupDate is before the deleteBeforeDate
 		if backupDate.Before(deleteBeforeDate) {
 			// Delete the folder
 			logHandler.ServiceLogger.Printf("[%v] Deleting=[%v] FolderDate=[%v] DeleteDate=[%v]", name, folder, backupDate.Format(DMY), deleteBeforeDateStr)
 			count++
-			err := ioHelpers.DeleteFolder(backupPath + folder)
+			deletePath := fmt.Sprintf("%v%v%v", backupPath, os.PathSeparator, folder)
+			logHandler.ServiceLogger.Printf("[%v] Deleting=[%v]", name, deletePath)
+			err := ioHelpers.DeleteFolder(deletePath)
 			if err != nil {
 				logHandler.ErrorLogger.Printf("[%v] Error=[%v]", name, err.Error())
 				return
@@ -121,5 +126,9 @@ func (job *DatabaseBackupCleanerJob) AddDatabaseAccessFunctions(fn func() ([]*da
 }
 
 func (job *DatabaseBackupCleanerJob) Description() string {
-	return "Scheduled Database Maintenance - Prunes Old Backups, Retaining the last 30 days, run at 00:25 every day"
+	settings := commonConfig.Get()
+	retainBackupDays := settings.GetBackup_RetainForDays()
+	sched := jobs.GetHumanReadableCronFreq(job.Schedule())
+	returnString := fmt.Sprintf("Scheduled Database Maintenance - Prunes Old Backups, Retaining the last %v days, run at %v", retainBackupDays, sched)
+	return returnString
 }

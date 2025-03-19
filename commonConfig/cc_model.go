@@ -157,4 +157,8 @@ type Settings struct {
 			Compress   string `toml:"compress"`
 		} `toml:"Defaults"`
 	} `toml:"Logging"`
+
+	Backups struct {
+		RetainDays int `toml:"retainDays"`
+	}
 }

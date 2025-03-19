@@ -85,6 +85,8 @@ internal = "20060102"
 [History]
 maxEntries = 10
 
+[Backups]
+retainDays = 7
 
 [[Hosts]]
 name = "SILICON"
