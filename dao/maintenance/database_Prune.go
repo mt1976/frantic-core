@@ -78,18 +78,20 @@ func pruneExpiredBackups(job *DatabaseBackupCleanerJob) {
 		logHandler.ServiceLogger.Panicf("[%v] Error=[%v]", name, err.Error())
 		return
 	}
-	logHandler.ServiceLogger.Printf("[%v] No Folders=[%v]", name, len(folders))
+	noFolders := len(folders)
+	logHandler.ServiceLogger.Printf("[%v] No Folders=[%v]", name, noFolders)
 	count := 0
 	// For each folder check if it is before the deleteBeforeDate
-	for _, folder := range folders {
+	for x, folder := range folders {
 		// Get the date from the folder name
 		backupDate, err := getDateFromBackupFolderName(folder)
 		if err != nil {
 			logHandler.ServiceLogger.Panicf("[%v] Error=[%v]", name, err.Error())
 			return
 		}
-		logHandler.InfoLogger.Printf("[%v] BackupDate=[%v]", name, backupDate.Format(DMY))
-		logHandler.InfoLogger.Printf("[%v] DeleteBeforeDate=[%v]", name, deleteBeforeDate.Format(DMY))
+
+		logHandler.ServiceLogger.Printf("[%v] (%v/%v) Folder=[%v] Backup=[%v] DeleteBefore=[%v]", name, x, noFolders, folder, backupDate.Format(DMY), deleteBeforeDate.Format(DMY))
+
 		// Check if the backupDate is before the deleteBeforeDate
 		if backupDate.Before(deleteBeforeDate) {
 			// Delete the folder
