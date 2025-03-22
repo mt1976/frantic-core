@@ -10,13 +10,15 @@ type UserMessage struct {
 	Code    string `json:"Code"`
 	Payload any    `json:"Payload"`
 	Source  string `json:"Source"`
+	Locale  string `json:"Locale"`
 }
 
-func (m *UserMessage) Request(key, code, source string) UserMessage {
+func (m *UserMessage) Request(key, code, source, locale string) UserMessage {
 	message := UserMessage{}
 	message.Key = key
 	message.Code = code
 	message.Source = source
+	message.Locale = locale
 	return message
 }
 

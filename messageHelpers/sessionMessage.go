@@ -19,6 +19,8 @@ func (m *SessionMessage) Request(sessionID string, expiry time.Time, user UserMe
 	message.SessionID = sessionID
 	message.Expiry = expiry
 	message.User = user
+	message.UserKey = user.Key
+	message.UserCode = user.Code
 	return message
 }
 

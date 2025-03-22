@@ -5,6 +5,7 @@ type AuthorityMessage struct {
 	User      UserMessage      `json:"User"`
 	Behaviour BehaviourMessage `json:"Behaviour"`
 	Payload   any              `json:"Payload"`
+	Source    string           `json:"Source"`
 }
 
 type GrantMessage struct {
