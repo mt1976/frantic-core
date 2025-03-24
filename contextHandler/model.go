@@ -5,7 +5,7 @@ import (
 	"github.com/mt1976/frantic-core/idHelpers"
 )
 
-type fartFarmer struct {
+type contextKey struct {
 	name                string
 	pointlessIdentifier string
 }
@@ -14,16 +14,19 @@ var cfg *commonConfig.Settings
 
 var (
 	// / SECURITY SESSION KEYS
-	sessionIDKey    fartFarmer
-	userKeyKey      fartFarmer
-	userCodeKey     fartFarmer
-	tokenKey        fartFarmer
-	expiryPeriodKey fartFarmer
+	sessionIDKey    contextKey
+	userKeyKey      contextKey
+	userCodeKey     contextKey
+	tokenKey        contextKey
+	expiryPeriodKey contextKey
+	localeKey       contextKey
+	themeKey        contextKey
+	timezoneKey     contextKey
 )
 
 // NewFartFarmer is a constructor for the fartFarmer struct
-func new(in string) fartFarmer {
-	var out fartFarmer
+func new(in string) contextKey {
+	var out contextKey
 	out.name = in
 	out.pointlessIdentifier = idHelpers.Encode(in)
 	return out
@@ -36,4 +39,7 @@ func init() {
 	userCodeKey = new(cfg.GetSecuritySessionKey_UserCode())
 	tokenKey = new(cfg.GetSecuritySessionKey_Token())
 	expiryPeriodKey = new(cfg.GetSecuritySessionKey_ExpiryPeriod())
+	localeKey = new(cfg.GetSecuritySessionKey_Locale())
+	themeKey = new(cfg.GetSecuritySessionKey_Theme())
+	timezoneKey = new(cfg.GetSecuritySessionKey_Timezone())
 }

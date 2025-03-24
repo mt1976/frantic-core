@@ -97,6 +97,9 @@ type Settings struct {
 				UserCode     string `toml:"userCode"`
 				Token        string `toml:"token"`
 				ExpiryPeriod string `toml:"expiryPeriod"`
+				Locale       string `toml:"locale"`
+				Theme        string `toml:"theme"`
+				Timezone     string `toml:"timezone"`
 			} `toml:"Keys"`
 		} `toml:"Sessions"`
 		Service struct {

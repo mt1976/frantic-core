@@ -39,3 +39,19 @@ func (s *Settings) GetServiceUser_UID() string {
 func (s *Settings) GetServiceUser_UserCode() string {
 	return s.GetServiceUser_UID() + "_" + s.GetServiceUser_Name()
 }
+
+// locale = "xs-locale"
+// theme = "xs-theme"
+// timezone = "xs-timezone"
+
+func (s *Settings) GetSecuritySessionKey_Locale() string {
+	return s.Security.Sessions.Keys.Locale
+}
+
+func (s *Settings) GetSecuritySessionKey_Theme() string {
+	return s.Security.Sessions.Keys.Theme
+}
+
+func (s *Settings) GetSecuritySessionKey_Timezone() string {
+	return s.Security.Sessions.Keys.Timezone
+}

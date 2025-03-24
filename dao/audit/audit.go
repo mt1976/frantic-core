@@ -257,7 +257,7 @@ func getAuditUserCode(ctx context.Context) (string, error) {
 	}
 
 	// Get the current user from the context
-	sessionUser := contextHandler.GetUserCode(ctx)
+	sessionUser := contextHandler.GetSession_UserCode(ctx)
 	//ctx.Value(cfg.GetSecuritySessionKey_UserCode())
 	if sessionUser != "" {
 		return sessionUser, nil
