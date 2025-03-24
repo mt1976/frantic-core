@@ -13,6 +13,8 @@ type SessionMessage struct {
 	User         UserMessage `json:"User"`
 	Payload      any         `json:"Payload"`
 	Locale       string      `json:"Locale"`
+	Spare1       string      `json:"Spare1"`
+	Spare2       string      `json:"Spare2"`
 }
 
 func (m *SessionMessage) Request(sessionID string, expiry time.Time, user UserMessage) SessionMessage {

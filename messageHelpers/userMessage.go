@@ -11,6 +11,8 @@ type UserMessage struct {
 	Payload any    `json:"Payload"`
 	Source  string `json:"Source"`
 	Locale  string `json:"Locale"`
+	Spare1  string `json:"Spare1"`
+	Spare2  string `json:"Spare2"`
 }
 
 func (m *UserMessage) Request(key, code, source, locale string) UserMessage {
