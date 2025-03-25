@@ -6,21 +6,34 @@ import (
 )
 
 type UserMessage struct {
-	Key     string `json:"Key"`
-	Code    string `json:"Code"`
-	Payload any    `json:"Payload"`
-	Source  string `json:"Source"`
-	Locale  string `json:"Locale"`
-	Spare1  string `json:"Spare1"`
-	Spare2  string `json:"Spare2"`
+	Key      string `json:"Key"`
+	Code     string `json:"Code"`
+	Payload  any    `json:"Payload"`
+	Source   string `json:"Source"`
+	Locale   string `json:"Locale"`
+	Theme    string `json:"Theme"`
+	Timezone string `json:"Timezone"`
+	Spare1   string `json:"Spare1"`
+	Spare2   string `json:"Spare2"`
 }
 
-func (m *UserMessage) Request(key, code, source, locale string) UserMessage {
+func (m *UserMessage) Request(key, code, source, locale, theme, timezone string) UserMessage {
 	message := UserMessage{}
 	message.Key = key
 	message.Code = code
 	message.Source = source
 	message.Locale = locale
+	if locale == "" {
+		message.Locale = cfg.GetApplication_Locale()
+	}
+	message.Theme = theme
+	if theme == "" {
+		message.Theme = cfg.GetApplication_Theme()
+	}
+	message.Timezone = timezone
+	if timezone == "" {
+		message.Timezone = cfg.GetApplication_Timezone()
+	}
 	return message
 }
 

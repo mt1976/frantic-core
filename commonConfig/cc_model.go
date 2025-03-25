@@ -13,6 +13,8 @@ type Settings struct {
 		Author      string `toml:"author"`
 		License     string `toml:"license"`
 		Locale      string `toml:"locale"`
+		Theme       string `toml:"theme"`
+		Timezone    string `toml:"timezone"`
 	} `toml:"Application"`
 
 	Database struct {

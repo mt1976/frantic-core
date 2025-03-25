@@ -1,6 +1,10 @@
 package commonConfig
 
-import "strings"
+import (
+	"strings"
+
+	timehelpers "github.com/mt1976/frantic-core/timeHelpers"
+)
 
 func (s *Settings) GetApplication_Name() string {
 	return s.Application.Name
@@ -47,6 +51,22 @@ func (s *Settings) GetApplication_Locale() string {
 		return "en_GB"
 	}
 	return s.Application.Locale
+}
+
+func (s *Settings) GetApplication_Theme() string {
+	if s.Application.Theme == "" {
+		return "default"
+	}
+	return s.Application.Theme
+}
+
+func (s *Settings) GetApplication_Timezone() string {
+	if s.Application.Timezone == "" {
+		locale := s.GetApplication_Locale()
+		rtnval, _ := timehelpers.InferTimezoneFromLocale(locale)
+		return rtnval
+	}
+	return s.Application.Timezone
 }
 
 func (s *Settings) IsApplicationMode(inMode MODE) bool {
