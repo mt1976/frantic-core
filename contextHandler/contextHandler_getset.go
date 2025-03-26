@@ -89,6 +89,15 @@ func GetSession_Timezone(ctx context.Context) string {
 	return value.(string)
 }
 
+func GetSession_UserRole(ctx context.Context) string {
+	value := ctx.Value(userRoleKey)
+	if value == nil {
+		logHandler.WarningLogger.Printf("User role requested but not found in context, returning empty string")
+		return ""
+	}
+	return value.(string)
+}
+
 // Setters
 
 func SetSession_ID(ctx context.Context, sessionID string) context.Context {
@@ -121,4 +130,8 @@ func SetSession_Theme(ctx context.Context, theme string) context.Context {
 
 func SetSession_Timezone(ctx context.Context, timezone string) context.Context {
 	return context.WithValue(ctx, timezoneKey, timezone)
+}
+
+func SetSession_UserRole(ctx context.Context, role string) context.Context {
+	return context.WithValue(ctx, userRoleKey, role)
 }

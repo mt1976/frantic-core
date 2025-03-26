@@ -34,7 +34,7 @@ func DeployDefaultsPayload() error {
 		//logger.InfoLogger.Printf("Copying %v", entry.Name())
 		from := "./" + defaultsFolder + string(os.PathSeparator) + entry.Name()
 		to := destinationFolder + string(os.PathSeparator) + entry.Name()
-		logHandler.EventLogger.Printf("Copying [%v] to [%v]", from, to)
+		//logHandler.EventLogger.Printf("Copying [%v] to [%v]", from, to)
 		err = startupCopyFile(from, to)
 		if err != nil {
 			logHandler.ErrorLogger.Println(err.Error())

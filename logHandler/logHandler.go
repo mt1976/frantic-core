@@ -94,7 +94,7 @@ func init() {
 		translationWriter = io.MultiWriter(io.Discard)
 	}
 
-	traceWriter := io.MultiWriter(&lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "trace"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	traceWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "trace"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsTraceLoggingDisabled() || settings.IsLoggingDisabled() {
 		traceWriter = io.MultiWriter(io.Discard)
 	}
@@ -155,7 +155,7 @@ func init() {
 	DatabaseLogger = log.New(databaseWriter, formatNameWithColor(Gray, "Database"), msgStructure)
 	ApiLogger = log.New(apiWriter, formatNameWithColor(Green, "API"), msgStructure)
 	ImportLogger = log.New(importWriter, formatNameWithColor(Blue, "Import"), msgStructure)
-	ExportLogger = log.New(exportWriter, formatNameWithColor(Blue, "Export"), msgStructure)
+	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Export"), msgStructure)
 	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Communications"), msgStructure)
 }
 

@@ -55,3 +55,7 @@ func (s *Settings) GetSecuritySessionKey_Theme() string {
 func (s *Settings) GetSecuritySessionKey_Timezone() string {
 	return s.Security.Sessions.Keys.Timezone
 }
+
+func (s *Settings) GetSecuritySessionKey_UserRole() string {
+	return s.Security.Sessions.Keys.Role
+}

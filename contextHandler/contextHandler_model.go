@@ -22,6 +22,7 @@ var (
 	localeKey       contextKey
 	themeKey        contextKey
 	timezoneKey     contextKey
+	userRoleKey     contextKey
 )
 
 // NewFartFarmer is a constructor for the fartFarmer struct
@@ -42,4 +43,5 @@ func init() {
 	localeKey = new(cfg.GetSecuritySessionKey_Locale())
 	themeKey = new(cfg.GetSecuritySessionKey_Theme())
 	timezoneKey = new(cfg.GetSecuritySessionKey_Timezone())
+	userRoleKey = new(cfg.GetSecuritySessionKey_UserRole())
 }

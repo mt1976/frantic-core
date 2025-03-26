@@ -102,6 +102,7 @@ type Settings struct {
 				Locale       string `toml:"locale"`
 				Theme        string `toml:"theme"`
 				Timezone     string `toml:"timezone"`
+				Role         string `toml:"role"`
 			} `toml:"Keys"`
 		} `toml:"Sessions"`
 		Service struct {
