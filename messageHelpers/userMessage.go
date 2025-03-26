@@ -13,11 +13,13 @@ type UserMessage struct {
 	Locale   string `json:"Locale"`
 	Theme    string `json:"Theme"`
 	Timezone string `json:"Timezone"`
+	Role     string `json:"Role"`
+	Spare0   string `json:"Spare0"`
 	Spare1   string `json:"Spare1"`
 	Spare2   string `json:"Spare2"`
 }
 
-func (m *UserMessage) Request(key, code, source, locale, theme, timezone string) UserMessage {
+func (m *UserMessage) Request(key, code, source, locale, theme, timezone, role string) UserMessage {
 	message := UserMessage{}
 	message.Key = key
 	message.Code = code
@@ -33,6 +35,10 @@ func (m *UserMessage) Request(key, code, source, locale, theme, timezone string)
 	message.Timezone = timezone
 	if timezone == "" {
 		message.Timezone = cfg.GetApplication_Timezone()
+	}
+	message.Role = role
+	if role == "" {
+		message.Role = "default"
 	}
 	return message
 }
