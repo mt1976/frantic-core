@@ -130,3 +130,45 @@ func IsAfterOrEqualTo(t1, t2 time.Time) bool {
 	}
 	return false
 }
+
+// AddWorkingDays adds n working days (excluding weekends) to a given date
+func AddWorkingDays(startDate time.Time, daysToAdd int) time.Time {
+	currentDate := startDate
+	addedDays := 0
+
+	for addedDays < daysToAdd {
+		currentDate = currentDate.AddDate(0, 0, 1) // Add one day
+
+		// Skip weekends
+		if IsWorkingDay(currentDate) {
+			addedDays++
+		}
+	}
+	return currentDate
+}
+
+func IsWorkingDay(t time.Time) bool {
+	// Purpose: check if a date is a working day
+	if t.Weekday() == time.Saturday || t.Weekday() == time.Sunday {
+		return false
+	}
+	return true
+}
+
+// AdjustToNextWorkingday moves the date forward to the next weekday if it's a weekend
+func AdjustToNextWorkingday(date time.Time) time.Time {
+	switch date.Weekday() {
+	case time.Saturday:
+		return date.AddDate(0, 0, 2) // Move to Monday
+	case time.Sunday:
+		return date.AddDate(0, 0, 1) // Move to Monday
+	default:
+		return date
+	}
+}
+
+// AddMonthAndAdjust adds 1 calendar month and adjusts to the next weekday if needed
+func AddMonthAndAdjust(startDate time.Time, noMonths int) time.Time {
+	datePlusMonth := startDate.AddDate(0, noMonths, 0)
+	return AdjustToNextWorkingday(datePlusMonth)
+}
