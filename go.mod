@@ -11,6 +11,7 @@ require (
 	github.com/segmentio/ksuid v1.0.4
 	github.com/trisacrypto/lei v1.0.0
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
+	golang.org/x/term v0.30.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
@@ -23,7 +24,6 @@ require (
 	github.com/smartystreets/goconvey v1.8.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/term v0.30.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
 
@@ -34,8 +34,8 @@ require (
 	github.com/gregdel/pushover v1.3.1
 	github.com/leodido/go-urn v1.4.0 // indirect
 	go.etcd.io/bbolt v1.4.0 // indirect
-	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 )
 
 require (
@@ -44,6 +44,6 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/jsuar/go-cron-descriptor v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
-	golang.org/x/crypto v0.35.0
+	golang.org/x/crypto v0.36.0
 	golang.org/x/sys v0.31.0 // indirect
 )
