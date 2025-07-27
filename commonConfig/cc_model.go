@@ -35,6 +35,7 @@ type Settings struct {
 		Port        int    `toml:"port"`
 		Protocol    string `toml:"protocol"`
 		Environment string `toml:"environment"`
+		Compression bool   `toml:"compression"`
 	} `toml:"Server"`
 
 	Message struct {
