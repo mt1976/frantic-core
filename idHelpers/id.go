@@ -16,7 +16,7 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-const SEP = "."
+const SEP = "⋮"
 
 func Encode(in string) string {
 
