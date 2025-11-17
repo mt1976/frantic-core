@@ -1,6 +1,6 @@
 # frantic-core
 
-frantic-core is a comprehensive Go utility library providing a wide range of helpers and utilities for application development. It includes modules for banking, colors, configuration, error handling, date and time helpers, logging, math, messaging, networking, notifications, string manipulation, and more.
+frantic-core is a comprehensive Go utility library providing a wide range of helpers and utilities for application development. It includes modules for banking, colors, configuration, error handling, date and time helpers, logging, math, messaging, networking, notifications, string manipulation, and more.  
 
 ## Features
 
