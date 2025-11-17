@@ -60,9 +60,9 @@ func PostRun(job Job) {
 func CodedName(job Job) string {
 	// Purpose: To return the coded name of a job
 	name := job.Name()
-	name = strings.Replace(name, " ", "", -1)
-	name = strings.Replace(name, "-", "", -1)
-	name = strings.Replace(name, "_", "", -1)
+	name = strings.ReplaceAll(name, " ", "")
+	name = strings.ReplaceAll(name, "-", "")
+	name = strings.ReplaceAll(name, "_", "")
 	name = stringHelpers.RemoveSpecialChars(name)
 	return name
 }
