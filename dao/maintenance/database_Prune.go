@@ -98,9 +98,9 @@ func pruneExpiredBackups(job *DatabaseBackupCleanerJob) {
 			logHandler.ServiceLogger.Printf("[%v] Deleting=[%v] FolderDate=[%v] DeleteDate=[%v]", name, folder, backupDate.Format(DMY), deleteBeforeDateStr)
 			count++
 			logHandler.ServiceLogger.Printf("[%v] (%v/%v) Deleting Folder=[%v]", name, x+1, noFolders, folder)
-			logHandler.ServiceLogger.Printf("[%v] pathSeparator=[%v]", name, os.PathSeparator)
-			logHandler.ServiceLogger.Printf("[%v] PathListSeparator=[%v]", name, os.PathListSeparator)
-			deletePath := fmt.Sprintf("%v%v%v%v", backupPath, os.PathSeparator, os.PathSeparator, folder)
+			// logHandler.ServiceLogger.Printf("[%v] pathSeparator=[%v]", name, os.PathSeparator)
+			// logHandler.ServiceLogger.Printf("[%v] PathListSeparator=[%v]", name, os.PathListSeparator)
+			deletePath := fmt.Sprintf("%v%c%v", backupPath, os.PathSeparator, folder)
 			logHandler.ServiceLogger.Printf("[%v] Deleting=[%v]", name, deletePath)
 			err := ioHelpers.DeleteFolder(deletePath)
 			if err != nil {
