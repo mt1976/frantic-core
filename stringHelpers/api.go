@@ -1,9 +1,12 @@
 package stringHelpers
 
 import (
+	"crypto/sha3"
+	"fmt"
 	"strings"
 
-	"github.com/mt1976/frantic-core/idHelpers"
+	"github.com/mt1976/frantic-core/htmlHelpers"
+	"github.com/mt1976/frantic-core/logHandler"
 )
 
 // Lowers the first character of a string
@@ -48,7 +51,20 @@ func PadLeft(s string, p string, l int) string {
 
 // Encode encodes a string to base64
 func Encode(rawStr string) string {
-	return idHelpers.Encode(rawStr)
+	// Encode a string to base64
+	out := rawStr
+	out = strings.Replace(out, " ", "", -1)
+	out = strings.Trim(out, " ")
+	out, err := htmlHelpers.ToPathSafe(out)
+	if err != nil {
+		logHandler.ErrorLogger.Printf("error encoding string: %v", err.Error())
+		return ""
+	}
+
+	z := sha3.Sum256([]byte(out))
+	out = fmt.Sprintf("%x", z)
+
+	return out
 }
 
 // DQuote wraps the string in double quotes - ""

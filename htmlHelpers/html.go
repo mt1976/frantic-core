@@ -28,6 +28,13 @@ func ValueToBool(s string) bool {
 	return s == "on"
 }
 
+func BoolToValue(b bool) string {
+	if b {
+		return "on"
+	}
+	return "off"
+}
+
 func ToPathSafe(s string) (string, error) {
 	r := url.PathEscape(s)
 	sEnc := b64.StdEncoding.EncodeToString([]byte(r))

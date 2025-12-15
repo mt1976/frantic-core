@@ -9,6 +9,9 @@ import (
 
 	"github.com/galsondor/go-ascii"
 	"github.com/mt1976/frantic-core/logHandler"
+	"github.com/rivo/uniseg"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 const (
@@ -195,4 +198,76 @@ func makeDisplayable(in string) string {
 	s := strings.ReplaceAll(in, cr, string(rune(ascii.CR)))
 	s = strings.ReplaceAll(s, lf, string(rune(ascii.LF)))
 	return s
+}
+
+func CamelCase(s string) string {
+
+	// Remove all characters that are not alphanumeric or spaces or underscores
+	s = regexp.MustCompile("[^a-zA-Z0-9_ ]+").ReplaceAllString(s, "")
+
+	// Replace all underscores with spaces
+	s = strings.ReplaceAll(s, "_", " ")
+
+	// Title case s
+	s = cases.Title(language.BritishEnglish, cases.NoLower).String(s)
+
+	// Remove all spaces
+	s = strings.ReplaceAll(s, " ", "")
+
+	// Lowercase the first letter
+	if len(s) > 0 {
+		s = strings.ToLower(s[:1]) + s[1:]
+	}
+
+	return s
+}
+
+func CompareStrings(a, b string) {
+	linesA := strings.Split(a, "\n")
+	linesB := strings.Split(b, "\n")
+
+	max := len(linesA)
+	if len(linesB) > max {
+		max = len(linesB)
+	}
+
+	for i := 0; i < max; i++ {
+		var lineA, lineB string
+
+		if i < len(linesA) {
+			lineA = linesA[i]
+		}
+		if i < len(linesB) {
+			lineB = linesB[i]
+		}
+
+		// If identical, skip
+		if lineA == lineB {
+			continue
+		}
+
+		// If one line is missing
+		switch {
+		case lineA == "" && lineB != "":
+			logHandler.WarningLogger.Printf("[Line %d] Added:    %q", i+1, lineB)
+		case lineA != "" && lineB == "":
+			logHandler.WarningLogger.Printf("[Line %d] Removed:  %q", i+1, lineA)
+		default:
+			logHandler.WarningLogger.Printf("[Line %d] Changed:", i+1)
+			logHandler.WarningLogger.Printf("   - %q", lineA)
+			logHandler.WarningLogger.Printf("   + %q", lineB)
+		}
+	}
+}
+
+func RemoveSpecialCharacters(s string) string {
+	var b strings.Builder
+	gr := uniseg.NewGraphemes(s)
+	for gr.Next() {
+		r := gr.Runes()[0]
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			b.WriteString(gr.Str())
+		}
+	}
+	return b.String()
 }
