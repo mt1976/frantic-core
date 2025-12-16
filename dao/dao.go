@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"strconv"
@@ -125,11 +126,15 @@ func (sb *StormBool) IsFalse() bool {
 }
 
 func (i *Int) Set(in int) Int {
-	return Int{Value: strconv.Itoa(in)}
+	i.Value = strconv.Itoa(in)
+	return *i
 }
 
 func (i *Int) Int() int {
 	val, err := strconv.Atoi(i.Value)
+	if i.Value == "" {
+		return 0
+	}
 	if err != nil {
 		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidTypeError("Int", i.Value, "int"))
 	}
@@ -144,11 +149,79 @@ func (i *Int) String() string {
 	return i.Value
 }
 
+func (i *Int) Equals(other Int) bool {
+	return i.Value == other.Value
+}
+
+func (i *Int) LessThan(other Int) bool {
+	return i.Int() < other.Int()
+}
+
+func (i *Int) LessThanOrEqual(other Int) bool {
+	return i.Int() <= other.Int()
+}
+
+func (i *Int) GreaterThan(other Int) bool {
+	return i.Int() > other.Int()
+}
+
+func (i *Int) GreaterThanOrEqual(other Int) bool {
+	return i.Int() >= other.Int()
+}
+
+func (i *Int) Add(other Int) Int {
+	sum := i.Int() + other.Int()
+	return i.Set(sum)
+}
+
+func (i *Int) Subtract(other Int) Int {
+	diff := i.Int() - other.Int()
+	return i.Set(diff)
+}
+
+func (i *Int) MultiplyBy(other Int) Int {
+	prod := i.Int() * other.Int()
+	return i.Set(prod)
+}
+
+func (i *Int) DivideBy(other Int) Int {
+	if other.Int() == 0 {
+		logHandler.ErrorLogger.Panic(fmt.Errorf("division by zero in Int.Divide"))
+		return *i
+	}
+	quot := i.Int() / other.Int()
+	return i.Set(quot)
+}
+
+func (i *Int) IncrumentBy(other Int) Int {
+	sum := i.Int() + other.Int()
+	return i.Set(sum)
+}
+
+func (i *Int) Increment() Int {
+	sum := i.Int() + 1
+	return i.Set(sum)
+}
+
+func (i *Int) DecrementBy(other Int) Int {
+	diff := i.Int() - other.Int()
+	return i.Set(diff)
+}
+
+func (i *Int) Decrement() Int {
+	diff := i.Int() - 1
+	return i.Set(diff)
+}
+
 func (f *Float) Set(in float64) Float {
-	return Float{Value: strconv.FormatFloat(in, 'f', -1, 64)}
+	f.Value = strconv.FormatFloat(in, 'f', -1, 64)
+	return *f
 }
 
 func (f *Float) Float() float64 {
+	if f.Value == "" {
+		return 0.0
+	}
 	val, err := strconv.ParseFloat(f.Value, 64)
 	if err != nil {
 		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidTypeError("Float", f.Value, "float64"))
@@ -173,6 +246,9 @@ func (b *Bool) Set(in bool) Bool {
 }
 
 func (b *Bool) Bool() bool {
+	if b.Value == "" {
+		return false
+	}
 	return b.Value == "true"
 }
 
