@@ -3,6 +3,7 @@ package dao
 import (
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/asdine/storm/v3"
@@ -21,6 +22,18 @@ var DBName string = "default"
 // StormBool is a boolean type that can be marshalled to and from a string, this has been created as Storm does not support boolean types properly
 type StormBool struct {
 	State string
+}
+
+type Int struct {
+	Value string
+}
+
+type Float struct {
+	Value string
+}
+
+type Bool struct {
+	Value string
 }
 
 func Initialise(cfg *commonConfig.Settings) error {
@@ -109,4 +122,72 @@ func (sb *StormBool) IsTrue() bool {
 
 func (sb *StormBool) IsFalse() bool {
 	return !sb.Bool()
+}
+
+func (i *Int) Set(in int) Int {
+	return Int{Value: strconv.Itoa(in)}
+}
+
+func (i *Int) Int() int {
+	val, err := strconv.Atoi(i.Value)
+	if err != nil {
+		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidTypeError("Int", i.Value, "int"))
+	}
+	return val
+}
+
+func (i *Int) Get() int {
+	return i.Int()
+}
+
+func (i *Int) String() string {
+	return i.Value
+}
+
+func (f *Float) Set(in float64) Float {
+	return Float{Value: strconv.FormatFloat(in, 'f', -1, 64)}
+}
+
+func (f *Float) Float() float64 {
+	val, err := strconv.ParseFloat(f.Value, 64)
+	if err != nil {
+		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidTypeError("Float", f.Value, "float64"))
+	}
+	return val
+}
+
+func (f *Float) Get() float64 {
+	return f.Float()
+}
+
+func (f *Float) String() string {
+	return f.Value
+}
+
+func (b *Bool) Set(in bool) Bool {
+	if in {
+		return Bool{Value: "true"}
+	} else {
+		return Bool{Value: "false"}
+	}
+}
+
+func (b *Bool) Bool() bool {
+	return b.Value == "true"
+}
+
+func (b *Bool) Get() bool {
+	return b.Bool()
+}
+
+func (b *Bool) String() string {
+	return b.Value
+}
+
+func (b *Bool) IsTrue() bool {
+	return b.Bool()
+}
+
+func (b *Bool) IsFalse() bool {
+	return !b.Bool()
 }
