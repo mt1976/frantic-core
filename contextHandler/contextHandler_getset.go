@@ -14,45 +14,45 @@ import (
 // expiryPeriodKey = new(cfg.GetSecuritySessionKey_ExpiryPeriod())
 
 func GetSession_UserCode(ctx context.Context) string {
-	value := ctx.Value(userCodeKey)
+	value := ctx.Value(userCodeKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("User code requested but not found in context, returning empty string")
+		logHandler.WarningLogger.Printf("User code (%v) requested but not found in context, returning empty string", userCodeKey.name)
 		return ""
 	}
 	return value.(string)
 }
 
 func GetSession_UserKey(ctx context.Context) string {
-	value := ctx.Value(userKeyKey)
+	value := ctx.Value(userKeyKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("User key requested but not found in context, returning empty string")
+		logHandler.WarningLogger.Printf("User key (%v) requested but not found in context, returning empty string", userKeyKey.name)
 		return ""
 	}
 	return value.(string)
 }
 
 func GetSession_ID(ctx context.Context) string {
-	value := ctx.Value(sessionIDKey)
+	value := ctx.Value(sessionIDKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("Session ID requested but not found in context, returning empty string")
+		logHandler.WarningLogger.Printf("Session ID (%v) requested but not found in context, returning empty string", sessionIDKey.name)
 		return ""
 	}
 	return value.(string)
 }
 
 func GetSession_Token(ctx context.Context) any {
-	value := ctx.Value(tokenKey)
+	value := ctx.Value(tokenKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("Session token requested but not found in context, returning nil")
+		logHandler.WarningLogger.Printf("Session token (%v) requested but not found in context, returning nil", tokenKey.name)
 		return nil
 	}
 	return value
 }
 
 func GetSession_Expiry(ctx context.Context) time.Time {
-	value := ctx.Value(expiryPeriodKey)
+	value := ctx.Value(expiryPeriodKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("Session expiry requested but not found in context, returning zero time")
+		logHandler.WarningLogger.Printf("Session expiry (%v) requested but not found in context, returning zero time", expiryPeriodKey.name)
 		return time.Time{}
 	}
 	return value.(time.Time)
@@ -63,36 +63,36 @@ func GetSession_Identifier() string {
 }
 
 func GetSession_Locale(ctx context.Context) string {
-	value := ctx.Value(localeKey)
+	value := ctx.Value(localeKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("Session locale requested but not found in context, returning default")
+		logHandler.WarningLogger.Printf("Session locale (%v) requested but not found in context, returning default", localeKey.name)
 		return cfg.GetApplication_Locale()
 	}
 	return value.(string)
 }
 
 func GetSession_Theme(ctx context.Context) string {
-	value := ctx.Value(themeKey)
+	value := ctx.Value(themeKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("Session theme requested but not found in context, returning empty string")
+		logHandler.WarningLogger.Printf("Session theme (%v) requested but not found in context, returning empty string", themeKey.name)
 		return ""
 	}
 	return value.(string)
 }
 
 func GetSession_Timezone(ctx context.Context) string {
-	value := ctx.Value(timezoneKey)
+	value := ctx.Value(timezoneKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("Session timezone requested but not found in context, returning empty string")
+		logHandler.WarningLogger.Printf("Session timezone (%v) requested but not found in context, returning empty string", timezoneKey.name)
 		return ""
 	}
 	return value.(string)
 }
 
 func GetSession_UserRole(ctx context.Context) string {
-	value := ctx.Value(userRoleKey)
+	value := ctx.Value(userRoleKey.name)
 	if value == nil {
-		logHandler.WarningLogger.Printf("User role requested but not found in context, returning empty string")
+		logHandler.WarningLogger.Printf("User role (%v) requested but not found in context, returning empty string", userRoleKey.name)
 		return ""
 	}
 	return value.(string)
