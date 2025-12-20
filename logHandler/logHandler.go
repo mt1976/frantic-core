@@ -135,7 +135,7 @@ func init() {
 		exportWriter = io.MultiWriter(io.Discard)
 	}
 
-	lockWriter := io.MultiWriter(&lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "lock"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	lockWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "lock"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsLockLoggingDisabled() || settings.IsLoggingDisabled() {
 		lockWriter = io.MultiWriter(io.Discard)
 	}
