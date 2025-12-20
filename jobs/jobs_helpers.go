@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jsuar/go-cron-descriptor/pkg/crondescriptor"
+	"github.com/gorhill/cronexpr"
 	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dateHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -28,7 +28,7 @@ func AfterOrEqualTo(t1, t2 time.Time) bool {
 
 func NextRun(name, schedule string) string {
 	// Purpose: To determine the next run time of a job
-	rtn := fmt.Sprintf("[%v] [%v] NextRun=[%v]", domain, name, GetHumanReadableCronFreq(schedule))
+	rtn := fmt.Sprintf("%v - NextRun: %v", name, GetHumanReadableCronFreq(schedule))
 	logHandler.ServiceLogger.Println(rtn)
 	return rtn
 }
@@ -40,9 +40,11 @@ func Announce(name, inAction string) {
 }
 
 func GetHumanReadableCronFreq(freq string) string {
-	bkHuman1, _ := crondescriptor.NewCronDescriptor(freq)
-	bkHuman, _ := bkHuman1.GetDescription(crondescriptor.Full)
-	return *bkHuman
+	//bkHuman1, _ := crondescriptor.NewCronDescriptor(freq)
+	//bkHuman, _ := bkHuman1.GetDescription(crondescriptor.Full)
+	nextTime := cronexpr.MustParse(freq).Next(time.Now())
+	bkHuman := nextTime.Format("02 Jan 2006 (Mon) 15:04:05")
+	return bkHuman
 }
 
 func PreRun(job Job) {

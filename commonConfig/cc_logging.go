@@ -63,6 +63,10 @@ func (s *Settings) IsLoggingDisabled() bool {
 	return isTrueFalse(s.Logging.Disable.All)
 }
 
+func (s *Settings) IsLockLoggingDisabled() bool {
+	return isTrueFalse(s.Logging.Disable.Lock)
+}
+
 func (s *Settings) GetLogging_MaxSize() int {
 	a, _ := strconv.Atoi(s.Logging.Defaults.MaxSize)
 	if a == 0 {

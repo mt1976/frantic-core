@@ -216,6 +216,7 @@ api = "false"
 import = "false"
 export = "false"
 comms = "false"
+lock = "false"
 all = ""
 
 [Logging.Defaults]

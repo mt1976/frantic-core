@@ -29,6 +29,7 @@ var (
 	ImportLogger         *log.Logger
 	ExportLogger         *log.Logger
 	CommunicationsLogger *log.Logger
+	LockLogger           *log.Logger
 )
 
 var Reset string
@@ -134,6 +135,11 @@ func init() {
 		exportWriter = io.MultiWriter(io.Discard)
 	}
 
+	lockWriter := io.MultiWriter(&lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "lock"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	if settings.IsLockLoggingDisabled() || settings.IsLoggingDisabled() {
+		lockWriter = io.MultiWriter(io.Discard)
+	}
+
 	communicationsWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "communications"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsCommunicationsLoggingDisabled() || settings.IsLoggingDisabled() {
 		communicationsWriter = io.MultiWriter(io.Discard)
@@ -157,6 +163,7 @@ func init() {
 	ImportLogger = log.New(importWriter, formatNameWithColor(Blue, "Import"), msgStructure)
 	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Export"), msgStructure)
 	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Communications"), msgStructure)
+	LockLogger = log.New(lockWriter, formatNameWithColor(Blue, "Lock"), msgStructure)
 }
 
 func TestIt() {
@@ -177,6 +184,7 @@ func TestIt() {
 	ImportLogger.Println("Import")
 	ExportLogger.Println("Export")
 	CommunicationsLogger.Println("Communications")
+	LockLogger.Println("Lock")
 }
 
 var hdr = "*------------------------------------------------------------------------*"

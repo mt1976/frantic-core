@@ -12,7 +12,7 @@ func assembleLogFileName(in, name string) string {
 
 func formatNameWithColor(colour, name string) string {
 	name = strings.ToUpper(name)
-	return colour + "[" + name + "]" + Reset + " "
+	return colour + name + Reset + " "
 }
 
 func setColoursNormal() {

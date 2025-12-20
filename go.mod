@@ -3,14 +3,14 @@ module github.com/mt1976/frantic-core
 go 1.25.0
 
 require (
-	github.com/BurntSushi/toml v1.5.0
+	github.com/BurntSushi/toml v1.6.0
 	github.com/galsondor/go-ascii v0.0.0-20151210013816-e2eb5175fb10
 	github.com/leekchan/accounting v1.0.0
 	github.com/rivo/uniseg v0.4.7
 	github.com/robfordww/finident v0.2.1
 	github.com/segmentio/ksuid v1.0.4
 	github.com/trisacrypto/lei v1.0.0
-	golang.org/x/exp v0.0.0-20251209150349-8475f28825e9
+	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
 	golang.org/x/term v0.38.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -18,12 +18,11 @@ require (
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/smarty/assertions v1.16.0 // indirect
 	github.com/smartystreets/goconvey v1.8.1 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
 
@@ -42,7 +41,6 @@ require (
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/go-playground/validator/v10 v10.29.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
-	github.com/jsuar/go-cron-descriptor v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	golang.org/x/crypto v0.46.0
 	golang.org/x/sys v0.39.0 // indirect
