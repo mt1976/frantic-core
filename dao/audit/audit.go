@@ -250,10 +250,18 @@ func (a *Action) Code() string {
 }
 
 func getAuditUserCode(ctx context.Context) (string, error) {
-	// Implement the logic to get the user without importing the dao package
+
 	defaultUser := cfg.GetServiceUser_UserCode()
+
+	if ctx == context.Background() {
+		usr := "svc_" + application.HostName()
+		return usr, nil
+	}
+
+	// Implement the logic to get the user without importing the dao package
 	if ctx == context.TODO() || ctx == nil {
-		return defaultUser, nil
+		usr := "sys_" + application.HostName()
+		return usr, nil
 	}
 
 	// Get the current user from the context
