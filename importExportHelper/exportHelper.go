@@ -58,7 +58,7 @@ func ExportCSV[T any](exportName string, exportList []T) error {
 	exportFile.Close()
 
 	logHandler.ExportLogger.Printf("Exported (%v/%v) %v(s) to [%v]", len(exportList), len(exportList), exportName, exportFile.Name())
-	logHandler.EventLogger.Printf("Exported (%v/%v) %v(s) to [%v]", len(exportList), len(exportList), exportName, exportFile.Name())
+	//logHandler.EventLogger.Printf("Exported (%v/%v) %v(s) to [%v]", len(exportList), len(exportList), exportName, exportFile.Name())
 	clock.Stop(len(exportList))
 	return nil
 }
