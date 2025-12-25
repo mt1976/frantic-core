@@ -12,6 +12,8 @@ import (
 	"github.com/mt1976/frantic-core/timing"
 )
 
+type Field string
+
 type DB struct {
 	connection   *storm.DB
 	Name         string
@@ -66,9 +68,9 @@ func (db *DB) Disconnect() {
 	timer.Stop(1)
 }
 
-func (db *DB) Retrieve(fieldName string, value, to any) error {
+func (db *DB) Retrieve(fieldName Field, value, to any) error {
 	logHandler.DatabaseLogger.Printf("Retrieve (%+v=%+v)[%+v] [%v.db]", fieldName, value, dao.GetStructType(to), db.Name)
-	return db.connection.One(fieldName, value, to)
+	return db.connection.One(string(fieldName), value, to)
 }
 
 func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
@@ -116,13 +118,13 @@ func (db *DB) Count(data any) (int, error) {
 	return db.connection.Count(data)
 }
 
-func (db *DB) CountWhere(fieldName string, value any, to any) (int, error) {
+func (db *DB) CountWhere(fieldName Field, value any, to any) (int, error) {
 	logHandler.DatabaseLogger.Printf("CountWhere (%+v=%+v)[%+v] [%v.db]", fieldName, value, dao.GetStructType(to), db.Name)
-	if err := dao.IsValidFieldInStruct(fieldName, to); err != nil {
+	if err := dao.IsValidFieldInStruct(string(fieldName), to); err != nil {
 		logHandler.DatabaseLogger.Printf("CountWhere (%+v=%+v)[%+v] [%v.db] - Error", fieldName, value, dao.GetStructType(to), db.Name)
 		return 0, err
 	}
-	query := db.connection.Select(q.Eq(fieldName, value))
+	query := db.connection.Select(q.Eq(string(fieldName), value))
 	count, err := query.Count(to)
 	return count, err
 }
