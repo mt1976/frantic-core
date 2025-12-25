@@ -37,6 +37,8 @@ type Bool struct {
 	Value string
 }
 
+type Field string
+
 func Initialise(cfg *commonConfig.Settings) error {
 	clock := timing.Start(name, "Initialise", "")
 	logHandler.InfoLogger.Printf("[%v] Initialising...", strings.ToUpper(name))
@@ -59,24 +61,24 @@ func GetDBNameFromPath(t string) string {
 	return dbName
 }
 
-func IsValidFieldInStruct(fromField string, data any) error {
-	_, isValidField := reflect.TypeOf(data).FieldByName(fromField)
+func IsValidFieldInStruct(fromField Field, data any) error {
+	_, isValidField := reflect.TypeOf(data).FieldByName(fromField.String())
 	if !isValidField {
-		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidFieldError(fromField))
-		return commonErrors.WrapInvalidFieldError(fromField)
+		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidFieldError(fromField.String()))
+		return commonErrors.WrapInvalidFieldError(fromField.String())
 	}
 	return nil
 }
 
-func IsValidTypeForField(field string, data, forStruct any) error {
+func IsValidTypeForField(field Field, data, forStruct any) error {
 	dataType := reflect.TypeOf(data).String()
-	structField, found := reflect.TypeOf(forStruct).FieldByName(field)
+	structField, found := reflect.TypeOf(forStruct).FieldByName(field.String())
 	if !found {
-		return commonErrors.WrapInvalidFieldError(field)
+		return commonErrors.WrapInvalidFieldError(field.String())
 	}
 	structFieldType := structField.Type.String()
 	if dataType != structFieldType {
-		return commonErrors.WrapInvalidTypeError(field, dataType, structFieldType)
+		return commonErrors.WrapInvalidTypeError(field.String(), dataType, structFieldType)
 	}
 	return nil
 }
@@ -266,4 +268,8 @@ func (b *Bool) IsTrue() bool {
 
 func (b *Bool) IsFalse() bool {
 	return !b.Bool()
+}
+
+func (f Field) String() string {
+	return string(f)
 }
