@@ -3,6 +3,7 @@
 package dateHelpers
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ type DateFormat struct {
 	BackupFolder string
 	HTMLInput    string
 	DMY4         string
+	MYH          string
 }
 
 func init() {
@@ -46,6 +48,7 @@ func init() {
 	Format.BackupFolder = cfg.GetDateFormat_BackupDirectory()
 	Format.HTMLInput = "02/01/2006" // 14/12/2025
 	Format.DMY4 = "02/01/2006"
+	Format.MYH = "Jan 2006"
 }
 
 // func FormatYMD(in time.Time) string {
@@ -616,4 +619,25 @@ func AdjustToPreviousWorkingday(date time.Time) time.Time {
 func AddMonthAndAdjust(startDate time.Time, noMonths int) time.Time {
 	datePlusMonth := startDate.AddDate(0, noMonths, 0)
 	return AdjustToNextWorkingday(datePlusMonth)
+}
+
+func OrdinaliseDay(x int) string {
+	if x >= 10 && x < 19 {
+		return fmt.Sprint(x, "th")
+	}
+
+	switch x % 10 { // the last digit
+	case 1:
+		return fmt.Sprint(x, "st")
+	case 2:
+		return fmt.Sprint(x, "nd")
+	case 3:
+		return fmt.Sprint(x, "rd")
+	}
+
+	return fmt.Sprint(x, "th")
+}
+
+func HumanDate(t time.Time) string {
+	return OrdinaliseDay(t.Day()) + t.Format(" "+Format.MYH)
 }
