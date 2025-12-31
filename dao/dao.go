@@ -64,7 +64,7 @@ func GetDBNameFromPath(t string) string {
 func IsValidFieldInStruct(fromField Field, data any) error {
 	_, isValidField := reflect.TypeOf(data).FieldByName(fromField.String())
 	if !isValidField {
-		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidFieldError(fromField.String()))
+		logHandler.ErrorLogger.Println(commonErrors.WrapInvalidFieldError(fromField.String()))
 		return commonErrors.WrapInvalidFieldError(fromField.String())
 	}
 	return nil

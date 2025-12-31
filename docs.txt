@@ -1,0 +1,404 @@
+package templateStore // import "github.com/mt1976/frantic-core/dao/test/templateStore"
+
+
+VARIABLES
+
+var Domain = "Template"
+var Fields = fieldNames{
+
+	ID:    "ID",
+	Key:   "Key",
+	Raw:   "Raw",
+	Audit: "Audit",
+
+	UID:           "UID",
+	GID:           "GID",
+	RealName:      "RealName",
+	UserName:      "UserName",
+	UserCode:      "UserCode",
+	Email:         "Email",
+	Notes:         "Notes",
+	Active:        "Active",
+	ExampleInt:    "ExampleInt",
+	ExampleFloat:  "ExampleFloat",
+	ExampleBool:   "ExampleBool",
+	ExampleDate:   "ExampleDate",
+	ExampleString: "ExampleString",
+	LastLogin:     "LastLogin",
+	LastHost:      "LastHost",
+}
+    Fields provides a structured way to reference model field names.
+
+var TableName = Domain + "Store"
+
+FUNCTIONS
+
+func ClearDown(ctx context.Context) error
+    ClearDown removes all records from the DAO's database.
+
+    This function is typically used during the initialisation phase to ensure
+    that the database is clean and free of any existing records related to the
+    DAO's domain entity. It retrieves all records and deletes them one by one,
+    logging the process. Parameters:
+      - ctx: The context for the operation.
+
+    Returns:
+      - error: An error object if any issues occur during the clear down
+        process; otherwise, nil.
+
+func Close()
+    Close terminates the connection to the database used by the DAO.
+
+    This function closes the active database connection associated with the Data
+    Access Object (DAO). It ensures that any resources related to the database
+    connection are properly released.
+
+func Count() (int, error)
+    Count returns the total number of TemplateStore records in the database.
+
+    Returns:
+      - int: The total count of TemplateStore records.
+      - error: An error object if any issues occur during the counting process;
+        otherwise, nil.
+
+func CountWhere(field dao.Field, value any) (int, error)
+    CountWhere counts the number of TemplateStore records that match the
+    specified field and value.
+
+    Parameters:
+      - field: The field to be used for filtering records.
+      - value: The value of the specified field to filter records.
+
+    Returns:
+      - int: The count of TemplateStore records that match the specified
+        criteria.
+      - error: An error object if any issues occur during the counting process;
+        otherwise, nil.
+
+func Delete(ctx context.Context, id int, note string) error
+    Delete removes a TemplateStore record from the database based on the
+    specified ID.
+
+    Parameters:
+      - ctx: The context for the operation.
+      - id: The ID of the record to delete.
+      - note: A note describing the delete action.
+
+    Returns:
+      - error: An error object if any issues occur during the deletion process;
+        otherwise, nil.
+
+func DeleteBy(ctx context.Context, field dao.Field, value any, note string) error
+    DeleteBy deletes a TemplateStore record from the database based on the
+    specified field and value.
+
+    Parameters:
+      - ctx: The context for the operation.
+      - field: The field to be used for identifying the record to delete.
+      - value: The value of the specified field to identify the record.
+      - note: A note describing the delete action.
+
+    Returns:
+      - error: An error object if any issues occur during the deletion process;
+        otherwise, nil.
+
+func DeleteByKey(ctx context.Context, key string, note string) error
+    DeleteByKey deletes a TemplateStore record from the database based on the
+    specified key.
+
+    Parameters:
+      - ctx: The context for the operation.
+      - key: The key of the record to delete.
+      - note: A note describing the delete action.
+
+    Returns:
+      - error: An error object if any issues occur during the deletion process;
+        otherwise, nil.
+
+func Drop() error
+    Drop removes the DAO's database entirely.
+
+    This function is typically used during development or testing phases to
+    completely remove the database associated with the Data Access Object (DAO).
+    It logs the drop action and invokes the database's drop method for the
+    specific domain entity.
+
+    Returns:
+      - error: An error object if any issues occur during the drop process;
+        otherwise, nil.
+
+func ExportAllAsCSV() error
+    ExportAllAsCSV exports all TemplateStore records as a CSV file. Parameters:
+      - none
+
+func ExportAllAsJSON(message string)
+    ExportAllAsJSON exports all TemplateStore records as JSON files. Parameters:
+      - message: A message to be included in the export process.
+
+func GetDatabaseConnections() func() ([]*database.DB, error)
+    GetDatabaseConnections returns a function that fetches the current database
+    instances.
+
+    This function is used to retrieve the active database instances being used
+    by the application. It returns a function that, when called, returns a slice
+    of pointers to `database.DB` and an error.
+
+    Returns:
+
+        func() ([]*database.DB, error): A function that returns a slice of pointers to `database.DB` and an error.
+
+func GetDefaultLookup() (lookup.Lookup, error)
+    GetDefaultLookup builds a default Lookup structure using Key as the key
+    field and Raw as the value field.
+
+    Returns:
+      - lookup.Lookup: A Lookup structure containing key-value pairs based on
+        the Key and Raw fields.
+      - error: An error object if any issues occur during the lookup process;
+        otherwise, nil.
+
+func GetLookup(field, value dao.Field) (lookup.Lookup, error)
+    GetLookup builds a Lookup structure for the specified field and value.
+
+    Parameters:
+      - field: The field to be used as the key in the lookup.
+      - value: The field to be used as the value in the lookup.
+
+    Returns:
+      - lookup.Lookup: A Lookup structure containing key-value pairs based on
+        the specified fields.
+      - error: An error object if any issues occur during the lookup process;
+        otherwise, nil.
+
+func ImportAllFromCSV() error
+func Initialise(ctx context.Context)
+    Initialise sets up the database connection and prepares the DAO for
+    operations.
+
+    This function establishes a connection to the database specified for the
+    DAO. It configures the database connection with necessary parameters and
+    indices. The function also sets the initialised flag to true, indicating
+    that the DAO is ready for use.
+
+    Parameters:
+
+        ctx context.Context: The context for managing request-scoped values, cancellation signals, and deadlines.
+
+    Returns:
+
+        None
+
+func IsInitialised() bool
+    IsInitialised returns the initialisation status of the DAO.
+
+    This function checks whether the Data Access Object (DAO) has been
+    successfully initialised. It returns a boolean value indicating the
+    initialisation status.
+
+    Returns:
+
+        bool: A boolean value indicating whether the DAO is initialised (true) or not (false).
+
+func Login(ctx context.Context)
+func PreLoad(ctx context.Context) error
+    PreLoad preloads the cache for the TemplateStore DAO.
+
+    This function preloads the cache for the TemplateStore Data Access Object
+    (DAO). It retrieves all records from the database and stores them in the
+    cache for faster access. The function logs the start and completion of the
+    preload process.
+
+    Parameters:
+      - ctx: The context for managing request-scoped values, cancellation
+        signals, and deadlines.
+
+    Returns:
+      - error: An error object if any issues occur during the preload process;
+        otherwise, nil.
+
+func Worker(j jobs.Job, db *database.DB)
+    Worker is a job that is scheduled to run at a predefined interval
+
+
+TYPES
+
+type TemplateStore struct {
+	// First three fields are mandatory for all DAO entities
+	ID  int    `storm:"id,increment=100"` // primary key with auto increment
+	Key string `storm:"unique"`           // key
+	Raw string `storm:"unique"`           // raw ID before encoding
+	// Add your domain entity fields below
+	UID           string `validate:"required"`
+	GID           string `storm:"index" validate:"required"`
+	RealName      string `validate:"required,min=5"` // this field will not be indexed
+	UserName      string `validate:"required,min=5"`
+	UserCode      string `storm:"index" validate:"required,min=5"`
+	Email         string
+	Notes         string `validate:"max=75"`
+	Active        dao.StormBool
+	ExampleInt    dao.Int
+	ExampleFloat  dao.Float
+	ExampleBool   dao.Bool
+	ExampleDate   time.Time
+	ExampleString string
+	LastLogin     time.Time
+	LastHost      string
+	// Last field is mandatory for all DAO entities
+	Audit audit.Audit `csv:"-"` // audit data
+}
+    TemplateStore represents a User entity.
+
+func Add(ctx context.Context) (TemplateStore, error)
+
+func Create(ctx context.Context, userName, uid, realName, email, gid string) (TemplateStore, error)
+    Create creates a new template instance in the database It takes name as
+    a parameter and returns the created template instance or an error if any
+    occurs It also checks if the DAO is ready for operations It records the
+    creation action in the audit data and saves the instance to the database
+    Parameters: (all but ctx are used to create a new template instance and
+    should be replaced as needed)
+      - ctx context.Context: The context for managing request-scoped values,
+        cancellation signals, and deadlines.
+      - userName string: The user name for the new template instance.
+      - uid string: The UID for the new template instance.
+      - realName string: The real name for the new template instance.
+      - email string: The email for the new template instance.
+      - gid string: The GID for the new template instance.
+
+    Returns:
+      - TemplateStore: The created template instance.
+      - error: An error object if any issues occur during the creation process;
+        otherwise, nil.
+
+func GetAll() ([]TemplateStore, error)
+    GetAll retrieves all TemplateStore records from the database.
+
+    Returns:
+      - []TemplateStore: A slice of all TemplateStore records.
+      - error: An error object if any issues occur during the retrieval process;
+        otherwise, nil.
+
+func GetAllWhere(field dao.Field, value any) ([]TemplateStore, error)
+    GetAllWhere retrieves all TemplateStore records that match the specified
+    field and value.
+
+    Parameters:
+      - field: The field to be used for filtering records.
+      - value: The value of the specified field to filter records.
+
+    Returns:
+      - []TemplateStore: A slice of TemplateStore records that match the
+        specified criteria.
+      - error: An error object if any issues occur during the retrieval process;
+        otherwise, nil.
+
+func GetBy(field dao.Field, value any) (TemplateStore, error)
+    GetBy retrieves a TemplateStore record from the database based on the
+    specified field and value.
+
+    Parameters:
+      - field: The field to be used for filtering records.
+      - value: The value of the specified field to filter records.
+
+    Returns:
+      - TemplateStore: The TemplateStore record that matches the specified
+        criteria.
+      - error: An error object if any issues occur during the retrieval process;
+        otherwise, nil.
+
+func GetById(id any) (TemplateStore, error)
+    GetById retrieves a TemplateStore record from the database based on the
+    specified ID.
+
+    Parameters:
+      - id: The ID of the record to retrieve.
+
+    Returns:
+      - TemplateStore: The TemplateStore record that matches the specified ID.
+      - error: An error object if any issues occur during the retrieval process;
+        otherwise, nil.
+
+func GetByKey(key any) (TemplateStore, error)
+    GetByKey retrieves a TemplateStore record from the database based on the
+    specified key.
+
+    Parameters:
+      - key: The key of the record to retrieve.
+
+    Returns:
+      - TemplateStore: The TemplateStore record that matches the specified key.
+      - error: An error object if any issues occur during the retrieval process;
+        otherwise, nil.
+
+func New() TemplateStore
+    New creates a new template instance
+
+func (record *TemplateStore) Clone(ctx context.Context) (TemplateStore, error)
+    Clone creates a duplicate of the current TemplateStore record in the
+    database.
+
+    Parameters:
+      - ctx: The context for the operation.
+
+    Returns:
+      - TemplateStore: A new TemplateStore instance that is a clone of the
+        current record.
+      - error: An error object if any issues occur during the cloning process;
+        otherwise, nil.
+
+func (record *TemplateStore) Create(ctx context.Context, note string) error
+    Create inserts a new TemplateStore record into the database.
+
+    Parameters:
+      - ctx: The context for the operation.
+      - note: A note describing the creation action.
+
+    Returns:
+      - error: An error object if any issues occur during the creation process;
+        otherwise, nil.
+
+func (record *TemplateStore) ExportRecordAsCSV(name string) error
+    ExportRecordAsCSV exports the TemplateStore record as a CSV file.
+    Parameters:
+      - name: The name to be used for the exported file.
+
+func (record *TemplateStore) ExportRecordAsJSON(name string)
+    ExportRecordAsJSON exports the TemplateStore record as a JSON file.
+    Parameters:
+      - name: The name to be used for the exported file.
+
+func (u *TemplateStore) SetName(name string) error
+
+func (record *TemplateStore) Spew()
+    Spew outputs the contents of the TemplateStore record to the Info log.
+
+func (record *TemplateStore) Update(ctx context.Context, note string) error
+    Update updates the TemplateStore record in the database.
+
+    Parameters:
+      - ctx: The context for the operation.
+      - note: A note describing the update action.
+
+    Returns:
+      - error: An error object if any issues occur during the update process;
+        otherwise, nil.
+
+func (record *TemplateStore) UpdateWithAction(ctx context.Context, auditAction audit.Action, note string) error
+    UpdateWithAction updates the TemplateStore record in the database with a
+    specified audit action.
+
+    Parameters:
+      - ctx: The context for the operation.
+      - auditAction: The audit action to be recorded during the update.
+      - note: A note describing the update action.
+
+    Returns:
+      - error: An error object if any issues occur during the update process;
+        otherwise, nil.
+
+func (record *TemplateStore) Validate() error
+    Validate checks if the TemplateStore record is valid.
+
+    Returns:
+      - error: An error object if the record is invalid; otherwise, nil.
+

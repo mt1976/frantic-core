@@ -19,6 +19,7 @@ var (
 	connectionPoolMaxSize int                    = 10                                                   // maximum number of connections
 	cfg                   *commonConfig.Settings = commonConfig.Get()                                   // configuration settings
 	dataValidator         *validator.Validate    = validator.New(validator.WithRequiredStructEnabled()) // data validator
+	inMemoryCache         map[string]any         = make(map[string]any)                                 // in-memory storage
 )
 
 func init() {
@@ -30,27 +31,97 @@ func init() {
 	logHandler.DatabaseLogger.Printf("Database Connection Pool Size [%v]", connectionPoolMaxSize)
 }
 
-func connect(name string) *DB {
+func Connect(options ...Option) *DB {
+	logHandler.InfoLogger.Printf("Options : '%+v'", options)
+	return connect(options...)
+}
+
+func ConnectToNamedDB(name string, options ...Option) *DB {
+	logHandler.WarningLogger.Println("DEPRECATED: ConnectToNamedDB - Use Connect with WithNameSpace option instead")
+	options = append(options, WithNameSpace(name))
+	return connect(options...)
+}
+
+func (db *DB) Disconnect() {
+	timer := timing.Start(db.Name, actions.DISCONNECT.Code, db.databaseName)
+	logHandler.DatabaseLogger.Printf("[DISCONNECT] Disconnecting [%v.db] connection", db.Name)
+	err := db.connection.Close()
+	if err != nil {
+		logHandler.DatabaseLogger.Panicf("[DISCONNECT] Closing [%v.db] %v ", db.Name, err.Error())
+		panic(commonErrors.WrapDisconnectError(err))
+	}
+	releaseFromConnectionPool(db)
+	logHandler.DatabaseLogger.Printf("[DISCONNECT] Closed [%v.db] connection", db.Name)
+	for key, value := range connectionPool {
+		logHandler.DatabaseLogger.Printf("[DISCONNECT] Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+	}
+	timer.Stop(1)
+}
+
+func (db *DB) Reconnect() {
+	logHandler.DatabaseLogger.Printf("[RECONNECT] Reconnecting [%v.db] data - %+v", db.Name, db)
+	logHandler.DatabaseLogger.Printf("[RECONNECT] Connection Pool [%+v]", connectionPool)
+	for key, value := range connectionPool {
+		logHandler.DatabaseLogger.Printf("[RECONNECT] Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+	}
+	connect(WithNameSpace(db.Name))
+	logHandler.DatabaseLogger.Printf("[RECONNECT] Reconnected [%v.db] data", db.Name)
+}
+
+func connect(options ...Option) *DB {
+	// Create default configuration
+	config := &connectionConfig{
+		withCaching:      false,
+		verbose:          false,
+		timeout:          30,
+		poolSize:         connectionPoolMaxSize,
+		nameSpace:        "main",
+		withEncryption:   false,
+		indices:          []Field{},
+		withCacheKey:     "ID",
+		cacheInitialised: false,
+	}
+
+	// Clear the inmory cache
+	inMemoryCache = make(map[string]any)
+
+	// Apply all provided options
+	for _, option := range options {
+		option(config)
+	}
+
+	// Log the applied configuration
+	logHandler.DatabaseLogger.Printf("[CONNECT] Configuration for [%v.db]: caching=%t, verbose=%t, timeout=%d, poolSize=%d, nameSpace=%s, encryption=%t, indices=%v",
+		config.nameSpace, config.withCaching, config.verbose, config.timeout, config.poolSize, config.nameSpace, config.withEncryption, config.indices)
+
 	// Ensure the name is lowercase
-	name = strings.ToLower(name)
-	logHandler.DatabaseLogger.Printf("[CONNECT] Opening Connection to [%v.db] data (%v)", name, len(connectionPool))
+	config.nameSpace = strings.ToLower(config.nameSpace)
+	logHandler.DatabaseLogger.Printf("[CONNECT] Opening Connection to [%v.db] data (%v)", config.nameSpace, len(connectionPool))
 	// list the connection pool
 	for key, value := range connectionPool {
 		logHandler.DatabaseLogger.Printf("[CONNECT] Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
 	}
 	// check if connection already exists
-	if connectionPool[name] != nil && connectionPool[name].Name == name {
-		logHandler.DatabaseLogger.Printf("[CONNECT] Connection already open [%v], using connection pool [%v] [codec=%v]", connectionPool[name].Name, connectionPool[name].databaseName, connectionPool[name].connection.Node.Codec().Name())
-		return connectionPool[name]
+	if connectionPool[config.nameSpace] != nil && connectionPool[config.nameSpace].Name == config.nameSpace {
+		logHandler.DatabaseLogger.Printf("[CONNECT] Connection already open [%v], using connection pool [%v] [codec=%v]", connectionPool[config.nameSpace].Name, connectionPool[config.nameSpace].databaseName, connectionPool[config.nameSpace].connection.Node.Codec().Name())
+		return connectionPool[config.nameSpace]
 	}
 
-	logHandler.DatabaseLogger.Printf("[CONNECT] (re)Opening [%v.db] data connection", name)
+	logHandler.DatabaseLogger.Printf("[CONNECT] (re)Opening [%v.db] data connection", config.nameSpace)
 	// Open a new connection
 
 	db := DB{}
-	db.Name = name
+	db.Name = config.nameSpace
 	db.databaseName = ioHelpers.GetDBFileName(db.Name)
 	db.initialised = false
+	db.withCaching = config.withCaching
+	db.withCacheKey = config.withCacheKey
+	db.verbose = config.verbose
+	db.timeout = config.timeout
+	db.poolSize = config.poolSize
+	db.withEncryption = config.withEncryption
+	db.indices = config.indices
+	db.cacheInitialised = false
 	logHandler.DatabaseLogger.Printf("[CONNECT]  Opening [%v.db] data connection *%+v*", db.Name, db)
 	connect := timing.Start(db.Name, actions.CONNECT.GetCode(), db.databaseName)
 	var err error

@@ -59,6 +59,10 @@ func (s *Settings) IsCommunicationsLoggingDisabled() bool {
 	return isTrueFalse(s.Logging.Disable.Communications)
 }
 
+func (s *Settings) IsCacheLoggingDisabled() bool {
+	return isTrueFalse(s.Logging.Disable.Cache)
+}
+
 func (s *Settings) IsLoggingDisabled() bool {
 	return isTrueFalse(s.Logging.Disable.All)
 }

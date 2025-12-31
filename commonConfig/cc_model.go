@@ -156,6 +156,7 @@ type Settings struct {
 			Export         string `toml:"export"`
 			Communications string `toml:"comms"`
 			Lock           string `toml:"lock"`
+			Cache          string `toml:"cache"`
 			All            string `toml:"all"`
 		} `toml:"disable"`
 		Defaults struct {

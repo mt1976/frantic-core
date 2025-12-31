@@ -30,6 +30,7 @@ var (
 	ExportLogger         *log.Logger
 	CommunicationsLogger *log.Logger
 	LockLogger           *log.Logger
+	CacheLogger          *log.Logger
 )
 
 var Reset string
@@ -145,7 +146,12 @@ func init() {
 		communicationsWriter = io.MultiWriter(io.Discard)
 	}
 
-	msgStructure := log.Lmsgprefix | log.Ldate | log.Lmicroseconds | log.Lshortfile
+	cacheWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "cache"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	if settings.IsCacheLoggingDisabled() || settings.IsLoggingDisabled() {
+		cacheWriter = io.MultiWriter(io.Discard)
+	}
+
+	msgStructure := log.Lmsgprefix | log.Ldate | log.LstdFlags | log.Lshortfile
 
 	InfoLogger = log.New(generalWriter, formatNameWithColor(White, "Info"), msgStructure)
 	WarningLogger = log.New(warningWriter, formatNameWithColor(Yellow, "Warning"), msgStructure)
@@ -158,12 +164,13 @@ func init() {
 	AuditLogger = log.New(auditWriter, formatNameWithColor(Yellow, "Audit"), msgStructure)
 	TranslationLogger = log.New(translationWriter, formatNameWithColor(Cyan, "Translation"), msgStructure)
 	SecurityLogger = log.New(securityWriter, formatNameWithColor(Magenta, "Security"), msgStructure)
-	DatabaseLogger = log.New(databaseWriter, formatNameWithColor(Gray, "Database"), msgStructure)
+	DatabaseLogger = log.New(databaseWriter, formatNameWithColor(Green, "Database"), msgStructure)
 	ApiLogger = log.New(apiWriter, formatNameWithColor(Green, "API"), msgStructure)
 	ImportLogger = log.New(importWriter, formatNameWithColor(Blue, "Import"), msgStructure)
 	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Export"), msgStructure)
 	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Communications"), msgStructure)
 	LockLogger = log.New(lockWriter, formatNameWithColor(Blue, "Lock"), msgStructure)
+	CacheLogger = log.New(cacheWriter, formatNameWithColor(Green, "Cache"), msgStructure)
 }
 
 func TestIt() {

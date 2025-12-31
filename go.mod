@@ -1,6 +1,6 @@
 module github.com/mt1976/frantic-core
 
-go 1.25.0
+go 1.25
 
 require (
 	github.com/BurntSushi/toml v1.6.0
@@ -39,8 +39,9 @@ require (
 
 require (
 	github.com/asdine/storm/v3 v3.2.1
-	github.com/go-playground/validator/v10 v10.29.0
+	github.com/go-playground/validator/v10 v10.30.1
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
+	github.com/goforj/godump v1.9.0
 	github.com/robfig/cron/v3 v3.0.1
 	golang.org/x/crypto v0.46.0
 	golang.org/x/sys v0.39.0 // indirect
