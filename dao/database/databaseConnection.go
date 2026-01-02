@@ -1,6 +1,8 @@
 package database
 
 import (
+	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/asdine/storm/v3"
@@ -32,8 +34,13 @@ func init() {
 }
 
 func Connect(options ...Option) *DB {
-	logHandler.InfoLogger.Printf("[CON] Options : '%+v'", options)
+	logHandler.DatabaseLogger.Printf("[CON] %d Options ", len(options))
 	return connect(options...)
+}
+
+func GetFunctionName(temp interface{}) string {
+	strs := strings.Split((runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name()), ".")
+	return strs[len(strs)-1]
 }
 
 // DEPRECATED: ConnectToNamedDB - Use Connect with WithNameSpace option instead
@@ -92,7 +99,7 @@ func connect(options ...Option) *DB {
 	}
 
 	// Log the applied configuration
-	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Configuration for [%v.db]: caching=%t, verbose=%t, timeout=%d, poolSize=%d, nameSpace=%s, encryption=%t, indices=%v",
+	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Configuration for %v.db: caching: %t, verbose: %t, timeout: %d, poolSize: %d, nameSpace: %s, encryption: %t, indices: %v",
 		config.nameSpace, config.withCaching, config.verbose, config.timeout, config.poolSize, config.nameSpace, config.withEncryption, config.indices)
 
 	// Ensure the name is lowercase

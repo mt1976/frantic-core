@@ -61,7 +61,7 @@ func hydrateCache(db *DB, err error, to any, action string) {
 }
 
 func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
-	logHandler.EventLogger.Printf("[GET]{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", dao.GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
+	logHandler.DatabaseLogger.Printf("[GET]{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", dao.GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
 
 	if db.withCaching && db.cacheInitialised {
 		logHandler.CacheLogger.Printf("[GET]{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", dao.GetStructType(to), db.Name, "GetAll")
