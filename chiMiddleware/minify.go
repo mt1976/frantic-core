@@ -30,7 +30,7 @@ func (rw *responseWriterWrapper) Write(b []byte) (int, error) {
 func HandleHTMLMinification() func(http.Handler) http.Handler {
 	m := minify.New()
 	m.Add("text/html", &html.Minifier{
-		KeepConditionalComments: true,
+		KeepSpecialComments: true,
 	})
 
 	return func(next http.Handler) http.Handler {
@@ -47,6 +47,7 @@ func HandleHTMLMinification() func(http.Handler) http.Handler {
 
 			contentType := w.Header().Get("Content-Type")
 			if strings.Contains(contentType, "text/html") {
+				// Minify HTML content
 				minified, err := m.String("text/html", buf.String())
 				if err != nil {
 					// fallback to unminified content
