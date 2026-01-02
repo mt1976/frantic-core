@@ -43,7 +43,7 @@ func Count() (int, error) {
 // Returns:
 //   - int: The count of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the counting process; otherwise, nil.
-func CountWhere(field dao.Field, value any) (int, error) {
+func CountWhere(field database.Field, value any) (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", Domain, field.String(), value)
 	clock := timing.Start(Domain, actions.COUNT.GetCode(), fmt.Sprintf("%v=%v", field.String(), value))
 	list, err := GetAllWhere(field, value)
@@ -94,7 +94,7 @@ func GetByKey(key any) (TemplateStore, error) {
 // Returns:
 //   - TemplateStore: The TemplateStore record that matches the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func GetBy(field dao.Field, value any) (TemplateStore, error) {
+func GetBy(field database.Field, value any) (TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 
 	clock := timing.Start(Domain, actions.GET.GetCode(), fmt.Sprintf("%v=%v", field, value))
@@ -107,11 +107,11 @@ func GetBy(field dao.Field, value any) (TemplateStore, error) {
 		return TemplateStore{}, commonErrors.WrapDAOReadError(Domain, field.String(), value, fmt.Errorf(msg, value))
 	}
 
-	if err := dao.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
+	if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
 		return TemplateStore{}, err
 	}
 
-	if err := dao.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
+	if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
 		return TemplateStore{}, err
 	}
 
@@ -171,7 +171,7 @@ func GetAll() ([]TemplateStore, error) {
 // Returns:
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func GetAllWhere(field dao.Field, value any) ([]TemplateStore, error) {
+func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
 
@@ -182,11 +182,11 @@ func GetAllWhere(field dao.Field, value any) ([]TemplateStore, error) {
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
 
-	if err := dao.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
+	if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
 		return recordList, err
 	}
 
-	if err := dao.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
+	if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
 		return recordList, err
 	}
 
@@ -253,20 +253,20 @@ func DeleteByKey(ctx context.Context, key string, note string) error {
 //
 // Returns:
 //   - error: An error object if any issues occur during the deletion process; otherwise, nil.
-func DeleteBy(ctx context.Context, field dao.Field, value any, note string) error {
+func DeleteBy(ctx context.Context, field database.Field, value any, note string) error {
 	logHandler.DatabaseLogger.Printf("DELETE %v WHERE %v=%v", Domain, field, value)
 
 	dao.CheckDAOReadyState(Domain, audit.DELETE, initialised) // Check the DAO has been initialised, Mandatory.
 
 	clock := timing.Start(Domain, actions.DELETE.GetCode(), fmt.Sprintf("%v=%v", field.String(), value))
 
-	if err := dao.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
+	if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
 		logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, err).Error())
 		clock.Stop(0)
 		return commonErrors.WrapDAODeleteError(Domain, field.String(), value, err)
 	}
 
-	if err := dao.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
+	if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
 		logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, err).Error())
 		clock.Stop(0)
 		return err
@@ -391,7 +391,7 @@ func GetDefaultLookup() (lookup.Lookup, error) {
 // Returns:
 //   - lookup.Lookup: A Lookup structure containing key-value pairs based on the specified fields.
 //   - error: An error object if any issues occur during the lookup process; otherwise, nil.
-func GetLookup(field, value dao.Field) (lookup.Lookup, error) {
+func GetLookup(field, value database.Field) (lookup.Lookup, error) {
 
 	dao.CheckDAOReadyState(Domain, audit.PROCESS, initialised) // Check the DAO has been initialised, Mandatory.
 

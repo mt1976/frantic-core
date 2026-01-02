@@ -7,6 +7,9 @@ import (
 	"github.com/mt1976/frantic-core/timing"
 )
 
+// Backup creates a backup of the database to the specified location
+// It disconnects the database, performs the backup, and then reconnects.
+// The backup process is timed and logged.
 func (db *DB) Backup(loc string) {
 	timer := timing.Start(db.Name, actions.BACKUP.GetCode(), db.databaseName)
 	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] data started... %v", db.Name, loc)

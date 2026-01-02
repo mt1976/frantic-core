@@ -16,11 +16,8 @@ import (
 	"github.com/mt1976/frantic-core/dao"
 	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/audit"
-	"github.com/mt1976/frantic-core/idHelpers"
 	"github.com/mt1976/frantic-core/importExportHelper"
-	"github.com/mt1976/frantic-core/ioHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
-	"github.com/mt1976/frantic-core/paths"
 	"github.com/mt1976/frantic-core/timing"
 )
 
@@ -33,7 +30,11 @@ func (record *TemplateStore) ExportRecordAsJSON(name string) {
 
 	clock := timing.Start(Domain, actions.EXPORT.GetCode(), fmt.Sprintf("%v", ID))
 
-	ioHelpers.Dump(Domain, paths.Dumps(), name, fmt.Sprintf("%v", ID), record)
+	//ioHelpers.Dump(Domain, paths.Dumps(), name, fmt.Sprintf("%v", ID), record)
+	err := importExportHelper.ExportJSON(name, []TemplateStore{*record}, Fields.ID)
+	if err != nil {
+		logHandler.ExportLogger.Panicf("error exporting %v record %v: %v", Domain, ID, err.Error())
+	}
 
 	clock.Stop(1)
 }
@@ -52,14 +53,17 @@ func ExportAllAsJSON(message string) {
 		clock.Stop(0)
 		return
 	}
-	SEP := "!"
-	for _, record := range recordList {
-		msg := fmt.Sprintf("%v%v%v", audit.EXPORT.Description(), SEP, message)
-		if message == "" {
-			msg = fmt.Sprintf("%v%v", audit.EXPORT.Description(), SEP)
-		}
-		record.ExportRecordAsJSON(msg)
+	//SEP := "!"
+	// for _, record := range recordList {
+	// 	//msg := fmt.Sprintf("%v%v%v", audit.EXPORT.Description(), SEP, message)
+	// 	//if message == "" {
+	// 	//	msg = fmt.Sprintf("%v%v", audit.EXPORT.Description(), SEP)
+	// 	//}
+	err := importExportHelper.ExportJSON(message, recordList, Fields.ID)
+	if err != nil {
+		logHandler.ExportLogger.Panicf("error exporting all %v's: %v", Domain, err.Error())
 	}
+	// }
 	clock.Stop(len(recordList))
 }
 
@@ -71,8 +75,7 @@ func (record *TemplateStore) ExportRecordAsCSV(name string) error {
 	ID := reflect.ValueOf(*record).FieldByName(Fields.ID.String())
 
 	clock := timing.Start(Domain, actions.EXPORT.GetCode(), fmt.Sprintf("%v", ID))
-	name = fmt.Sprintf("%v_%v_%v_%v", Domain, ID, name, idHelpers.GetUUID())
-	err := importExportHelper.ExportCSV(name, []TemplateStore{*record})
+	err := importExportHelper.ExportCSV(name, []TemplateStore{*record}, Fields.ID)
 	if err != nil {
 		logHandler.ExportLogger.Printf("Error exporting %v record %v: %v", Domain, ID, err.Error())
 		clock.Stop(0)
@@ -86,14 +89,14 @@ func (record *TemplateStore) ExportRecordAsCSV(name string) error {
 // ExportAllAsCSV exports all TemplateStore records as a CSV file.
 // Parameters:
 //   - none
-func ExportAllAsCSV() error {
+func ExportAllAsCSV(msg string) error {
 
 	exportListData, err := GetAll()
 	if err != nil {
 		logHandler.ExportLogger.Panicf("error Getting all %v's: %v", Domain, err.Error())
 	}
 
-	return importExportHelper.ExportCSV(Domain, exportListData)
+	return importExportHelper.ExportCSV(msg, exportListData, Fields.ID)
 }
 
 func ImportAllFromCSV() error {

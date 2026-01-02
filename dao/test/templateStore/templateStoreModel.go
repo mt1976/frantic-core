@@ -13,6 +13,7 @@ import (
 
 	"github.com/mt1976/frantic-core/dao"
 	audit "github.com/mt1976/frantic-core/dao/audit"
+	"github.com/mt1976/frantic-core/dao/database"
 )
 
 var Domain = "Template"
@@ -47,26 +48,26 @@ type TemplateStore struct {
 // Fields provides a structured way to reference model field names.
 type fieldNames struct {
 	// First four fields are mandatory for all DAO entities
-	ID    dao.Field
-	Key   dao.Field
-	Raw   dao.Field
-	Audit dao.Field
+	ID    database.Field
+	Key   database.Field
+	Raw   database.Field
+	Audit database.Field
 	// Add your domain entity fields below
-	UID           dao.Field
-	GID           dao.Field
-	RealName      dao.Field
-	UserName      dao.Field
-	UserCode      dao.Field
-	Email         dao.Field
-	Notes         dao.Field
-	Active        dao.Field
-	ExampleInt    dao.Field
-	ExampleFloat  dao.Field
-	ExampleBool   dao.Field
-	ExampleDate   dao.Field
-	ExampleString dao.Field
-	LastLogin     dao.Field
-	LastHost      dao.Field
+	UID           database.Field
+	GID           database.Field
+	RealName      database.Field
+	UserName      database.Field
+	UserCode      database.Field
+	Email         database.Field
+	Notes         database.Field
+	Active        database.Field
+	ExampleInt    database.Field
+	ExampleFloat  database.Field
+	ExampleBool   database.Field
+	ExampleDate   database.Field
+	ExampleString database.Field
+	LastLogin     database.Field
+	LastHost      database.Field
 }
 
 // Fields provides a structured way to reference model field names.

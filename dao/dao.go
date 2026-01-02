@@ -3,7 +3,6 @@ package dao
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -61,27 +60,27 @@ func GetDBNameFromPath(t string) string {
 	return dbName
 }
 
-func IsValidFieldInStruct(fromField Field, data any) error {
-	_, isValidField := reflect.TypeOf(data).FieldByName(fromField.String())
-	if !isValidField {
-		logHandler.ErrorLogger.Println(commonErrors.WrapInvalidFieldError(fromField.String()))
-		return commonErrors.WrapInvalidFieldError(fromField.String())
-	}
-	return nil
-}
+// func IsValidFieldInStruct(fromField database.Field, data any) error {
+// 	_, isValidField := reflect.TypeOf(data).FieldByName(fromField.String())
+// 	if !isValidField {
+// 		logHandler.ErrorLogger.Println(commonErrors.WrapInvalidFieldError(fromField.String()))
+// 		return commonErrors.WrapInvalidFieldError(fromField.String())
+// 	}
+// 	return nil
+// }
 
-func IsValidTypeForField(field Field, data, forStruct any) error {
-	dataType := reflect.TypeOf(data).String()
-	structField, found := reflect.TypeOf(forStruct).FieldByName(field.String())
-	if !found {
-		return commonErrors.WrapInvalidFieldError(field.String())
-	}
-	structFieldType := structField.Type.String()
-	if dataType != structFieldType {
-		return commonErrors.WrapInvalidTypeError(field.String(), dataType, structFieldType)
-	}
-	return nil
-}
+// func IsValidTypeForField(field database.Field, data, forStruct any) error {
+// 	dataType := reflect.TypeOf(data).String()
+// 	structField, found := reflect.TypeOf(forStruct).FieldByName(field.String())
+// 	if !found {
+// 		return commonErrors.WrapInvalidFieldError(field.String())
+// 	}
+// 	structFieldType := structField.Type.String()
+// 	if dataType != structFieldType {
+// 		return commonErrors.WrapInvalidTypeError(field.String(), dataType, structFieldType)
+// 	}
+// 	return nil
+// }
 
 func CheckDAOReadyState(table string, action audit.Action, isDaoReady bool) {
 	if !isDaoReady {
@@ -90,18 +89,18 @@ func CheckDAOReadyState(table string, action audit.Action, isDaoReady bool) {
 	}
 }
 
-func GetStructType(data any) string {
-	rtnType := reflect.TypeOf(data).String()
-	// If the type is a pointer, get the underlying type
-	if strings.Contains(rtnType, "*") {
-		rtnType = reflect.TypeOf(data).Elem().String()
-	}
-	// If the type is a struct, get the name of the struct
-	if strings.Contains(rtnType, ".") {
-		rtnType = strings.Split(rtnType, ".")[1]
-	}
-	return rtnType
-}
+// func GetStructType(data any) string {
+// 	rtnType := reflect.TypeOf(data).String()
+// 	// If the type is a pointer, get the underlying type
+// 	if strings.Contains(rtnType, "*") {
+// 		rtnType = reflect.TypeOf(data).Elem().String()
+// 	}
+// 	// If the type is a struct, get the name of the struct
+// 	if strings.Contains(rtnType, ".") {
+// 		rtnType = strings.Split(rtnType, ".")[1]
+// 	}
+// 	return rtnType
+// }
 
 func (sb *StormBool) Set(b bool) {
 	if b {

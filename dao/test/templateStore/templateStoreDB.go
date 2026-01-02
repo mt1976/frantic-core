@@ -49,7 +49,7 @@ func Initialise(ctx context.Context) {
 	//
 	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace("BNK"), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
 
-	activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace(Domain), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
+	activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace("cheeseOnToast"), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
 	initialised = true
 
 	//TODO: Add any initialisation code here

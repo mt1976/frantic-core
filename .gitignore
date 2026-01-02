@@ -34,8 +34,7 @@ dao/test/userStore/userStore_internals.go
 dao/test/userStore/userStore_model.go
 dao/test/userStore/userStore_new.go
 dao/test/userStore/userStore.go
-data/database/frantic_example-main.db
-data/database/frantic_example-user.db
+data/database/*.db
 data/dumps/*.json
 data/defaults/*.csv
 data/logs/*.log
@@ -45,5 +44,4 @@ dao/test/templateStore/.DS_Store
 .gitignore
 dao/test/.DS_Store
 dao/.DS_Store
-data/database/frantic_example-template.db
 chiMiddleware/placeholder.txt

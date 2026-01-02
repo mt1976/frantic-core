@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/mt1976/frantic-core/paths"
 )
@@ -18,10 +17,10 @@ var FIELDSEPARATOR = '|'
 var importString = "Import"
 var exportString = "Export"
 
-func openTargetFile(in, action string, useLog *log.Logger) *os.File {
-	defaultPath := paths.Defaults()
-	templateDataFileName := strings.ToLower(in) + "s.csv"
-	fileName := fmt.Sprintf("%s%s/%s", paths.Application().String(), defaultPath.String(), templateDataFileName)
+func openTargetFile(in, action string, useLog *log.Logger, fileExtension string, path string) *os.File {
+	//defaultPath := paths.Defaults()
+	templateDataFileName := in + "." + fileExtension
+	fileName := fmt.Sprintf("%s%s/%s", paths.Application().String(), path, templateDataFileName)
 
 	dataFileHandle, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {

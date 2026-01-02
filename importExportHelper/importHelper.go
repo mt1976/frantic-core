@@ -7,6 +7,7 @@ import (
 	"github.com/gocarina/gocsv"
 	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/logHandler"
+	"github.com/mt1976/frantic-core/paths"
 	"github.com/mt1976/frantic-core/timing"
 )
 
@@ -16,7 +17,7 @@ func ImportCSV[T any](importName string, entryTypeToInsert T, importProcessor fu
 	// Create a slice of entryTypeToInsert to hold the data from the CSV file
 	insertEntriesList := []T{}
 
-	importFile := openTargetFile(importName, importString, logHandler.ImportLogger)
+	importFile := openTargetFile(importName, importString, logHandler.ImportLogger, "csv", paths.Defaults().String())
 	defer importFile.Close()
 
 	gocsv.SetCSVReader(func(in io.Reader) gocsv.CSVReader {

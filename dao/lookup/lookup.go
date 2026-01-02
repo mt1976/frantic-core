@@ -2,10 +2,12 @@ package lookup
 
 import "github.com/mt1976/frantic-core/logHandler"
 
+// Lookup represents a collection of lookup data entries
 type Lookup struct {
 	Data []LookupData
 }
 
+// LookupData represents a single entry in the lookup data
 type LookupData struct {
 	Key          string
 	Value        string
