@@ -16,7 +16,12 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
-require github.com/tdewolff/parse/v2 v2.8.5 // indirect
+require (
+	github.com/andybalholm/brotli v1.2.0 // indirect
+	github.com/google/brotli v1.2.0 // indirect
+	github.com/kothar/brotli-go v0.0.0-20170728081549-771231d473d6 // indirect
+	github.com/tdewolff/parse/v2 v2.8.5 // indirect
+)
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
