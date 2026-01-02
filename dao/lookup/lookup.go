@@ -15,6 +15,7 @@ type LookupData struct {
 	Selected     bool
 }
 
+// Spew outputs the contents of the Lookup structure for debugging purposes
 func (a *Lookup) Spew() error {
 	// Spew the Audit Data
 	noAudit := len(a.Data)
@@ -22,7 +23,7 @@ func (a *Lookup) Spew() error {
 	if noAudit > 0 {
 		for i := 0; i < noAudit; i++ {
 			upd := a.Data[i]
-			logHandler.TraceLogger.Printf("Lookup Data [%v] Key=[%v] Value=[%v]", i, upd.Key, upd.Value)
+			logHandler.TraceLogger.Printf("[LKP] Lookup Data [%v] Key=[%v] Value=[%v]", i, upd.Key, upd.Value)
 		}
 	}
 	return nil

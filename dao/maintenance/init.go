@@ -1,14 +1,10 @@
 package maintenance
 
-import (
-	"github.com/mt1976/frantic-core/logHandler"
-)
-
 var domain = "Maintenance"
 
 func init() {
 
-	logHandler.InfoLogger.Println("Text - Initialising")
+	//logHandler.InfoLogger.Println("Text - Initialising")
 
 	// cfg = commonConfig.Get()
 	// err := error(nil)
@@ -18,6 +14,6 @@ func init() {
 	// 	return
 	// }
 
-	logHandler.InfoLogger.Println("Text - Initialised")
+	//logHandler.InfoLogger.Println("Text - Initialised")
 
 }

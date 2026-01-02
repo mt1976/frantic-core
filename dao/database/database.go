@@ -29,21 +29,21 @@ type DB struct {
 }
 
 func (db *DB) Retrieve(fieldName Field, value, to any) error {
-	logHandler.DatabaseLogger.Printf("Retrieve (%+v=%+v)[%+v] [%v.db]", fieldName, value, dao.GetStructType(to), db.Name)
+	logHandler.DatabaseLogger.Printf("[GET] (%+v=%+v)[%+v] [%v.db]", fieldName, value, dao.GetStructType(to), db.Name)
 
 	if db.withCaching {
 		cacheKeyValue := value.(string)
 		if cachedValue, found := inMemoryCache[cacheKeyValue]; found {
 			reflect.ValueOf(to).Elem().Set(reflect.ValueOf(cachedValue).Elem())
-			logHandler.CacheLogger.Printf("[CACHE] HIT (%v=%v) [%+v] [...%v.db] on %v - Skipping DB Access", db.withCacheKey, cacheKeyValue, dao.GetStructType(to), db.Name, "Retrieve")
+			logHandler.CacheLogger.Printf("[GET]{HIT} (%v=%v) [%+v] [...%v.db] on %v - {SKIP} DB Access", db.withCacheKey, cacheKeyValue, dao.GetStructType(to), db.Name, "Retrieve")
 			return nil
 		}
-		logHandler.CacheLogger.Printf("[CACHE] MISS (%v=%v) [%+v] [...%v.db] on %v - Accessing DB", db.withCacheKey, cacheKeyValue, dao.GetStructType(to), db.Name, "Retrieve")
+		logHandler.CacheLogger.Printf("[GET]{MISS} (%v=%v) [%+v] [...%v.db] on %v - Accessing DB", db.withCacheKey, cacheKeyValue, dao.GetStructType(to), db.Name, "Retrieve")
 	}
 
-	logHandler.DatabaseLogger.Printf("Retrieve (%+v=%+v)[%+v] [%v.db] - From Database", fieldName, value, dao.GetStructType(to), db.Name)
+	logHandler.DatabaseLogger.Printf("[GET] (%+v=%+v)[%+v] [%v.db] - From Database", fieldName, value, dao.GetStructType(to), db.Name)
 
-	// Retrieve from database
+	// [GET] from database
 	err := db.connection.One(string(fieldName), value, to)
 
 	// Store in cache if caching is enabled and retrieval was successful
@@ -56,16 +56,15 @@ func hydrateCache(db *DB, err error, to any, action string) {
 	if db.withCaching && err == nil {
 		cacheKeyValue := db.getCacheKeyValue(to)
 		inMemoryCache[cacheKeyValue] = to
-		logHandler.CacheLogger.Printf("[CACHE] ADD (%v=%v) [%+v] [...%v.db] on %v initialised: %t", db.withCacheKey, cacheKeyValue, dao.GetStructType(to), db.Name, action, db.cacheInitialised)
-		logHandler.DatabaseLogger.Printf("[DB] ADD (%v=%v) [%+v] [...%v.db] on %v initialised: %t", db.withCacheKey, cacheKeyValue, dao.GetStructType(to), db.Name, action, db.cacheInitialised)
+		logHandler.CacheLogger.Printf("[HYD]{Add} (%v=%v) [%+v] [...%v.db] on %v initialised: %t", db.withCacheKey, cacheKeyValue, dao.GetStructType(to), db.Name, action, db.cacheInitialised)
 	}
 }
 
 func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
-	logHandler.EventLogger.Printf("GetAll [%+v][%+v] [%v.db] caching: %t initialised: %t", dao.GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
+	logHandler.EventLogger.Printf("[GET]{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", dao.GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
 
 	if db.withCaching && db.cacheInitialised {
-		logHandler.CacheLogger.Printf("[CACHE] HIT GetAll [%+v] [...%v.db] on %v - Returning from cache", dao.GetStructType(to), db.Name, "GetAll")
+		logHandler.CacheLogger.Printf("[GET]{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", dao.GetStructType(to), db.Name, "GetAll")
 		// return all cached entries of the appropriate type
 		sliceValue := reflect.ValueOf(to).Elem()
 		elemType := sliceValue.Type().Elem()
@@ -76,9 +75,9 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
 
 		for i, v := range inMemoryCache {
 			cachedValue := reflect.ValueOf(v)
-			logHandler.CacheLogger.Printf("[CACHE] GetAll Checking cached entry [%v] of type [%v] against expected type [%v]", i, cachedValue.Type(), elemType)
+			logHandler.CacheLogger.Printf("[GET]{ALL} Checking cached entry [%v] of type [%v] against expected type [%v]", i, cachedValue.Type(), elemType)
 			if cachedValue.Type().Elem() == elemType {
-				logHandler.CacheLogger.Printf("[CACHE] GetAll Adding cached entry [%v] to result set [%v][%v]", i, elemType, cachedValue.Type())
+				logHandler.CacheLogger.Printf("[GET]{ALL} Adding cached entry [%v] to result set [%v][%v]", i, elemType, cachedValue.Type())
 				sliceValue.Set(reflect.Append(sliceValue, cachedValue.Elem()))
 			}
 		}
@@ -88,15 +87,15 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
 		// Set the output parameter
 		to = sliceValue.Interface()
 
-		logHandler.CacheLogger.Printf("[CACHE] HIT GetAll [%+v] [...%v.db] on %v - Returning %d cached entries", dao.GetStructType(to), db.Name, "GetAll", sliceValue.Len())
+		logHandler.CacheLogger.Printf("[GET]{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", dao.GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 		return nil
 	}
 
-	// Retrieve from database
+	// [GET] from database
 	err := db.connection.All(to, options...)
 	// Store in cache if caching is enabled and retrieval was successful
 	if !db.withCaching || err != nil || !db.cacheInitialised {
-		logHandler.CacheLogger.Printf("[CACHE] SKIP GetAll [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", dao.GetStructType(to), db.Name, "GetAll")
+		logHandler.CacheLogger.Printf("[GET]{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", dao.GetStructType(to), db.Name, "GetAll")
 		return err
 	}
 
@@ -105,7 +104,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
 
 	// Check if it's actually a slice
 	if sliceValue.Kind() != reflect.Slice {
-		logHandler.CacheLogger.Printf("GetAll - Expected slice, got %v", sliceValue.Kind())
+		logHandler.CacheLogger.Printf("[GET]{ALL} - Expected slice, got %v", sliceValue.Kind())
 		return err
 	}
 
@@ -121,10 +120,9 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
 }
 
 func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
-	logHandler.DatabaseLogger.Printf("[DB] PreLoadCache [%+v][%+v] [%v.db]", dao.GetStructType(to), options, db.Name)
-	logHandler.CacheLogger.Printf("[CACHE] PRELOAD [%+v] [...%v.db] on %v", dao.GetStructType(to), db.Name, "PreLoadCache")
+	logHandler.CacheLogger.Printf("[HYD]{LOAD} Hydrate Cache  [%+v] [...%v.db] on %v", dao.GetStructType(to), db.Name, "PreLoadCache")
 
-	// Retrieve from database
+	// [GET] from database
 	// err := db.connection.All(to, options...)
 	// // Store in cache if caching is enabled and retrieval was successful
 	// if !db.withCaching || err != nil {
@@ -134,13 +132,14 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 
 	err := db.GetAll(to, options...)
 
-	logHandler.CacheLogger.Printf("[CACHE] FETCH COMPLETE [%+v] [...%v.db] on %v", dao.GetStructType(to), db.Name, "PreLoadCache")
+	logHandler.CacheLogger.Printf("[HYD]{LOAD}{GET} COMPLETE [%+v] [...%v.db] on %v", dao.GetStructType(to), db.Name, "PreLoadCache")
 	// Use reflection to iterate through the slice without casting
 	sliceValue := reflect.ValueOf(to).Elem()
 
 	// Check if it's actually a slice
 	if sliceValue.Kind() != reflect.Slice {
-		logHandler.CacheLogger.Printf("GetAll - Expected slice, got %v", sliceValue.Kind())
+		logHandler.CacheLogger.Printf("[HYD]{LOAD} - Expected slice, got %v", sliceValue.Kind())
+		logHandler.WarningLogger.Printf("[HYD]{LOAD} - Expected slice, got %v", sliceValue.Kind())
 		return err
 	}
 
@@ -154,13 +153,13 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 
 	db.cacheInitialised = true
 
-	logHandler.CacheLogger.Printf("[CACHE] PRELOAD COMPLETE [%+v] [...%v.db] on %v - Cached %d entries", dao.GetStructType(to), db.Name, "PreLoadCache", sliceValue.Len())
+	logHandler.CacheLogger.Printf("[HYD]{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries", dao.GetStructType(to), db.Name, "PreLoadCache", sliceValue.Len())
 
 	return err
 }
 
 func (db *DB) Delete(data any) error {
-	logHandler.DatabaseLogger.Printf("Delete [%+v] [%v.db]", dao.GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[DEL]{DELETE} Delete [%+v] [%v.db]", dao.GetStructType(data), db.Name)
 	err := db.connection.DeleteStruct(data)
 	removeFromCache(db, data, "Delete")
 	return err
@@ -170,25 +169,25 @@ func removeFromCache(db *DB, data any, action string) {
 	if db.withCaching {
 		cacheKeyValue := db.getCacheKeyValue(data)
 		delete(inMemoryCache, cacheKeyValue)
-		logHandler.CacheLogger.Printf("[CACHE] DELETE (%v=%v) [%+v] [...%v.db] on %v", db.withCacheKey, cacheKeyValue, dao.GetStructType(data), db.Name, action)
+		logHandler.CacheLogger.Printf("[CAC]{REMOVE} Remove (%v=%v) from Cache [%+v] [...%v.db] on %v", db.withCacheKey, cacheKeyValue, dao.GetStructType(data), db.Name, action)
 	}
 }
 
 func (db *DB) Drop(data any) error {
-	logHandler.DatabaseLogger.Printf("Drop [%+v] [%v.db]", dao.GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[DRP]{DROP} Drop [%+v] [%v.db]", dao.GetStructType(data), db.Name)
 	err := db.connection.Drop(data)
 	removeFromCache(db, data, "Drop")
 	return err
 }
 
 func (db *DB) Update(data any) error {
-	logHandler.DatabaseLogger.Printf("Update [%+v] [%v.db] - Start", dao.GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[UPD] Update [%+v] [%v.db] - Start", dao.GetStructType(data), db.Name)
 	err := validate(data, db)
 	if err != nil {
-		logHandler.DatabaseLogger.Printf("Update [%+v] [%v.db] - Error", dao.GetStructType(data), db.Name)
+		logHandler.DatabaseLogger.Printf("[UPD] Update [%+v] [%v.db] - Error", dao.GetStructType(data), db.Name)
 		return commonErrors.WrapError(err)
 	}
-	logHandler.DatabaseLogger.Printf("Update [%+v] [%v.db] - End", dao.GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[UPD] Update [%+v] [%v.db] - End", dao.GetStructType(data), db.Name)
 	err = db.connection.Update(data)
 	hydrateCache(db, err, data, "Update")
 
@@ -196,13 +195,13 @@ func (db *DB) Update(data any) error {
 }
 
 func (db *DB) Create(data any) error {
-	logHandler.DatabaseLogger.Printf("Create [%+v] [%v.db] - Start", dao.GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[NEW] Create [%+v] [%v.db] - Start", dao.GetStructType(data), db.Name)
 	err := validate(data, db)
 	if err != nil {
-		logHandler.DatabaseLogger.Printf("Create [%+v] [%v.db] - Error", dao.GetStructType(data), db.Name)
+		logHandler.DatabaseLogger.Printf("[NEW] Create [%+v] [%v.db] - Error", dao.GetStructType(data), db.Name)
 		return commonErrors.WrapCreateError(err)
 	}
-	logHandler.DatabaseLogger.Printf("Create [%+v] [%v.db] - End", dao.GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[NEW] Create [%+v] [%v.db] - End", dao.GetStructType(data), db.Name)
 	err = db.connection.Save(data)
 
 	hydrateCache(db, err, data, "Create")
@@ -211,25 +210,25 @@ func (db *DB) Create(data any) error {
 }
 
 func (db *DB) Count(data any) (int, error) {
-	logHandler.DatabaseLogger.Printf("Count [%+v] [%v.db]", dao.GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[CNT] Count [%+v] [%v.db]", dao.GetStructType(data), db.Name)
 	if db.withCaching {
-		logHandler.DatabaseLogger.Printf("[CACHE] SKIP Count [%+v] [%v.db] - Caching Enabled", dao.GetStructType(data), db.Name)
+		logHandler.CacheLogger.Printf("[CNT]{SKIP} Count [%+v] [%v.db] - Caching Enabled", dao.GetStructType(data), db.Name)
 		return len(inMemoryCache), nil
 	}
 	for key, value := range connectionPool {
-		logHandler.DatabaseLogger.Printf("Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+		logHandler.DatabaseLogger.Printf("[CON] Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
 	}
 	return db.connection.Count(data)
 }
 
 func (db *DB) CountWhere(fieldName dao.Field, value any, to any) (int, error) {
-	logHandler.DatabaseLogger.Printf("CountWhere (%+v=%+v)[%+v] [%v.db]", fieldName, value, dao.GetStructType(to), db.Name)
+	logHandler.DatabaseLogger.Printf("[CNT] CountWhere (%+v=%+v)[%+v] [%v.db]", fieldName, value, dao.GetStructType(to), db.Name)
 	if err := dao.IsValidFieldInStruct(fieldName, to); err != nil {
-		logHandler.DatabaseLogger.Printf("CountWhere (%+v=%+v)[%+v] [%v.db] - Error", fieldName, value, dao.GetStructType(to), db.Name)
+		logHandler.DatabaseLogger.Printf("[CNT] CountWhere (%+v=%+v)[%+v] [%v.db] - Error", fieldName, value, dao.GetStructType(to), db.Name)
 		return 0, err
 	}
 	if db.withCaching {
-		logHandler.CacheLogger.Printf("[CACHE] SKIP CountWhere (%+v=%+v)[%+v] [%v.db] - Caching Enabled", fieldName, value, dao.GetStructType(to), db.Name)
+		logHandler.CacheLogger.Printf("[CNT] {SKIP} CountWhere (%+v=%+v)[%+v] [%v.db] - Caching Enabled", fieldName, value, dao.GetStructType(to), db.Name)
 		// Range through inMemoryCache and count matching entries
 		count := 0
 		for _, v := range inMemoryCache {

@@ -61,7 +61,7 @@ type AuditUpdateInfo struct {
 }
 
 const (
-	AUDITMSG = "[%v] Action=[%s] At=[%v] By=[%v] On=[%v] Notes=[%v]"
+	AUDITMSG = "[%v] Action: %s At: %v By: %v On: %v Notes: %v"
 )
 
 var (
@@ -121,7 +121,7 @@ func (a *Action) popMessage() string {
 func (a *Audit) Action(ctx context.Context, action Action) error {
 
 	message := action.popMessage()
-	timingMessage := fmt.Sprintf("Action=[%v] Message=[%v]", action.Code(), message)
+	timingMessage := fmt.Sprintf("Action: %v Message: %v", action.Code(), message)
 	clock := timing.Start("Audit", actions.AUDIT.GetCode(), timingMessage)
 
 	auditTime := time.Now()
@@ -129,13 +129,13 @@ func (a *Audit) Action(ctx context.Context, action Action) error {
 	// auditUser := support.GetActiveUserCode()
 	auditUser, err := getAuditUserCode(ctx)
 	if err != nil {
-		logHandler.WarningLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err)
+		logHandler.WarningLogger.Printf("[%v] Error: %v", strings.ToUpper(name), err)
 	}
 	auditHost := application.HostName()
 
 	if auditUser == "" {
-		logHandler.ErrorLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), "No Active User")
-		logHandler.InfoLogger.Printf("[%v] Action=[%v] Message=[%v]", strings.ToUpper(name), action.code, message)
+		logHandler.ErrorLogger.Printf("[%v] Error: %v", strings.ToUpper(name), "No Active User")
+		logHandler.InfoLogger.Printf("[%v] Action: %v Message: %v", strings.ToUpper(name), action.code, message)
 		os.Exit(0)
 	}
 	//updateAction := action

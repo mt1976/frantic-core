@@ -16,6 +16,8 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
+require github.com/tdewolff/parse/v2 v2.8.5 // indirect
+
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
@@ -39,10 +41,13 @@ require (
 
 require (
 	github.com/asdine/storm/v3 v3.2.1
+	github.com/go-chi/chi v1.5.5
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/goforj/godump v1.9.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/tdewolff/minify/v2 v2.24.8
 	golang.org/x/crypto v0.46.0
 	golang.org/x/sys v0.39.0 // indirect
+	gopkg.in/kothar/brotli-go.v0 v0.0.0-20170728081549-771231d473d6
 )

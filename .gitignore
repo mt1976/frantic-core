@@ -45,3 +45,5 @@ dao/test/templateStore/.DS_Store
 .gitignore
 dao/test/.DS_Store
 dao/.DS_Store
+data/database/frantic_example-template.db
+chiMiddleware/placeholder.txt

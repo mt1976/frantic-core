@@ -47,7 +47,7 @@ func performDatabaseBackup(job *DatabaseBackupJob) {
 	j := timing.Start(name, actions.BACKUP.Code, job.Description())
 
 	dateTime := time.Now().Format(dateHelpers.Format.BackupFolder)
-	logHandler.ServiceLogger.Printf("[%v] [BACKUP] Date=[%v]", domain, dateTime)
+	logHandler.ServiceLogger.Printf("[%v] Backup Date: [%v]", domain, dateTime)
 
 	destPath := paths.Backups().String() + paths.Seperator() + dateTime
 	fullBackupPath := paths.Application().String() + destPath
@@ -55,13 +55,13 @@ func performDatabaseBackup(job *DatabaseBackupJob) {
 	//create a folder
 	err := ioHelpers.MkDir(fullBackupPath)
 	if err != nil {
-		logHandler.ServiceLogger.Panicf("[%v] [%v] Error=[%v]", domain, name, err.Error())
+		logHandler.ServiceLogger.Panicf("[%v] [%v] Error: [%v]", domain, name, err.Error())
 	}
 	count := 0
 	for _, thisFunc := range job.databaseAccessors {
 		dbList, err := thisFunc()
 		if err != nil {
-			logHandler.ServiceLogger.Panicf("[%v] [%v] Error=[%v]", domain, name, err.Error())
+			logHandler.ServiceLogger.Panicf("[%v] [%v] Error: [%v]", domain, name, err.Error())
 			panic(err)
 		}
 		for _, db := range dbList {
@@ -70,7 +70,7 @@ func performDatabaseBackup(job *DatabaseBackupJob) {
 			db.Disconnect()
 			logHandler.ServiceLogger.Printf("[%v] [%v] Disconnected [%v]", domain, name, db.Name)
 			db.Backup(fullBackupPath)
-			logHandler.ServiceLogger.Printf("[%v] [%v] Backup Done [%v]", domain, name, db.Name)
+			logHandler.ServiceLogger.Printf("[%v] [%v] Done [%v]", domain, name, db.Name)
 			db.Reconnect()
 			logHandler.ServiceLogger.Printf("[%v] [%v] Reconnected [%v]", domain, name, db.Name)
 		}
@@ -86,5 +86,5 @@ func (job *DatabaseBackupJob) AddDatabaseAccessFunctions(fn func() ([]*database.
 }
 
 func (job *DatabaseBackupJob) Description() string {
-	return "Scheduled Database Backup, runs at 11:55 daily"
+	return "Database Backup, runs at 11:55 daily"
 }
