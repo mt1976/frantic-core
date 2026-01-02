@@ -165,8 +165,8 @@ func Login(ctx context.Context) {
 	usr.LastLogin = time.Now()
 	usr.LastHost, _ = os.Hostname()
 	//u.Dump("login")
-	xx := audit.LOGIN.WithMessage(fmt.Sprintf("User %v logged in", usr.UserName))
-	err = usr.UpdateWithAction(ctx, xx, "LOGIN")
+	//xx := audit.LOGIN.WithMessage(fmt.Sprintf("User %v logged in", usr.UserName))
+	err = usr.UpdateWithAction(ctx, audit.LOGIN, fmt.Sprintf("User %v logged in", usr.UserName))
 	if err != nil {
 		logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), usr.UserName)
 	}
@@ -225,6 +225,6 @@ func buildUserStub() TemplateStore {
 	stub.GID = currentUser.Gid
 	stub.Email = strings.ToLower(fmt.Sprintf("%v@%v.com", currentUser.Username, hostname))
 	stub.UserCode = strings.ToLower(fmt.Sprintf("%v%v%s", stub.UID, cfg.Display.Delimiter, currentUser.Username))
-	godump.DumpJSON(stub)
+	//godump.DumpJSON(stub)
 	return stub
 }
