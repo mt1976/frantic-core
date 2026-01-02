@@ -11,7 +11,7 @@ import (
 )
 
 func (db *DB) Retrieve(fieldName Field, value, to any) error {
-	logHandler.InfoLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), fieldName, value, GetStructType(to), db.Name, db)
+	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), fieldName, value, GetStructType(to), db.Name, db)
 
 	if db.withCaching {
 		cacheKeyValue := value.(string)
