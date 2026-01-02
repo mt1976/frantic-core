@@ -143,7 +143,7 @@ func (db *DB) Count(data any) (int, error) {
 		return len(inMemoryCache), nil
 	}
 	for key, value := range connectionPool {
-		logHandler.DatabaseLogger.Printf("[CON]<%v>{CONNECTION POOL} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+		logHandler.DatabaseLogger.Printf("[CON]<%v>{CONNECTION POOL} Connection Pool [%v] [%v] [codec=%v]", GetStructType(data), key, value.databaseName, value.connection.Node.Codec().Name())
 	}
 	return db.connection.Count(data)
 }
