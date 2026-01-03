@@ -4,6 +4,7 @@ go 1.25
 
 require (
 	github.com/BurntSushi/toml v1.6.0
+	github.com/andybalholm/brotli v1.2.0
 	github.com/galsondor/go-ascii v0.0.0-20151210013816-e2eb5175fb10
 	github.com/leekchan/accounting v1.0.0
 	github.com/rivo/uniseg v0.4.7
@@ -16,12 +17,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
-require (
-	github.com/andybalholm/brotli v1.2.0 // indirect
-	github.com/google/brotli v1.2.0 // indirect
-	github.com/kothar/brotli-go v0.0.0-20170728081549-771231d473d6 // indirect
-	github.com/tdewolff/parse/v2 v2.8.5 // indirect
-)
+require github.com/tdewolff/parse/v2 v2.8.5 // indirect
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
@@ -54,5 +50,4 @@ require (
 	github.com/tdewolff/minify/v2 v2.24.8
 	golang.org/x/crypto v0.46.0
 	golang.org/x/sys v0.39.0 // indirect
-	gopkg.in/kothar/brotli-go.v0 v0.0.0-20170728081549-771231d473d6
 )
