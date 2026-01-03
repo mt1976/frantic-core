@@ -56,7 +56,17 @@ func connect(options ...Option) *DB {
 	// check if connection already exists
 	if connectionPool[config.nameSpace] != nil && connectionPool[config.nameSpace].Name == config.nameSpace {
 		logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Connection already open [%v], using connection pool [%v] [codec=%v]", connectionPool[config.nameSpace].Name, connectionPool[config.nameSpace].databaseName, connectionPool[config.nameSpace].connection.Node.Codec().Name())
-		return connectionPool[config.nameSpace]
+		rtn := connectionPool[config.nameSpace]
+		// Update configuration in case options have changed
+		rtn.withCaching = config.withCaching
+		rtn.withCacheKey = config.withCacheKey
+		rtn.verbose = config.verbose
+		rtn.timeout = config.timeout
+		rtn.poolSize = config.poolSize
+		rtn.withEncryption = config.withEncryption
+		rtn.indices = config.indices
+		rtn.cacheInitialised = config.cacheInitialised
+		return rtn
 	}
 
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} (re)Opening [%v.db] data connection", config.nameSpace)
@@ -83,7 +93,6 @@ func connect(options ...Option) *DB {
 		logHandler.DatabaseLogger.Fatalf("[CON]{CONNECT} Opening [%v.db] connection Error=[%v]", strings.ToLower(db.databaseName), err.Error())
 		panic(commonErrors.WrapConnectError(err))
 	}
-	db.initialised = true
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%+v]", connectionPool)
 	for key, value := range connectionPool {
 		logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())

@@ -46,9 +46,10 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 	// [GET] from database
 	// err := db.connection.All(to, options...)
 	// // Store in cache if caching is enabled and retrieval was successful
-	// if !db.withCaching || err != nil {
-	// 	return err
-	// }
+	if !db.withCaching {
+		logHandler.WarningLogger.Printf("[HYD]<%v>{LOAD} CACHING NOT ENABLED [...%v.db] on %v", GetStructType(to), db.Name, "PreLoadCache")
+		return nil
+	}
 	db.cacheInitialised = false
 
 	err := db.GetAll(to, options...)
@@ -74,7 +75,7 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 
 	db.cacheInitialised = true
 
-	logHandler.CacheLogger.Printf("[HYD]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", sliceValue.Len())
+	logHandler.CacheLogger.Printf("[HYD]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", sliceValue.Len(), db.withCaching, db.cacheInitialised, db.withCacheKey)
 
 	return err
 }
