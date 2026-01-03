@@ -15,6 +15,7 @@ import (
 	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao/audit"
+	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/mathHelpers"
 )
@@ -70,6 +71,17 @@ func (record *TemplateStore) preDeleteProcessing() error {
 func templateClone(ctx context.Context, source TemplateStore) (TemplateStore, error) {
 	//TODO: Add any clone processing here
 	panic("Not Implemented")
+}
+
+// assertTemplateStore asserts that the given result is of type *TemplateStore.
+// It returns the asserted TemplateStore and any error encountered during the assertion.
+func assertTemplateStore(result any, field database.Field, value any) (*TemplateStore, error) {
+	x, ok := result.(*TemplateStore)
+	if !ok {
+		return nil, commonErrors.WrapDAOReadError(Domain, field.String(), value,
+			fmt.Errorf("type assertion failed: expected *TemplateStore, got %T", result))
+	}
+	return x, nil
 }
 
 // // prepare performs preparation steps for the TemplateStore record before it is saved to the database.

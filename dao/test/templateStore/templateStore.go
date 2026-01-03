@@ -99,7 +99,7 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 
 	clock := timing.Start(Domain, actions.GET.GetCode(), fmt.Sprintf("%v=%v", field, value))
 
-	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
+	dao.CheckDAOReadyState(Domain, audit.GET, initialised)
 
 	if field == Fields.ID && reflect.TypeOf(value).Name() != "int" {
 		msg := "invalid data type. Expected type of %v is int"
@@ -116,20 +116,27 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 	}
 
 	record := TemplateStore{}
-	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
 
-	if err := activeDB.Retrieve(database.Field(field), value, &record); err != nil {
+	// activeDB.Retrieve returns any, so we need to type-assert to *TemplateStore
+	result, err := activeDB.Retrieve(database.Field(field), value, &record)
+	if err != nil {
 		clock.Stop(0)
 		return TemplateStore{}, commonErrors.WrapRecordNotFoundError(Domain, field.String(), fmt.Sprintf("%v", value))
 	}
 
-	if err := record.postGet(); err != nil {
+	// Type assert the result to *TemplateStore
+	x, err := assertTemplateStore(result, field, value)
+	if err != nil {
+		return TemplateStore{}, err
+	}
+
+	if err := x.postGet(); err != nil {
 		clock.Stop(0)
 		return TemplateStore{}, commonErrors.WrapDAOReadError(Domain, field.String(), value, err)
 	}
 
 	clock.Stop(1)
-	return record, nil
+	return *x, nil
 }
 
 // GetAll retrieves all TemplateStore records from the database.

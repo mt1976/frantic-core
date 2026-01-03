@@ -10,7 +10,7 @@ import (
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
-func (db *DB) Retrieve(fieldName Field, value, to any) error {
+func (db *DB) Retrieve(fieldName Field, value, to any) (any, error) {
 	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), fieldName, value, GetStructType(to), db.Name, db)
 
 	if db.withCaching {
@@ -18,7 +18,7 @@ func (db *DB) Retrieve(fieldName Field, value, to any) error {
 		if cachedValue, found := inMemoryCache[cacheKeyValue]; found {
 			reflect.ValueOf(to).Elem().Set(reflect.ValueOf(cachedValue).Elem())
 			logHandler.CacheLogger.Printf("[GET]<%v>{HIT} (%v=%v) [%+v] [...%v.db] on %v - {SKIP} DB Access", GetStructType(to), db.withCacheKey, cacheKeyValue, GetStructType(to), db.Name, "Retrieve")
-			return nil
+			return cachedValue, nil
 		}
 		logHandler.CacheLogger.Printf("[GET]<%v>{MISS} (%v=%v) [%+v] [...%v.db] on %v - Accessing DB", GetStructType(to), db.withCacheKey, cacheKeyValue, GetStructType(to), db.Name, "Retrieve")
 	}
@@ -31,7 +31,9 @@ func (db *DB) Retrieve(fieldName Field, value, to any) error {
 	// Store in cache if caching is enabled and retrieval was successful
 	//HydrateCache(db, err, to, fieldName, value)
 	hydrateCache(db, err, to, "Retrieve", GetStructType(to))
-	return err
+	// Type assert the result to *TemplateStore
+
+	return to, err
 }
 
 func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
