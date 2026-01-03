@@ -3,6 +3,7 @@ package paths
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 var name = "Paths"
@@ -12,63 +13,63 @@ type FileSystemPath struct {
 }
 
 func (f FileSystemPath) String() string {
-	return f.path
+	return clean(f.path)
 }
 
 func HTML() FileSystemPath {
-	return FileSystemPath{Res().String() + "/html/templates/"}
+	return FileSystemPath{clean(Res().String() + "/html/templates/")}
 }
 
 func HTMLTemplates() FileSystemPath {
-	return FileSystemPath{Res().String() + "/html/"}
+	return FileSystemPath{clean(Res().String() + "/html/")}
 }
 
 func HTMLPage(in string) string {
-	return HTML().String() + in + ".html"
+	return clean(HTML().String() + in + ".html")
 }
 
 func HTMLTemplate() string {
-	return HTMLTemplates().String() + "templates.html"
+	return clean(HTMLTemplates().String() + "templates.html")
 }
 
 func Images() FileSystemPath {
-	return FileSystemPath{Res().String() + "/img"}
+	return FileSystemPath{clean(Res().String() + "/img")}
 }
 
 func Backups() FileSystemPath {
-	return FileSystemPath{Data().String() + "/backups"}
+	return FileSystemPath{clean(Data().String() + "/backups")}
 }
 
 func Dumps() FileSystemPath {
-	return FileSystemPath{Data().String() + "/dumps"}
+	return FileSystemPath{clean(Data().String() + "/dumps")}
 }
 
 func Database() FileSystemPath {
-	return FileSystemPath{Data().String() + "/database"}
+	return FileSystemPath{clean(Data().String() + "/database")}
 }
 
 func Config() FileSystemPath {
-	return FileSystemPath{Data().String() + "/config"}
+	return FileSystemPath{clean(Data().String() + "/config")}
 }
 
 func Defaults() FileSystemPath {
-	return FileSystemPath{Data().String() + "/defaults"}
+	return FileSystemPath{clean(Data().String() + "/defaults")}
 }
 
 func Logs() FileSystemPath {
-	return FileSystemPath{Data().String() + "/logs"}
+	return FileSystemPath{clean(Data().String() + "/logs")}
 }
 
 func Data() FileSystemPath {
-	return FileSystemPath{"/data"}
+	return FileSystemPath{clean("/data")}
 }
 
 func Res() FileSystemPath {
-	return FileSystemPath{"./res"}
+	return FileSystemPath{clean("./res")}
 }
 
 func Application() FileSystemPath {
-	return FileSystemPath{fullPath()}
+	return FileSystemPath{clean(fullPath())}
 }
 
 func Seperator() string {
@@ -76,7 +77,7 @@ func Seperator() string {
 }
 
 func (F *FileSystemPath) Is(in FileSystemPath) bool {
-	return F.path == in.path
+	return clean(F.path) == clean(in.path)
 }
 
 func fullPath() string {
@@ -86,5 +87,11 @@ func fullPath() string {
 		fmt.Printf("[%v] Error getting current directory [%v]", name, err.Error())
 		panic(err)
 	}
-	return dir
+	return clean(dir)
+}
+
+func clean(path string) string {
+	sep := string(os.PathSeparator) + string(os.PathSeparator)
+	rtn := strings.ReplaceAll(path, sep, string(os.PathSeparator))
+	return rtn
 }
