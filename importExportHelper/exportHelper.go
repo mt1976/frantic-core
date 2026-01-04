@@ -117,7 +117,7 @@ func buildName[T any](baseName string, exportList []T, idField database.Field) s
 }
 
 func buildNameForRecord[T any](baseName string, record T, idField database.Field) string {
-	logHandler.EventLogger.Printf("buildNameForRecord IN: baseName=[%v]", baseName)
+	logHandler.TraceLogger.Printf("buildNameForRecord IN: baseName=[%v]", baseName)
 	if baseName == "" {
 		baseName = "Export"
 	}
@@ -145,13 +145,13 @@ func buildNameForRecord[T any](baseName string, record T, idField database.Field
 	}
 	xx := field.Interface()
 	domainName = domainName + SEP + fmt.Sprintf("%v", xx) + SEP + baseName
-	logHandler.EventLogger.Printf("buildNameForRecord OUT: domainName=[%v]", domainName)
+	logHandler.TraceLogger.Printf("buildNameForRecord OUT: domainName=[%v]", domainName)
 	return domainName
 }
 
 func exportJSON[T any](exportName string, where paths.FileSystemPath, record T) {
 
-	logHandler.EventLogger.Printf("Exporting %v.json", exportName)
+	logHandler.TraceLogger.Printf("Exporting %v.json", exportName)
 
 	exportFile := openTargetFile(exportName, exportString, logHandler.ExportLogger, "json", where.String())
 	defer exportFile.Close()

@@ -52,30 +52,30 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 	}
 	db.cacheInitialised = false
 
-	err := db.GetAll(to, options...)
+	res, err := db.GetAll(to, options...)
 
 	logHandler.CacheLogger.Printf("[HYD]<%v>{LOAD}{GET} COMPLETE [%+v] [...%v.db] on %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache")
-	// Use reflection to iterate through the slice without casting
-	sliceValue := reflect.ValueOf(to).Elem()
-
-	// Check if it's actually a slice
-	if sliceValue.Kind() != reflect.Slice {
-		logHandler.CacheLogger.Printf("[HYD]<%v>{LOAD} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
-		logHandler.WarningLogger.Printf("[HYD]<%v>{LOAD} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
+	if err != nil {
 		return err
 	}
 
-	// Iterate through each element in the slice
-	for i := 0; i < sliceValue.Len(); i++ {
-		item := sliceValue.Index(i)
-		// Get the address of the item so we can pass it to hydrateCache
-		itemPtr := item.Addr().Interface()
+	// res is []any containing concrete values (e.g. []TemplateStore)
+	for _, item := range res {
+		val := reflect.ValueOf(item)
+		var itemPtr any
+		if val.Kind() == reflect.Ptr {
+			itemPtr = item
+		} else {
+			ptr := reflect.New(val.Type())
+			ptr.Elem().Set(val)
+			itemPtr = ptr.Interface()
+		}
 		hydrateCache(db, err, itemPtr, "PreLoadCache", GetStructType(to))
 	}
 
 	db.cacheInitialised = true
 
-	logHandler.CacheLogger.Printf("[HYD]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", sliceValue.Len(), db.withCaching, db.cacheInitialised, db.withCacheKey)
+	logHandler.CacheLogger.Printf("[HYD]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", len(res), db.withCaching, db.cacheInitialised, db.withCacheKey)
 
-	return err
+	return nil
 }

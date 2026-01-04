@@ -27,6 +27,6 @@ func openTargetFile(in, action string, useLog *log.Logger, fileExtension string,
 		useLog.Fatalf("error opening file: %v", err)
 		panic(err)
 	}
-	useLog.Printf("%ving %vs from File=[%v]", action, in, dataFileHandle.Name())
+	//useLog.Printf("%ving %vs from File=[%v]", action, in, dataFileHandle.Name())
 	return dataFileHandle
 }

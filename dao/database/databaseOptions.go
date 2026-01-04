@@ -73,7 +73,7 @@ func WithNameSpace(name string) Option {
 // Reserved for Future use.
 func WithEncryption(enabled bool) Option {
 	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithEncryption set to %v", enabled)
-	panic("WithEncryption is not yet implemented")
+	logHandler.WarningLogger.Printf("WithEncryption is not yet implemented")
 	return func(c *connectionConfig) {
 		c.withEncryption = enabled
 	}
@@ -84,7 +84,7 @@ func WithEncryption(enabled bool) Option {
 // Reserved for Future use.
 func WithIndices(indices []Field) Option {
 	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithIndices set to %v", indices)
-	panic("WithIndices is not yet implemented")
+	logHandler.WarningLogger.Printf("WithIndices is not yet implemented")
 	return func(c *connectionConfig) {
 		c.indices = indices
 	}

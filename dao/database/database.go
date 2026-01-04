@@ -1,11 +1,14 @@
 package database
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/asdine/storm/v3/index"
 	"github.com/asdine/storm/v3/q"
 	"github.com/mt1976/frantic-core/commonErrors"
+	"github.com/mt1976/frantic-core/dao/actions"
+	"github.com/mt1976/frantic-core/timing"
 
 	"github.com/mt1976/frantic-core/logHandler"
 )
@@ -36,15 +39,18 @@ func (db *DB) Retrieve(fieldName Field, value, to any) (any, error) {
 	return to, err
 }
 
-func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
+func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
 
 	if db.withCaching && db.cacheInitialised {
 		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 		// return all cached entries of the appropriate type
 		sliceValue := reflect.ValueOf(to).Elem()
+		if sliceValue.Kind() != reflect.Slice {
+			logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
+			return nil, fmt.Errorf("GetAll expected slice pointer, got %v", sliceValue.Kind())
+		}
 		elemType := sliceValue.Type().Elem()
-		//elemPtrType := reflect.PointerTo(elemType)
 
 		// Clear the slice before populating
 		sliceValue.Set(reflect.MakeSlice(sliceValue.Type(), 0, 0))
@@ -58,41 +64,96 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) error {
 			}
 		}
 
-		//	godump.DumpJSON(sliceValue)
-
-		// Set the output parameter
-		to = sliceValue.Interface()
-
 		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
-		return nil
+
+		// Convert the typed slice (e.g. []TemplateStore) into []any
+		result := make([]any, sliceValue.Len())
+		for i := 0; i < sliceValue.Len(); i++ {
+			result[i] = sliceValue.Index(i).Interface()
+		}
+		return result, nil
 	}
 
 	// [GET] from database
 	err := db.connection.All(to, options...)
-	// Store in cache if caching is enabled and retrieval was successful
-	if !db.withCaching || err != nil || !db.cacheInitialised {
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", GetStructType(to), GetStructType(to), db.Name, "GetAll")
-		return err
+	if err != nil {
+		// On error, do not attempt to use or populate the cache
+		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{ERR} [%+v] [...%v.db] on %v - Error from DB: %v", GetStructType(to), GetStructType(to), db.Name, "GetAll", err)
+		return nil, err
 	}
 
-	// Use reflection to iterate through the slice without casting
+	// Use reflection to iterate through the slice without assuming its concrete type
 	sliceValue := reflect.ValueOf(to).Elem()
-
-	// Check if it's actually a slice
 	if sliceValue.Kind() != reflect.Slice {
 		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
-		return err
+		return nil, fmt.Errorf("GetAll expected slice pointer, got %v", sliceValue.Kind())
 	}
 
-	// Iterate through each element in the slice
+	// Optionally hydrate cache if caching is enabled and initialised
+	if db.withCaching && db.cacheInitialised {
+		for i := 0; i < sliceValue.Len(); i++ {
+			item := sliceValue.Index(i)
+			// Get the address of the item so we can pass it to hydrateCache
+			itemPtr := item.Addr().Interface()
+			hydrateCache(db, err, itemPtr, "GetAll", GetStructType(to))
+		}
+	} else {
+		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+	}
+
+	// Convert the typed slice (e.g. []TemplateStore) into []any
+	result := make([]any, sliceValue.Len())
 	for i := 0; i < sliceValue.Len(); i++ {
-		item := sliceValue.Index(i)
-		// Get the address of the item so we can pass it to hydrateCache
-		itemPtr := item.Addr().Interface()
-		hydrateCache(db, err, itemPtr, "GetAll", GetStructType(to))
+		result[i] = sliceValue.Index(i).Interface()
 	}
 
-	return err
+	return result, nil
+}
+
+// GetAllWhere retrieves all TemplateStore records that match the specified field and value.
+//
+// Parameters:
+//   - field: The field to be used for filtering records.
+//   - value: The value of the specified field to filter records.
+//
+// Returns:
+//   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
+//   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
+func (db *DB) GetAllWhere(field Field, value any, to any) ([]any, error) {
+	Domain := GetStructType(to)
+	logHandler.EventLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
+
+	clock := timing.Start(Domain, actions.GETALL.GetCode(), fmt.Sprintf("%v=%v", field, value))
+
+	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
+	logHandler.EventLogger.Println("Check IsValidFieldInStruct")
+	if err := IsValidFieldInStruct(field, to); err != nil {
+		return nil, err
+	}
+
+	logHandler.EventLogger.Println("Check IsValidTypeForField")
+	if err := IsValidTypeForField(field, value, to); err != nil {
+		return nil, err
+	}
+
+	//err := activeDB.Retrieve(field, value, &recordList)
+	var resultList []any
+	recordList, err := db.GetAll(to)
+	if err != nil {
+		return nil, err
+	}
+	count := 0
+
+	for _, record := range recordList {
+		if reflect.ValueOf(record).FieldByName(field.String()).Interface() == value {
+			count++
+			resultList = append(resultList, record)
+		}
+	}
+
+	clock.Stop(len(resultList))
+
+	return resultList, nil
 }
 
 func (db *DB) Delete(data any) error {

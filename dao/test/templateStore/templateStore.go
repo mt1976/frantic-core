@@ -145,28 +145,40 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 //   - []TemplateStore: A slice of all TemplateStore records.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func GetAll() ([]TemplateStore, error) {
-
+	logHandler.EventLogger.Printf("SELECT %v ALL", Domain)
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
 
 	recordList := []TemplateStore{}
+	resultList := []TemplateStore{}
 
 	clock := timing.Start(Domain, actions.GETALL.GetCode(), "ALL")
 	logHandler.DatabaseLogger.Printf("SELECT %v ALL", Domain)
 
-	if errG := activeDB.GetAll(&recordList); errG != nil {
+	recordListAny, errG := activeDB.GetAll(&recordList)
+
+	if errG != nil {
 		clock.Stop(0)
 		return []TemplateStore{}, commonErrors.WrapNotFoundError(Domain, errG)
 	}
 
+	for _, rec := range recordListAny {
+		ts, ok := rec.(TemplateStore)
+		if !ok {
+			clock.Stop(0)
+			return []TemplateStore{}, fmt.Errorf("invalid record type returned from GetAll")
+		}
+		recordList = append(recordList, ts)
+	}
+
 	var errPost error
-	if recordList, errPost = postGetList(&recordList); errPost != nil {
+	if resultList, errPost = postGetList(&recordList); errPost != nil {
 		clock.Stop(0)
 		return nil, errPost
 	}
 
-	clock.Stop(len(recordList))
+	clock.Stop(len(resultList))
 
-	return recordList, nil
+	return resultList, nil
 }
 
 // GetAllWhere retrieves all TemplateStore records that match the specified field and value.
@@ -179,7 +191,7 @@ func GetAll() ([]TemplateStore, error) {
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
-	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
+	logHandler.EventLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
 
 	recordList := []TemplateStore{}
@@ -189,28 +201,37 @@ func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
 
+	logHandler.EventLogger.Println("Check IsValidFieldInStruct")
 	if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
-		return recordList, err
+		return nil, err
 	}
-
+	logHandler.EventLogger.Println("Check IsValidTypeForField")
 	if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
-		return recordList, err
+		return nil, err
 	}
 
 	//err := activeDB.Retrieve(field, value, &recordList)
-
-	recordList, err := GetAll()
+	logHandler.EventLogger.Println("Call GetAllWhere")
+	recordListAny, err := activeDB.GetAllWhere(field, value, recordList)
 	if err != nil {
-		return []TemplateStore{}, err
+		return nil, err
 	}
-	count := 0
-
-	for _, record := range recordList {
-		if reflect.ValueOf(record).FieldByName(field.String()).Interface() == value {
-			count++
-			resultList = append(resultList, record)
+	logHandler.EventLogger.Println("Process returned records")
+	for _, rec := range recordListAny {
+		ts, ok := rec.(TemplateStore)
+		if !ok {
+			return nil, fmt.Errorf("invalid record type returned from GetAllWhere")
 		}
+		recordList = append(recordList, ts)
 	}
+	// count := 0
+
+	// for _, record := range recordList {
+	// 	if reflect.ValueOf(record).FieldByName(field.String()).Interface() == value {
+	// 		count++
+	// 		resultList = append(resultList, record)
+	// 	}
+	// }
 
 	var errPost error
 	if resultList, errPost = postGetList(&resultList); errPost != nil {

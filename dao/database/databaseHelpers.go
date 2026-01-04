@@ -30,6 +30,14 @@ func GetStructType(data any) string {
 }
 
 func IsValidFieldInStruct(fromField Field, data any) error {
+	// Check if the field exists in the struct
+	// if the data parameter passed in is an array or slice, get the element type, also need to cope if the slice is empty
+	if reflect.TypeOf(data).Kind() == reflect.Slice || reflect.TypeOf(data).Kind() == reflect.Array {
+		if reflect.ValueOf(data).Len() == 0 {
+			return commonErrors.WrapInvalidFieldError(fromField.String())
+		}
+		data = reflect.ValueOf(data).Index(0).Interface()
+	}
 	_, isValidField := reflect.TypeOf(data).FieldByName(fromField.String())
 	if !isValidField {
 		logHandler.ErrorLogger.Println(commonErrors.WrapInvalidFieldError(fromField.String()))
