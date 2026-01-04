@@ -23,7 +23,39 @@ import (
 // Returns:
 //   - any: The retrieved record.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
+//
+// DEPRECATED: Use Get instead.
 func (db *DB) Retrieve(field Field, value, to any) (any, error) {
+	logHandler.WarningLogger.Printf("Retrieve is DEPRECATED, use Get instead")
+	return db.get(field, value, to)
+}
+
+// Get retrieves a single record from the database based on the specified field and value.
+//
+// Parameters:
+//   - field: The field to be used for filtering the record.
+//   - value: The value of the specified field to filter the record.
+//   - to: A pointer to the struct where the retrieved record will be stored.
+//
+// Returns:
+//   - any: The retrieved record.
+//   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
+func (db *DB) Get(field Field, value, to any) (any, error) {
+	//logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db]", GetStructType(to), field, value, GetStructType(to), db.Name)
+	return db.get(field, value, to)
+}
+
+// get is the internal implementation for retrieving a single record from the database.
+//
+// Parameters:
+//   - field: The field to be used for filtering the record.
+//   - value: The value of the specified field to filter the record.
+//   - to: A pointer to the struct where the retrieved record will be stored.
+//
+// Returns:
+//   - any: The retrieved record.
+//   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
+func (db *DB) get(field Field, value, to any) (any, error) {
 	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), field, value, GetStructType(to), db.Name, db)
 
 	if db.withCaching {
@@ -139,17 +171,17 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
 	Domain := GetStructType(to)
-	logHandler.EventLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
+	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 
 	clock := timing.Start(Domain, actions.GETALL.GetCode(), fmt.Sprintf("%v=%v", field, value))
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
-	logHandler.EventLogger.Println("Check IsValidFieldInStruct")
+	logHandler.TraceLogger.Println("Check IsValidFieldInStruct")
 	if err := IsValidFieldInStruct(field, to); err != nil {
 		return nil, err
 	}
 
-	logHandler.EventLogger.Println("Check IsValidTypeForField")
+	logHandler.TraceLogger.Println("Check IsValidTypeForField")
 	if err := IsValidTypeForField(field, value, to); err != nil {
 		return nil, err
 	}

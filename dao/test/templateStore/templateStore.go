@@ -191,7 +191,7 @@ func GetAll() ([]TemplateStore, error) {
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
-	logHandler.EventLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
+	logHandler.TraceLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
 
 	recordList := []TemplateStore{}
@@ -201,22 +201,22 @@ func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
 
-	logHandler.EventLogger.Println("Check IsValidFieldInStruct")
+	logHandler.TraceLogger.Println("Check IsValidFieldInStruct")
 	if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
 		return nil, err
 	}
-	logHandler.EventLogger.Println("Check IsValidTypeForField")
+	logHandler.TraceLogger.Println("Check IsValidTypeForField")
 	if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
 		return nil, err
 	}
 
 	//err := activeDB.Retrieve(field, value, &recordList)
-	logHandler.EventLogger.Println("Call GetAllWhere")
+	logHandler.TraceLogger.Println("Call GetAllWhere")
 	recordListAny, err := activeDB.GetAllWhere(field, value, recordList)
 	if err != nil {
 		return nil, err
 	}
-	logHandler.EventLogger.Println("Process returned records")
+	logHandler.TraceLogger.Println("Process returned records")
 	for _, rec := range recordListAny {
 		ts, ok := rec.(TemplateStore)
 		if !ok {
