@@ -13,8 +13,18 @@ import (
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
-func (db *DB) Retrieve(fieldName Field, value, to any) (any, error) {
-	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), fieldName, value, GetStructType(to), db.Name, db)
+// Retrieve retrieves a single record from the database based on the specified field and value.
+//
+// Parameters:
+//   - field: The field to be used for filtering the record.
+//   - value: The value of the specified field to filter the record.
+//   - to: A pointer to the struct where the retrieved record will be stored.
+//
+// Returns:
+//   - any: The retrieved record.
+//   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
+func (db *DB) Retrieve(field Field, value, to any) (any, error) {
+	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), field, value, GetStructType(to), db.Name, db)
 
 	if db.withCaching {
 		cacheKeyValue := value.(string)
@@ -26,10 +36,10 @@ func (db *DB) Retrieve(fieldName Field, value, to any) (any, error) {
 		logHandler.CacheLogger.Printf("[GET]<%v>{MISS} (%v=%v) [%+v] [...%v.db] on %v - Accessing DB", GetStructType(to), db.withCacheKey, cacheKeyValue, GetStructType(to), db.Name, "Retrieve")
 	}
 
-	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] - From Database", GetStructType(to), fieldName, value, GetStructType(to), db.Name)
+	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] - From Database", GetStructType(to), field, value, GetStructType(to), db.Name)
 
 	// [GET] from database
-	err := db.connection.One(string(fieldName), value, to)
+	err := db.connection.One(string(field), value, to)
 
 	// Store in cache if caching is enabled and retrieval was successful
 	//HydrateCache(db, err, to, fieldName, value)
@@ -39,6 +49,14 @@ func (db *DB) Retrieve(fieldName Field, value, to any) (any, error) {
 	return to, err
 }
 
+// GetAll retrieves all records of the specified type from the database.
+//
+// Parameters:
+//   - to: A pointer to a slice where the retrieved records will be stored.
+//
+// Returns:
+//   - []any: A slice of all retrieved records.
+//   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
 
@@ -119,7 +137,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 // Returns:
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func (db *DB) GetAllWhere(field Field, value any, to any) ([]any, error) {
+func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
 	Domain := GetStructType(to)
 	logHandler.EventLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 
@@ -156,6 +174,13 @@ func (db *DB) GetAllWhere(field Field, value any, to any) ([]any, error) {
 	return resultList, nil
 }
 
+// Delete removes the specified record from the database.
+//
+// Parameters:
+//   - data: A pointer to the struct representing the record to be deleted.
+//
+// Returns:
+//   - error: An error object if any issues occur during the deletion process; otherwise, nil.
 func (db *DB) Delete(data any) error {
 	logHandler.DatabaseLogger.Printf("[DEL]<%v>{DELETE} Delete [%+v] [%v.db]", GetStructType(data), GetStructType(data), db.Name)
 	err := db.connection.DeleteStruct(data)
@@ -163,6 +188,13 @@ func (db *DB) Delete(data any) error {
 	return err
 }
 
+// Drop removes the entire bucket or collection associated with the specified struct from the database.
+//
+// Parameters:
+//   - data: A pointer to the struct representing the type whose bucket or collection is to be dropped.
+//
+// Returns:
+//   - error: An error object if any issues occur during the drop process; otherwise, nil.
 func (db *DB) Drop(data any) error {
 	logHandler.DatabaseLogger.Printf("[DRP]<%v>{DROP} Drop [%+v] [%v.db]", GetStructType(data), GetStructType(data), db.Name)
 	err := db.connection.Drop(data)
@@ -170,6 +202,13 @@ func (db *DB) Drop(data any) error {
 	return err
 }
 
+// Update modifies an existing record in the database.
+//
+// Parameters:
+//   - data: A pointer to the struct representing the record to be updated.
+//
+// Returns:
+//   - error: An error object if any issues occur during the update process; otherwise, nil.
 func (db *DB) Update(data any) error {
 	logHandler.DatabaseLogger.Printf("[UPD]<%v>{UPDATE} Update [%+v] [%v.db] - Start", GetStructType(data), GetStructType(data), db.Name)
 	err := validate(data, db)
@@ -184,6 +223,13 @@ func (db *DB) Update(data any) error {
 	return err
 }
 
+// Create adds a new record to the database.
+//
+// Parameters:
+//   - data: A pointer to the struct representing the record to be created.
+//
+// Returns:
+//   - error: An error object if any issues occur during the creation process; otherwise, nil.
 func (db *DB) Create(data any) error {
 	logHandler.DatabaseLogger.Printf("[NEW]<%v>{CREATE} Create [%+v] [%v.db] - Start", GetStructType(data), GetStructType(data), db.Name)
 	err := validate(data, db)
@@ -199,6 +245,14 @@ func (db *DB) Create(data any) error {
 	return err
 }
 
+// Count returns the total number of records of the specified type in the database.
+//
+// Parameters:
+//   - data: A pointer to the struct representing the type whose records are to be counted.
+//
+// Returns:
+//   - int: The total number of records.
+//   - error: An error object if any issues occur during the counting process; otherwise, nil.
 func (db *DB) Count(data any) (int, error) {
 	logHandler.DatabaseLogger.Printf("[CNT]<%v>{COUNT} Count [%+v] [%v.db]", GetStructType(data), GetStructType(data), db.Name)
 	if db.withCaching {
@@ -211,6 +265,16 @@ func (db *DB) Count(data any) (int, error) {
 	return db.connection.Count(data)
 }
 
+// CountWhere returns the number of records that match the specified field and value.
+//
+// Parameters:
+//   - fieldName: The field to be used for filtering records.
+//   - value: The value of the specified field to filter records.
+//   - to: A pointer to the struct representing the type whose records are to be counted.
+//
+// Returns:
+//   - int: The number of records that match the specified criteria.
+//   - error: An error object if any issues occur during the counting process; otherwise, nil.
 func (db *DB) CountWhere(fieldName Field, value any, to any) (int, error) {
 	logHandler.DatabaseLogger.Printf("[CNT]<%v>{COUNT} CountWhere (%+v=%+v)[%+v] [%v.db]", GetStructType(to), fieldName, value, GetStructType(to), db.Name)
 	if err := IsValidFieldInStruct(fieldName, to); err != nil {
