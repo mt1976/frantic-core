@@ -34,7 +34,8 @@ func GetDBFileName(name string) string {
 
 	xx := fmt.Sprintf(path, paths.Application().String(), name)
 	//logger.InfoLogger.Println("DBN: DB File Name: ", xx)
-	return xx
+
+	return clean(xx)
 }
 
 func Dump(tableName string, where paths.FileSystemPath, action string, recordID string, yy any) {
@@ -78,11 +79,11 @@ func Backup(table, location string) {
 	time.Sleep(1 * time.Second)
 	timing := timing.Start(table, "Backup", "")
 	//dateTime := time.Now().Format("20060102150405")
-	toPath := location // location has all the path info
-	toFile := toPath + paths.Seperator() + table + ".db"
+	toPath := clean(location) // location has all the path info
+	toFile := clean(toPath + paths.Seperator() + table + ".db")
 
-	fromPath := paths.Database().String()
-	fromFile := paths.Application().String() + paths.Database().String() + paths.Seperator() + table + ".db"
+	fromPath := clean(paths.Database().String())
+	fromFile := clean(paths.Application().String() + paths.Database().String() + paths.Seperator() + table + ".db")
 	logHandler.EventLogger.Printf("Backup=[%v] Path=[%v]", strings.ToLower(table), paths.Application().String())
 	logHandler.EventLogger.Printf("Backup=[%v] Database=[%v.db]", strings.ToLower(table), table)
 	logHandler.EventLogger.Printf("Backup=[%v] From=[%v] %v", strings.ToLower(table), fromPath, toFile)
@@ -111,6 +112,9 @@ func CopyFile(src, dst string) error {
 	var dstfd *os.File
 	var srcinfo os.FileInfo
 
+	src = clean(src)
+	dst = clean(dst)
+
 	if srcfd, err = os.Open(src); err != nil {
 		return commonErrors.WrapOSError(err)
 	}
@@ -131,11 +135,14 @@ func CopyFile(src, dst string) error {
 }
 
 func MkDir(path string) error {
+	// Create the folder
+	path = clean(path)
 	logHandler.InfoLogger.Printf("[%v] Creating folder Path=[%v]", strings.ToUpper(name), path)
 	return os.MkdirAll(path, os.ModeSticky|os.ModePerm)
 }
 
 func Dir(path string) ([]string, error) {
+	path = clean(path)
 	// Get all folders in the backup directory
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -151,8 +158,15 @@ func Dir(path string) ([]string, error) {
 }
 
 func DeleteFolder(path string) error {
+	path = clean(path)
 	// Delete the folder
 	logHandler.InfoLogger.Printf("[DELETE] [%v] Deleting folder Path=[%v]", strings.ToUpper(name), path)
 	return os.RemoveAll(path)
 	//return nil
+}
+
+func clean(path string) string {
+	sep := string(os.PathSeparator) + string(os.PathSeparator)
+	rtn := strings.ReplaceAll(path, sep, string(os.PathSeparator))
+	return rtn
 }

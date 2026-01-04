@@ -73,6 +73,12 @@ func (db *DB) get(field Field, value, to any) (any, error) {
 	// [GET] from database
 	err := db.connection.One(string(field), value, to)
 
+	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] - Completed", GetStructType(to), field, value, GetStructType(to), db.Name)
+	if err != nil {
+		// On error, do not attempt to use or populate the cache
+		logHandler.CacheLogger.Printf("[GET]<%v>{ERR} (%v=%v) [%+v] [...%v.db] on %v - Error from DB: %v", GetStructType(to), db.withCacheKey, value, GetStructType(to), db.Name, "Retrieve", err)
+		return nil, err
+	}
 	// Store in cache if caching is enabled and retrieval was successful
 	//HydrateCache(db, err, to, fieldName, value)
 	hydrateCache(db, err, to, "Retrieve", GetStructType(to))
