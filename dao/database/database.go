@@ -96,14 +96,15 @@ func (db *DB) get(field Field, value, to any) (any, error) {
 //   - []any: A slice of all retrieved records.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
-	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
+	logHandler.EventLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
 
 	if db.withCaching && db.cacheInitialised {
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 		// return all cached entries of the appropriate type
 		sliceValue := reflect.ValueOf(to).Elem()
 		if sliceValue.Kind() != reflect.Slice {
-			logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
+			logHandler.EventLogger.Printf("[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
 			return nil, fmt.Errorf("GetAll expected slice pointer, got %v", sliceValue.Kind())
 		}
 		elemType := sliceValue.Type().Elem()
@@ -130,23 +131,33 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 		return result, nil
 	}
 
+	logHandler.EventLogger.Printf("[GET]<%v>{ALL} [%+v] [%v.db] - From Database %+v", GetStructType(to), GetStructType(to), db.Name, options)
 	// [GET] from database
 	err := db.connection.All(to, options...)
 	if err != nil {
 		// On error, do not attempt to use or populate the cache
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{ERR} [%+v] [...%v.db] on %v - Error from DB: %v", GetStructType(to), GetStructType(to), db.Name, "GetAll", err)
+		logHandler.ErrorLogger.Printf("[GET]<%v>{ALL}{ERR} [%+v] [...%v.db] on %v - Error from DB: %v", GetStructType(to), GetStructType(to), db.Name, "GetAll", err)
 		return nil, err
 	}
+
+	// Completed DB retrieval, wait 1 seconds
+	logHandler.EventLogger.Printf("[GET]<%v>{ALL} [%+v] [%v.db] - Pausing before processing", GetStructType(to), GetStructType(to), db.Name)
+	//time.Sleep(1 * time.Second)
+
+	logHandler.EventLogger.Printf("[GET]<%v>{ALL} [%+v] [%v.db] - Completed", GetStructType(to), GetStructType(to), db.Name)
 
 	// Use reflection to iterate through the slice without assuming its concrete type
 	sliceValue := reflect.ValueOf(to).Elem()
 	if sliceValue.Kind() != reflect.Slice {
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
 		return nil, fmt.Errorf("GetAll expected slice pointer, got %v", sliceValue.Kind())
 	}
 
+	logHandler.EventLogger.Printf("[GET]<%v>{ALL} [%+v] [...%v.db] on %v - Retrieved %d entries from DB", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
+
 	// Optionally hydrate cache if caching is enabled and initialised
 	if db.withCaching && db.cacheInitialised {
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{POPULATE} [%+v] [...%v.db] on %v - Populating Cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 		for i := 0; i < sliceValue.Len(); i++ {
 			item := sliceValue.Index(i)
 			// Get the address of the item so we can pass it to hydrateCache
@@ -154,7 +165,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 			hydrateCache(db, err, itemPtr, "GetAll", GetStructType(to))
 		}
 	} else {
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 	}
 
 	// Convert the typed slice (e.g. []TemplateStore) into []any
@@ -162,6 +173,8 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 	for i := 0; i < sliceValue.Len(); i++ {
 		result[i] = sliceValue.Index(i).Interface()
 	}
+
+	logHandler.EventLogger.Printf("[GET]<%v>{ALL} [%+v] [...%v.db] on %v - Returning %d entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 
 	return result, nil
 }
@@ -177,18 +190,20 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
 	Domain := GetStructType(to)
-	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
+	logHandler.EventLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 
 	clock := timing.Start(Domain, actions.GETALL.GetCode(), fmt.Sprintf("%v=%v", field, value))
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
-	logHandler.TraceLogger.Println("Check IsValidFieldInStruct")
+	logHandler.InfoLogger.Println("Check IsValidFieldInStruct")
 	if err := IsValidFieldInStruct(field, to); err != nil {
+		logHandler.ErrorLogger.Printf("Field validation error for field '%v': %v", field.String(), err)
 		return nil, err
 	}
 
-	logHandler.TraceLogger.Println("Check IsValidTypeForField")
+	logHandler.InfoLogger.Println("Check IsValidTypeForField")
 	if err := IsValidTypeForField(field, value, to); err != nil {
+		logHandler.ErrorLogger.Printf("Type validation error for field '%v': %v", field.String(), err)
 		return nil, err
 	}
 
@@ -196,8 +211,11 @@ func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
 	var resultList []any
 	recordList, err := db.GetAll(to)
 	if err != nil {
+		logHandler.ErrorLogger.Print(err.Error())
 		return nil, err
 	}
+
+	logHandler.EventLogger.Printf("Filter %v records", len(recordList))
 	count := 0
 
 	for _, record := range recordList {

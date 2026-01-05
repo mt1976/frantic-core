@@ -30,31 +30,81 @@ func GetStructType(data any) string {
 }
 
 func IsValidFieldInStruct(fromField Field, data any) error {
-	// Check if the field exists in the struct
-	// if the data parameter passed in is an array or slice, get the element type, also need to cope if the slice is empty
-	if reflect.TypeOf(data).Kind() == reflect.Slice || reflect.TypeOf(data).Kind() == reflect.Array {
-		if reflect.ValueOf(data).Len() == 0 {
-			return commonErrors.WrapInvalidFieldError(fromField.String())
-		}
-		data = reflect.ValueOf(data).Index(0).Interface()
+	// Normalise the type: unwrap pointers, and if it's a slice/array, use the element type.
+	if data == nil {
+		logHandler.ErrorLogger.Printf("Cannot validate field '%v' on <nil> data", fromField.String())
+		return commonErrors.WrapInvalidFieldError(fromField.String())
 	}
-	_, isValidField := reflect.TypeOf(data).FieldByName(fromField.String())
-	if !isValidField {
+
+	t := reflect.TypeOf(data)
+	for t.Kind() == reflect.Ptr {
+		// Unwrap pointer types
+		t = t.Elem()
+	}
+
+	if t.Kind() == reflect.Slice || t.Kind() == reflect.Array {
+		logHandler.InfoLogger.Printf("Validating Field '%v' against slice/array element type '%v'", fromField.String(), t.Elem())
+		t = t.Elem()
+		for t.Kind() == reflect.Ptr {
+			// Handle slices of pointers to structs
+			t = t.Elem()
+		}
+	}
+
+	logHandler.InfoLogger.Printf("Validating Field '%v' in Struct type '%v'", fromField.String(), t.Name())
+
+	if t.Kind() != reflect.Struct {
+		logHandler.ErrorLogger.Printf("Type '%v' is not a struct; cannot validate field '%v'", t, fromField.String())
+		return commonErrors.WrapInvalidFieldError(fromField.String())
+	}
+
+	if _, isValidField := t.FieldByName(fromField.String()); !isValidField {
+		logHandler.ErrorLogger.Printf("Field '%v' not found in struct '%v'", fromField.String(), t.Name())
 		logHandler.ErrorLogger.Println(commonErrors.WrapInvalidFieldError(fromField.String()))
 		return commonErrors.WrapInvalidFieldError(fromField.String())
 	}
+	logHandler.WarningLogger.Printf("Field '%v' is valid in struct '%v'", fromField.String(), t.Name())
 	return nil
 }
 
 func IsValidTypeForField(field Field, data, forStruct any) error {
-	dataType := reflect.TypeOf(data).String()
-	structField, found := reflect.TypeOf(forStruct).FieldByName(field.String())
-	if !found {
+	if forStruct == nil {
+		logHandler.ErrorLogger.Printf("Cannot validate type for field '%v' on <nil> struct", field.String())
 		return commonErrors.WrapInvalidFieldError(field.String())
+	}
+
+	// Normalise the type of forStruct: unwrap pointers, and if it's a slice/array, use the element type.
+	st := reflect.TypeOf(forStruct)
+	for st.Kind() == reflect.Ptr {
+		st = st.Elem()
+	}
+	if st.Kind() == reflect.Slice || st.Kind() == reflect.Array {
+		st = st.Elem()
+		for st.Kind() == reflect.Ptr {
+			st = st.Elem()
+		}
+	}
+
+	if st.Kind() != reflect.Struct {
+		logHandler.ErrorLogger.Printf("Type '%v' is not a struct; cannot validate type for field '%v'", st, field.String())
+		return commonErrors.WrapInvalidFieldError(field.String())
+	}
+
+	structField, found := st.FieldByName(field.String())
+	if !found {
+		logHandler.ErrorLogger.Printf("Field '%v' not found in struct '%v' when validating type", field.String(), st.Name())
+		return commonErrors.WrapInvalidFieldError(field.String())
+	}
+
+	dataType := "<nil>"
+	if data != nil {
+		dataType = reflect.TypeOf(data).String()
 	}
 	structFieldType := structField.Type.String()
 	if dataType != structFieldType {
+		logHandler.ErrorLogger.Printf("Type mismatch for field '%v': expected '%v', got '%v'", field.String(), structFieldType, dataType)
 		return commonErrors.WrapInvalidTypeError(field.String(), dataType, structFieldType)
 	}
+	logHandler.WarningLogger.Printf("Type for field '%v' is valid: expected '%v', got '%v'", field.String(), structFieldType, dataType)
 	return nil
 }

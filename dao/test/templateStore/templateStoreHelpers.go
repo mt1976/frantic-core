@@ -17,7 +17,6 @@ import (
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/logHandler"
-	"github.com/mt1976/frantic-core/mathHelpers"
 )
 
 //TODO: RENAME "template" TO THE NAME OF THE DOMAIN ENTITY
@@ -146,42 +145,60 @@ func assertTemplateStore(result any, field database.Field, value any) (*Template
 
 // Insert additional functions below this line
 
-func Login(ctx context.Context) {
+func Login(ctx context.Context, sq string) error {
 
-	temp := buildUserStub()
+	logHandler.EventLogger.Printf("TemplateStore Login Initiated")
+
+	temp := buildUserStub(sq)
 	var usr TemplateStore
 
 	//godump.DumpJSON(temp)
 	logHandler.TraceLogger.Printf("%v", godump.DumpStr(temp))
 
 	//os.Exit(0)
-
+	logHandler.InfoLogger.Printf("Login Attempt User=[%v] Code=[%v]", temp.UserName, temp.UserCode)
 	usrList, err := GetAllWhere(Fields.UserCode, temp.UserCode)
 	logHandler.InfoLogger.Printf("Login UserCode=[%v] Count=[%v]", temp.UserCode, len(usrList))
 	if err != nil || len(usrList) == 0 {
 		if err != nil {
 			logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), temp.UserName)
+			return err
 		}
 		logHandler.InfoLogger.Printf("User=[%v] does not exist, creating", temp.UserName)
-		usr, err = Add(ctx)
+		usr, err = Add(ctx, sq)
 		if err != nil {
 			logHandler.ErrorLogger.Printf("Warning=[%v] User=[%v]", err.Error(), temp.UserName)
-			panic(err)
+			return err
 		}
 	}
 	logHandler.InfoLogger.Printf("Login UserCode=[%v] Count=[%v]", temp.UserCode, len(usrList))
 	if len(usrList) >= 1 {
-		usr = usrList[0]
-	}
+		logHandler.InfoLogger.Printf("User=[%v] exists, loading", temp.UserName)
+		// Range through userList and update usr
+		for _, u := range usrList {
+			u.LastHost, _ = os.Hostname()
+			u.LastLogin = time.Now()
+			err = u.UpdateWithAction(ctx, audit.LOGIN, fmt.Sprintf("User %v logged in", u.UserName))
+			if err != nil {
+				logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), u.UserName)
+				return err
+			}
+			logHandler.InfoLogger.Printf("User [%v] logged in successfully", u.UserName)
+		}
+	} else {
 
-	usr.LastLogin = time.Now()
-	usr.LastHost, _ = os.Hostname()
-	//u.Dump("login")
-	//xx := audit.LOGIN.WithMessage(fmt.Sprintf("User %v logged in", usr.UserName))
-	err = usr.UpdateWithAction(ctx, audit.LOGIN, fmt.Sprintf("User %v logged in", usr.UserName))
-	if err != nil {
-		logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), usr.UserName)
+		usr.LastLogin = time.Now()
+		usr.LastHost, _ = os.Hostname()
+		//u.Dump("login")
+		//xx := audit.LOGIN.WithMessage(fmt.Sprintf("User %v logged in", usr.UserName))
+		err = usr.UpdateWithAction(ctx, audit.LOGIN, fmt.Sprintf("User %v logged in", usr.UserName))
+		if err != nil {
+			logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), usr.UserName)
+			return err
+		}
+		logHandler.InfoLogger.Printf("User [%v] logged in successfully", usr.UserName)
 	}
+	return nil
 }
 
 func (u *TemplateStore) SetName(name string) error {
@@ -199,13 +216,13 @@ func (u *TemplateStore) buildUserCode() string {
 	return fmt.Sprintf("%v%v%v", u.UID, cfg.Display.Delimiter, u.UserName)
 }
 
-func Add(ctx context.Context) (TemplateStore, error) {
+func Add(ctx context.Context, sq string) (TemplateStore, error) {
 	// Create a new User object
 
 	//godump.Dump(currentUser)
 	//username := fmt.Sprintf("%v_%s", currentUser.Uid, currentUser.Username)
 	// Check if the user already exists, if not create
-	testu := buildUserStub()
+	testu := buildUserStub(sq)
 
 	// oldu, dupErr := testu.dup()
 	// if dupErr == commonErrors.ErrorDuplicate {
@@ -225,13 +242,13 @@ func Add(ctx context.Context) (TemplateStore, error) {
 	return u, nil
 }
 
-func buildUserStub() TemplateStore {
+func buildUserStub(sq string) TemplateStore {
 	currentUser, _ := user.Current()
 	hostname, _ := os.Hostname()
 
 	stub := TemplateStore{}
 	stub.ID = 0
-	stub.UID = fmt.Sprintf("%v%v", currentUser.Uid, mathHelpers.RandomInt(10))
+	stub.UID = fmt.Sprintf("%v%04v", currentUser.Uid, sq)
 	stub.UserName = currentUser.Username
 	stub.RealName = currentUser.Name
 	stub.GID = currentUser.Gid
