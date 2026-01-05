@@ -35,7 +35,7 @@ var cfg *commonConfig.Settings
 //
 //	None
 func Initialise(ctx context.Context) {
-	logHandler.EventLogger.Printf("Opening connection to %v", Domain)
+	logHandler.DatabaseLogger.Printf("Opening connection to %v", Domain)
 
 	timing := timing.Start(Domain, actions.INITIALISE.GetCode(), "Initialise")
 	cfg = commonConfig.Get()
@@ -55,7 +55,7 @@ func Initialise(ctx context.Context) {
 	//TODO: Add any initialisation code here
 
 	timing.Stop(1)
-	logHandler.EventLogger.Printf("Opened connection to %v", Domain)
+	logHandler.DatabaseLogger.Printf("Opened connection to %v", Domain)
 }
 
 // IsInitialised returns the initialisation status of the DAO.
