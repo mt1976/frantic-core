@@ -147,7 +147,7 @@ func assertTemplateStore(result any, field database.Field, value any) (*Template
 
 func Login(ctx context.Context, sq string) error {
 
-	logHandler.EventLogger.Printf("TemplateStore Login Initiated")
+	//	logHandler.EventLogger.Printf("TemplateStore Login Initiated")
 
 	temp := buildUserStub(sq)
 	var usr TemplateStore
@@ -156,22 +156,22 @@ func Login(ctx context.Context, sq string) error {
 	logHandler.TraceLogger.Printf("%v", godump.DumpStr(temp))
 
 	//os.Exit(0)
-	logHandler.InfoLogger.Printf("Login Attempt User=[%v] Code=[%v]", temp.UserName, temp.UserCode)
+	//logHandler.InfoLogger.Printf("Login Attempt User=[%v] Code=[%v]", temp.UserName, temp.UserCode)
 	usrList, err := GetAllWhere(Fields.UserCode, temp.UserCode)
-	logHandler.InfoLogger.Printf("Login UserCode=[%v] Count=[%v]", temp.UserCode, len(usrList))
+	//logHandler.InfoLogger.Printf("Login UserCode=[%v] Count=[%v]", temp.UserCode, len(usrList))
 	if err != nil || len(usrList) == 0 {
 		if err != nil {
 			logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), temp.UserName)
 			return err
 		}
-		logHandler.InfoLogger.Printf("User=[%v] does not exist, creating", temp.UserName)
+		//	logHandler.InfoLogger.Printf("User=[%v] does not exist, creating", temp.UserName)
 		usr, err = Add(ctx, sq)
 		if err != nil {
 			logHandler.ErrorLogger.Printf("Warning=[%v] User=[%v]", err.Error(), temp.UserName)
 			return err
 		}
 	}
-	logHandler.InfoLogger.Printf("Login UserCode=[%v] Count=[%v]", temp.UserCode, len(usrList))
+	//logHandler.InfoLogger.Printf("Login UserCode=[%v] Count=[%v]", temp.UserCode, len(usrList))
 	if len(usrList) >= 1 {
 		logHandler.InfoLogger.Printf("User=[%v] exists, loading", temp.UserName)
 		// Range through userList and update usr
@@ -183,7 +183,7 @@ func Login(ctx context.Context, sq string) error {
 				logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), u.UserName)
 				return err
 			}
-			logHandler.InfoLogger.Printf("User [%v] logged in successfully", u.UserName)
+			//logHandler.InfoLogger.Printf("User [%v] logged in successfully", u.UserName)
 		}
 	} else {
 
@@ -196,7 +196,7 @@ func Login(ctx context.Context, sq string) error {
 			logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), usr.UserName)
 			return err
 		}
-		logHandler.InfoLogger.Printf("User [%v] logged in successfully", usr.UserName)
+		//logHandler.InfoLogger.Printf("User [%v] logged in successfully", usr.UserName)
 	}
 	return nil
 }

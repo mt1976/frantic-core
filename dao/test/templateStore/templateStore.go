@@ -44,7 +44,7 @@ func Count() (int, error) {
 //   - int: The count of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the counting process; otherwise, nil.
 func CountWhere(field database.Field, value any) (int, error) {
-	logHandler.EventLogger.Printf("COUNT %v WHERE (%v=%v)", Domain, field.String(), value)
+	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", Domain, field.String(), value)
 	clock := timing.Start(Domain, actions.COUNT.GetCode(), fmt.Sprintf("%v=%v", field.String(), value))
 	list, err := GetAllWhere(field, value)
 	if err != nil {
@@ -52,7 +52,7 @@ func CountWhere(field database.Field, value any) (int, error) {
 		clock.Stop(0)
 		return 0, err
 	}
-	logHandler.EventLogger.Printf("COUNT RESULT %v WHERE (%v=%v) = %d", Domain, field.String(), value, len(list))
+	logHandler.DatabaseLogger.Printf("COUNT RESULT %v WHERE (%v=%v) = %d", Domain, field.String(), value, len(list))
 	clock.Stop(len(list))
 	return len(list), nil
 }
@@ -111,18 +111,18 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 		return TemplateStore{}, commonErrors.WrapDAOReadError(Domain, field.String(), value, fmt.Errorf(msg, value))
 	}
 
-	if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
-		return TemplateStore{}, err
-	}
+	// if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
+	// 	return TemplateStore{}, err
+	// }
 
-	if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
-		return TemplateStore{}, err
-	}
+	// if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
+	// 	return TemplateStore{}, err
+	// }
 
 	record := TemplateStore{}
 
 	// activeDB.Retrieve returns any, so we need to type-assert to *TemplateStore
-	result, err := activeDB.Retrieve(database.Field(field), value, &record)
+	result, err := activeDB.Get(database.Field(field), value, &record)
 	if err != nil {
 		clock.Stop(0)
 		return TemplateStore{}, commonErrors.WrapRecordNotFoundError(Domain, field.String(), fmt.Sprintf("%v", value))
@@ -149,7 +149,7 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 //   - []TemplateStore: A slice of all TemplateStore records.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func GetAll() ([]TemplateStore, error) {
-	logHandler.EventLogger.Printf("SELECT %v ALL", Domain)
+	logHandler.DatabaseLogger.Printf("SELECT %v ALL", Domain)
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
 
 	recordList := []TemplateStore{}
@@ -160,7 +160,7 @@ func GetAll() ([]TemplateStore, error) {
 
 	recordListAny, errG := activeDB.GetAll(&recordList)
 
-	logHandler.EventLogger.Printf("Got %v records from database (%v)", len(recordListAny), len(recordList))
+	logHandler.DatabaseLogger.Printf("Got %v records from database (%v)", len(recordListAny), len(recordList))
 
 	if errG != nil {
 		clock.Stop(0)
@@ -184,7 +184,7 @@ func GetAll() ([]TemplateStore, error) {
 
 	clock.Stop(len(resultList))
 
-	logHandler.TraceLogger.Printf("RETRIEVED %v records from %v", len(resultList), database.GetStructType(recordList))
+	logHandler.DatabaseLogger.Printf("RETRIEVED %v records from %v", len(resultList), database.GetStructType(recordList))
 
 	return resultList, nil
 }
@@ -199,7 +199,7 @@ func GetAll() ([]TemplateStore, error) {
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
-	logHandler.InfoLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
+	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
 
 	//recordList := []TemplateStore{}
@@ -220,13 +220,13 @@ func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
 	// }
 
 	//err := activeDB.Retrieve(field, value, &recordList)
-	logHandler.EventLogger.Println("Call GetAllWhere")
+	logHandler.DatabaseLogger.Println("Call GetAllWhere")
 	recordListAny, err := activeDB.GetAllWhere(field, value, &[]TemplateStore{})
 	if err != nil {
 		logHandler.ErrorLogger.Print(err.Error())
 		return nil, err
 	}
-	logHandler.EventLogger.Println("Process returned records")
+	logHandler.DatabaseLogger.Println("Process returned records")
 	for _, rec := range recordListAny {
 		ts, ok := rec.(TemplateStore)
 		if !ok {
@@ -279,7 +279,8 @@ func Delete(ctx context.Context, id int, note string) error {
 //   - error: An error object if any issues occur during the deletion process; otherwise, nil.
 func DeleteByKey(ctx context.Context, key string, note string) error {
 	logHandler.WarningLogger.Printf("DeleteByKey is deprecated, please use DeleteBy with Fields.Key instead")
-	return DeleteBy(ctx, Fields.Key, key, note)
+	panic("DeleteByKey is deprecated, please use DeleteBy with Fields.Key instead")
+	//	return DeleteBy(ctx, Fields.Key, key, note)
 }
 
 // DeleteBy deletes a TemplateStore record from the database based on the specified field and value.
@@ -299,17 +300,17 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 
 	clock := timing.Start(Domain, actions.DELETE.GetCode(), fmt.Sprintf("%v=%v", field.String(), value))
 
-	if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
-		logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, err).Error())
-		clock.Stop(0)
-		return commonErrors.WrapDAODeleteError(Domain, field.String(), value, err)
-	}
+	// if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
+	// 	logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, err).Error())
+	// 	clock.Stop(0)
+	// 	return commonErrors.WrapDAODeleteError(Domain, field.String(), value, err)
+	// }
 
-	if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
-		logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, err).Error())
-		clock.Stop(0)
-		return err
-	}
+	// if err := database.IsValidTypeForField(field, value, TemplateStore{}); err != nil {
+	// 	logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, err).Error())
+	// 	clock.Stop(0)
+	// 	return err
+	// }
 
 	record, err := GetBy(field, value)
 
@@ -334,8 +335,8 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 		clock.Stop(0)
 		return preDeleteErr
 	}
-
-	record.ExportRecordAsJSON(audit.DELETE.Description())
+	//logHandler.WarningLogger.Printf("Deleting %v record where %v=%v %v", Domain, field.String(), value, audit.DELETE.ShortName())
+	record.ExportRecordAsJSON(audit.DELETE.ShortName())
 
 	if err := activeDB.Delete(&record); err != nil {
 		delErr := commonErrors.WrapDAODeleteError(Domain, field.String(), value, err)
@@ -501,10 +502,10 @@ func ClearDown(ctx context.Context) error {
 
 	//noRecords := len(recordList)
 	count := 0
-	logHandler.EventLogger.Printf("Clearing %v records", len(recordList))
+	logHandler.DatabaseLogger.Printf("Clearing %v records", len(recordList))
 
 	for i, record := range recordList {
-		logHandler.EventLogger.Printf("(%v/%v) DELETE %v WHERE %v=%v", i+1, len(recordList), Domain, Fields.ID, record.ID)
+		logHandler.DatabaseLogger.Printf("(%v/%v) DELETE %v WHERE %v=%v", i+1, len(recordList), Domain, Fields.ID, record.ID)
 
 		delErr := Delete(ctx, record.ID, fmt.Sprintf("Clearing %v %v @ initialisation ", Domain, record.ID))
 		if delErr != nil {
@@ -515,6 +516,6 @@ func ClearDown(ctx context.Context) error {
 	}
 
 	clock.Stop(count)
-	logHandler.EventLogger.Printf("Cleared down %v", Domain)
+	logHandler.DatabaseLogger.Printf("Cleared down %v", Domain)
 	return nil
 }

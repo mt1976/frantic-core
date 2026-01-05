@@ -81,12 +81,12 @@ func ExportJSON[T any](exportName string, exportList []T, idField database.Field
 	//if exportName == "" {
 	//	exportName = buildName(exportName, exportList, idField)
 	//}
-	logHandler.ExportLogger.Printf("Exporting %v record(s) as JSON '%v'", len(exportList), exportName)
+	logHandler.TraceLogger.Printf("Exporting %v record(s) as JSON '%v'", len(exportList), exportName)
 
 	for _, record := range exportList {
 		//ID := reflect.ValueOf(record).FieldByName(idField.String())
 		outputName := buildNameForRecord(exportName, record, idField)
-		logHandler.ExportLogger.Printf("Exporting %v.json", outputName)
+		logHandler.TraceLogger.Printf("Exporting %v.json", outputName)
 
 		exportJSON(outputName, paths.Dumps(), record)
 	}
@@ -152,7 +152,7 @@ func buildNameForRecord[T any](baseName string, record T, idField database.Field
 func exportJSON[T any](exportName string, where paths.FileSystemPath, record T) {
 
 	logHandler.TraceLogger.Printf("Exporting %v.json", exportName)
-
+	logHandler.ExportLogger.Printf("Exporting %v %v.json", database.GetStructType(record), exportName)
 	exportFile := openTargetFile(exportName, exportString, logHandler.ExportLogger, "json", where.String())
 	defer exportFile.Close()
 
