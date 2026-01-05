@@ -77,7 +77,7 @@ func GetUUID() string {
 	//ip, _ := get_IP()
 	//ip = strings.Replace(ip, ".", "", -1)
 	xx := rand.Intn(100000)
-	yy := fmt.Sprintf("%s-%06d-%06d", today, uid, xx)
+	yy := fmt.Sprintf("%s-%04d-%06d", today, uid, xx)
 	yy = strings.Replace(yy, ".", "", -1)
 	yy = strings.Replace(yy, "-", "", -1)
 	//yy = base64Encode(yy)
