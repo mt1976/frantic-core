@@ -156,6 +156,8 @@ func GetAll() ([]TemplateStore, error) {
 
 	recordListAny, errG := activeDB.GetAll(&recordList)
 
+	logHandler.EventLogger.Printf("Got %v records from database (%v)", len(recordListAny), len(recordList))
+
 	if errG != nil {
 		clock.Stop(0)
 		return []TemplateStore{}, commonErrors.WrapNotFoundError(Domain, errG)
@@ -167,16 +169,18 @@ func GetAll() ([]TemplateStore, error) {
 			clock.Stop(0)
 			return []TemplateStore{}, fmt.Errorf("invalid record type returned from GetAll")
 		}
-		recordList = append(recordList, ts)
+		resultList = append(resultList, ts)
 	}
 
 	var errPost error
-	if resultList, errPost = postGetList(&recordList); errPost != nil {
+	if resultList, errPost = postGetList(&resultList); errPost != nil {
 		clock.Stop(0)
 		return nil, errPost
 	}
 
 	clock.Stop(len(resultList))
+
+	logHandler.TraceLogger.Printf("RETRIEVED %v records from %v", len(resultList), database.GetStructType(recordList))
 
 	return resultList, nil
 }
@@ -490,9 +494,10 @@ func ClearDown(ctx context.Context) error {
 
 	//noRecords := len(recordList)
 	count := 0
+	logHandler.EventLogger.Printf("Clearing %v records", len(recordList))
 
-	for _, record := range recordList {
-		logHandler.DatabaseLogger.Printf("DELETE %v WHERE %v=%v", Domain, Fields.ID, record.ID)
+	for i, record := range recordList {
+		logHandler.EventLogger.Printf("(%v/%v) DELETE %v WHERE %v=%v", i+1, len(recordList), Domain, Fields.ID, record.ID)
 
 		delErr := Delete(ctx, record.ID, fmt.Sprintf("Clearing %v %v @ initialisation ", Domain, record.ID))
 		if delErr != nil {
