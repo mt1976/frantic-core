@@ -69,7 +69,8 @@ func CountWhere(field database.Field, value any) (int, error) {
 // DEPRECATED: Please use GetBy with Fields.ID instead.
 func GetById(id any) (TemplateStore, error) {
 	logHandler.WarningLogger.Printf("GetById is deprecated, please use GetBy with Fields.ID instead")
-	return GetBy(Fields.ID, id)
+	panic("GetById is deprecated, please use GetBy with Fields.ID instead")
+	//	return GetBy(Fields.ID, id)
 }
 
 // GetByKey retrieves a TemplateStore record from the database based on the specified key.
@@ -84,7 +85,8 @@ func GetById(id any) (TemplateStore, error) {
 // DEPRECATED: Please use GetBy with Fields.Key instead.
 func GetByKey(key any) (TemplateStore, error) {
 	logHandler.WarningLogger.Printf("GetByKey is deprecated, please use GetBy with Fields.Key instead")
-	return GetBy(Fields.Key, key)
+	panic("GetByKey is deprecated, please use GetBy with Fields.Key instead")
+	// return GetBy(Fields.Key, key)
 }
 
 // GetBy retrieves a TemplateStore record from the database based on the specified field and value.
