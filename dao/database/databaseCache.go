@@ -57,7 +57,7 @@ func (db *DB) getCacheKeyValue(to any) string {
 }
 
 func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
-	logHandler.EventLogger.Printf("[CCH]<%v>{LOAD} Hydrate Cache  [%+v] [...%v.db] on %v - Caching: %t", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", db.withCaching)
+	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD} Hydrate Cache  [%+v] [...%v.db] on %v - Caching: %t", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", db.withCaching)
 
 	// [GET] from database
 	// err := db.connection.All(to, options...)
@@ -111,7 +111,7 @@ func enableCachingForTable(db *DB, table any) {
 		db.cachedTables = make(map[string]bool)
 	}
 	db.cachedTables[tableName] = true
-	logHandler.EventLogger.Printf("[CON]{CACHE} Caching enabled for table [%v] in database [%v]", tableName, db.Name)
+	logHandler.CacheLogger.Printf("[CON]{CACHE} Caching enabled for table [%v] in database [%v]", tableName, db.Name)
 }
 
 func (db *DB) CacheSpew() {

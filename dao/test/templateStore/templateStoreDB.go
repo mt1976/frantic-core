@@ -76,13 +76,13 @@ func IsInitialised() bool {
 // This function closes the active database connection associated with the Data Access Object (DAO).
 // It ensures that any resources related to the database connection are properly released.
 func Close() {
-	logHandler.EventLogger.Printf("Closing connection to %v", Domain)
+	logHandler.DatabaseLogger.Printf("Closing connection to %v", Domain)
 	if activeDB != nil {
 		activeDB.Disconnect()
 	}
 	initialised = false
 
-	logHandler.EventLogger.Printf("Closed connection to %v", Domain)
+	logHandler.DatabaseLogger.Printf("Closed connection to %v", Domain)
 }
 
 // GetDatabaseConnections returns a function that fetches the current database instances.
