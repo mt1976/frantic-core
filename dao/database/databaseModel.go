@@ -22,6 +22,7 @@ type DB struct {
 	withEncryption   bool
 	indices          []Field
 	cacheInitialised bool
+	cachedTables     map[string]bool
 }
 
 func (f Field) String() string {

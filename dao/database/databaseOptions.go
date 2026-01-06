@@ -24,7 +24,7 @@ type Option func(*connectionConfig)
 func WithCaching(enabled bool) Option {
 	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithCaching set to %v", enabled)
 	return func(c *connectionConfig) {
-		c.withCaching = false
+		c.withCaching = enabled
 	}
 }
 

@@ -57,16 +57,42 @@ func (db *DB) Get(field Field, value, to any) (any, error) {
 //   - any: The retrieved record.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) get(field Field, value, to any) (any, error) {
-	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), field, value, GetStructType(to), db.Name, db)
+	logHandler.WarningLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), field, value, GetStructType(to), db.Name, db)
 
 	if db.withCaching {
-		cacheKeyValue := value.(string)
-		if cachedValue, found := inMemoryCache[cacheKeyValue]; found {
-			reflect.ValueOf(to).Elem().Set(reflect.ValueOf(cachedValue).Elem())
-			logHandler.CacheLogger.Printf("[GET]<%v>{HIT} (%v=%v) [%+v] [...%v.db] on %v - {SKIP} DB Access", GetStructType(to), db.withCacheKey, cacheKeyValue, GetStructType(to), db.Name, "Retrieve")
-			return cachedValue, nil
+
+		// TODO: What this should do is look through the cache for the appropriate entry, and check if it can find one with the matching field/value
+		// Not just using the cache key
+
+		for key, val := range inMemoryCache {
+			logHandler.EventLogger.Printf("[GET]<%v>{CACHE SCAN} Checking cache entry [%v] of type [%v] against expected type [%v]", GetStructType(to), key, reflect.TypeOf(val), reflect.TypeOf(to))
+			// Val is a pointer to struct
+			valValue := reflect.ValueOf(val)
+			if valValue.Type() == reflect.TypeOf(to) {
+				fieldValue := valValue.Elem().FieldByName(field.String())
+				if fieldValue.IsValid() {
+					logHandler.EventLogger.Printf("[GET]<%v>{CACHE SCAN} Found matching type for cache entry [%v]. Checking field [%v] value [%v] against expected value [%v]", GetStructType(to), key, field.String(), fieldValue.Interface(), value)
+					if fieldValue.Interface() == value {
+						reflect.ValueOf(to).Elem().Set(valValue.Elem())
+						logHandler.EventLogger.Printf("[GET]<%v>{HIT} (%v=%v) [%+v] [...%v.db] on %v - {CACHE HIT} DB Access", GetStructType(to), field, value, GetStructType(to), db.Name, "Retrieve")
+						return val, nil
+					}
+				} else {
+					logHandler.EventLogger.Printf("[GET]<%v>{CACHE SCAN} Field [%v] not found in cached entry [%v]", GetStructType(to), field.String(), key)
+				}
+			} else {
+				logHandler.EventLogger.Printf("[GET]<%v>{CACHE SCAN} Type mismatch for cache entry [%v]: expected [%v], got [%v]", GetStructType(to), key, reflect.TypeOf(to), valValue.Type())
+			}
+
 		}
-		logHandler.CacheLogger.Printf("[GET]<%v>{MISS} (%v=%v) [%+v] [...%v.db] on %v - Accessing DB", GetStructType(to), db.withCacheKey, cacheKeyValue, GetStructType(to), db.Name, "Retrieve")
+
+		// cacheKeyValue := fmt.Sprintf("%v", value)
+		// if cachedValue, found := inMemoryCache[cacheKeyValue]; found {
+		// 	reflect.ValueOf(to).Elem().Set(reflect.ValueOf(cachedValue).Elem())
+		// 	logHandler.CacheLogger.Printf("[GET]<%v>{HIT} (%v=%v) [%+v] [...%v.db] on %v - {SKIP} DB Access", GetStructType(to), db.withCacheKey, cacheKeyValue, GetStructType(to), db.Name, "Retrieve")
+		// 	return cachedValue, nil
+		// }
+		// logHandler.CacheLogger.Printf("[GET]<%v>{MISS} (%v=%v) [%+v] [...%v.db] on %v - Accessing DB", GetStructType(to), db.withCacheKey, cacheKeyValue, GetStructType(to), db.Name, "Retrieve")
 	}
 
 	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] - From Database", GetStructType(to), field, value, GetStructType(to), db.Name)
@@ -82,7 +108,7 @@ func (db *DB) get(field Field, value, to any) (any, error) {
 	}
 	// Store in cache if caching is enabled and retrieval was successful
 	//HydrateCache(db, err, to, fieldName, value)
-	hydrateCache(db, err, to, "Retrieve", GetStructType(to))
+	db.hydrateCache(err, to, "Retrieve", GetStructType(to))
 	// Type assert the result to *TemplateStore
 
 	return to, err
@@ -97,38 +123,50 @@ func (db *DB) get(field Field, value, to any) (any, error) {
 //   - []any: A slice of all retrieved records.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
-	logHandler.TraceLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
+	logHandler.EventLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
 
 	if db.withCaching && db.cacheInitialised {
-		logHandler.TraceLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
-		logHandler.TraceLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 		// return all cached entries of the appropriate type
 		sliceValue := reflect.ValueOf(to).Elem()
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL} - Preparing to read into slice of type %v", GetStructType(to), sliceValue.Type())
 		if sliceValue.Kind() != reflect.Slice {
-			logHandler.TraceLogger.Printf("[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
+			logHandler.EventLogger.Printf("[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
 			return nil, fmt.Errorf("GetAll expected slice pointer, got %v", sliceValue.Kind())
 		}
 		elemType := sliceValue.Type().Elem()
-
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL} - Slice element type is %v", GetStructType(to), elemType)
 		// Clear the slice before populating
 		sliceValue.Set(reflect.MakeSlice(sliceValue.Type(), 0, 0))
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL} - Iterating through in-memory cache with %d entries", GetStructType(to), len(inMemoryCache))
 
-		for i, v := range inMemoryCache {
+		// Get the entries for this table from the in-memory cache
+		entries, found := inMemoryCache[GetStructType(to)]
+		if !found {
+			logHandler.EventLogger.Printf("[GET]<%v>{ALL} - No cached entries found for type %v", GetStructType(to), GetStructType(to))
+			return nil, nil
+		}
+
+		// Iterate through the cached entries and add matching types to the result slice
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL} - Found %d cached entries for type %v", GetStructType(to), len(entries), GetStructType(to))
+		for i, v := range entries {
 			cachedValue := reflect.ValueOf(v)
-			logHandler.CacheLogger.Printf("[GET]<%v>{ALL} Checking cached entry [%v] of type [%v] against expected type [%v]", GetStructType(to), i, cachedValue.Type(), elemType)
+			logHandler.EventLogger.Printf("[GET]<%v>{ALL} Checking cached entry [%v] of type [%v] against expected type [%v]", GetStructType(to), i, cachedValue.Type(), elemType)
 			if cachedValue.Type().Elem() == elemType {
-				logHandler.CacheLogger.Printf("[GET]<%v>{ALL} Adding cached entry [%v] to result set [%v][%v]", GetStructType(to), i, elemType, cachedValue.Type())
+				logHandler.EventLogger.Printf("[GET]<%v>{ALL} Adding cached entry [%v] to result set [%v][%v]", GetStructType(to), i, elemType, cachedValue.Type())
 				sliceValue.Set(reflect.Append(sliceValue, cachedValue.Elem()))
 			}
 		}
 
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 
 		// Convert the typed slice (e.g. []TemplateStore) into []any
 		result := make([]any, sliceValue.Len())
 		for i := 0; i < sliceValue.Len(); i++ {
 			result[i] = sliceValue.Index(i).Interface()
 		}
+		logHandler.EventLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 		return result, nil
 	}
 
@@ -163,7 +201,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 			item := sliceValue.Index(i)
 			// Get the address of the item so we can pass it to hydrateCache
 			itemPtr := item.Addr().Interface()
-			hydrateCache(db, err, itemPtr, "GetAll", GetStructType(to))
+			db.hydrateCache(err, itemPtr, "GetAll", GetStructType(to))
 		}
 	} else {
 		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", GetStructType(to), GetStructType(to), db.Name, "GetAll")
@@ -272,7 +310,7 @@ func (db *DB) Update(data any) error {
 	}
 	logHandler.DatabaseLogger.Printf("[UPD]<%v>{UPDATE} Update [%+v] [%v.db] - End", GetStructType(data), GetStructType(data), db.Name)
 	err = db.connection.Update(data)
-	hydrateCache(db, err, data, "Update,", GetStructType(data))
+	db.hydrateCache(err, data, "Update,", GetStructType(data))
 
 	return err
 }
@@ -294,7 +332,7 @@ func (db *DB) Create(data any) error {
 	logHandler.DatabaseLogger.Printf("[NEW]<%v>{CREATE} Create [%+v] [%v.db] - End", GetStructType(data), GetStructType(data), db.Name)
 	err = db.connection.Save(data)
 
-	hydrateCache(db, err, data, "Create", GetStructType(data))
+	db.hydrateCache(err, data, "Create", GetStructType(data))
 
 	return err
 }
@@ -311,7 +349,7 @@ func (db *DB) Count(data any) (int, error) {
 	logHandler.DatabaseLogger.Printf("[CNT]<%v>{COUNT} Count [%+v] [%v.db]", GetStructType(data), GetStructType(data), db.Name)
 	if db.withCaching {
 		logHandler.CacheLogger.Printf("[CNT]<%v>{SKIP} Count [%+v] [%v.db] - Caching Enabled", GetStructType(data), GetStructType(data), db.Name)
-		return len(inMemoryCache), nil
+		return len(inMemoryCache[GetStructType(data)]), nil
 	}
 	for key, value := range connectionPool {
 		logHandler.DatabaseLogger.Printf("[CON]<%v>{CONNECTION POOL} Connection Pool [%v] [%v] [codec=%v]", GetStructType(data), key, value.databaseName, value.connection.Node.Codec().Name())

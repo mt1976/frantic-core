@@ -9,11 +9,20 @@ import (
 
 // hydrateCache adds the retrieved data to the in-memory cache if caching is enabled
 // and the retrieval was successful
-func hydrateCache(db *DB, err error, to any, action string, structType string) {
+func (db *DB) hydrateCache(err error, to any, action string, structType string) {
 	logHandler.TraceLogger.Printf("[CCH]<%v>{Add} (%v=%v) [%+v] [...%v.db] on %v - Caching Enabled: %t", structType, db.withCacheKey, db.getCacheKeyValue(to), structType, db.Name, action, db.withCaching)
 	if db.withCaching && err == nil {
 		cacheKeyValue := db.getCacheKeyValue(to)
-		inMemoryCache[cacheKeyValue] = to
+		table := GetStructType(to)
+		// Ensure the table map exists
+		if _, exists := inMemoryCache[table]; !exists {
+			inMemoryCache[table] = make(cacheEntrys)
+		}
+		// Add to the cache
+		cacheEntry := cacheEntrys(inMemoryCache[table])
+		cacheEntry[cacheKeyValue] = to
+		inMemoryCache[table] = cacheEntry
+
 		logHandler.CacheLogger.Printf("[CCH]<%v>{Add} (%v=%v) [%+v] [...%v.db] on %v initialised: %t", structType, db.withCacheKey, cacheKeyValue, structType, db.Name, action, db.cacheInitialised)
 	}
 }
@@ -23,8 +32,13 @@ func hydrateCache(db *DB, err error, to any, action string, structType string) {
 func removeFromCache(db *DB, data any, action string, structType string) {
 	logHandler.TraceLogger.Printf("[CCH]<%v>{REMOVE} (%v=%v) from Cache [%+v] [...%v.db] on %v - Caching Enabled: %t", structType, db.withCacheKey, db.getCacheKeyValue(data), structType, db.Name, action, db.withCaching)
 	if db.withCaching {
+		// Remove the entry from the cache, first find the entries for the table, then delete by cache key
+		table := GetStructType(data)
+		cacheEntry := cacheEntrys(inMemoryCache[table])
+
 		cacheKeyValue := db.getCacheKeyValue(data)
-		delete(inMemoryCache, cacheKeyValue)
+		delete(cacheEntry, cacheKeyValue)
+		inMemoryCache[table] = cacheEntry
 		logHandler.CacheLogger.Printf("[CCH]<%v>{REMOVE} Remove (%v=%v) from Cache [%+v] [...%v.db] on %v %v", structType, db.withCacheKey, cacheKeyValue, structType, db.Name, action, GetStructType(data))
 	}
 }
@@ -43,7 +57,7 @@ func (db *DB) getCacheKeyValue(to any) string {
 }
 
 func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
-	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD} Hydrate Cache  [%+v] [...%v.db] on %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache")
+	logHandler.EventLogger.Printf("[CCH]<%v>{LOAD} Hydrate Cache  [%+v] [...%v.db] on %v - Caching: %t", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", db.withCaching)
 
 	// [GET] from database
 	// err := db.connection.All(to, options...)
@@ -56,7 +70,7 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 
 	res, err := db.GetAll(to, options...)
 
-	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD}{GET} COMPLETE [%+v] [...%v.db] on %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache")
+	logHandler.EventLogger.Printf("[CCH]<%v>{LOAD}{GET} COMPLETE [%+v] %v [...%v.db] on %v", GetStructType(to), GetStructType(to), len(res), db.Name, "PreLoadCache")
 	if err != nil {
 		return err
 	}
@@ -72,12 +86,55 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 			ptr.Elem().Set(val)
 			itemPtr = ptr.Interface()
 		}
-		hydrateCache(db, err, itemPtr, "PreLoadCache", GetStructType(to))
+		db.hydrateCache(err, itemPtr, "PreLoadCache", GetStructType(to))
 	}
 
 	db.cacheInitialised = true
 
-	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", len(res), db.withCaching, db.cacheInitialised, db.withCacheKey)
+	logHandler.EventLogger.Printf("[CCH]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", len(res), db.withCaching, db.cacheInitialised, db.withCacheKey)
 
 	return nil
+}
+
+func (db *DB) isCachedEnabled(tableName string) bool {
+	if db.cachedTables == nil {
+		return false
+	}
+	_, exists := db.cachedTables[tableName]
+	return exists
+}
+
+func enableCachingForTable(db *DB, table any) {
+	tableName := GetStructType(table)
+	logHandler.EventLogger.Printf("[CON]{CACHE} Enabling caching for table [%v] in database [%v]", tableName, db.Name)
+	if db.cachedTables == nil {
+		db.cachedTables = make(map[string]bool)
+	}
+	db.cachedTables[tableName] = true
+	logHandler.EventLogger.Printf("[CON]{CACHE} Caching enabled for table [%v] in database [%v]", tableName, db.Name)
+}
+
+func (db *DB) CacheSpew() {
+	logHandler.DatabaseLogger.Printf("[CON]{CACHE} Caching Status for Database [%v]:", db.Name)
+	if db.cachedTables == nil || len(db.cachedTables) == 0 {
+		logHandler.DatabaseLogger.Printf("[CON]{CACHE} No tables are currently cached in database [%v]", db.Name)
+		return
+	}
+	for tableName := range db.cachedTables {
+		logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] is cached in database [%v]", tableName, db.Name)
+	}
+	// Display A COUNT OF THE RECORDS IN THE CACHE
+	logHandler.DatabaseLogger.Printf("[CON]{CACHE} Cached Records Summary for Database [%v]:", db.Name)
+	for tableName := range db.cachedTables {
+		inMemoryCacheEntry, exists := inMemoryCache[tableName]
+		if !exists {
+			logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] has 0 cached records in database [%v]", tableName, db.Name)
+			continue
+		}
+		lenInMemoryCache := len(inMemoryCacheEntry)
+		logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, lenInMemoryCache, db.Name)
+		//
+		logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, len(inMemoryCache), db.Name)
+	}
+	// Additional logic to display cached records can be added here
 }

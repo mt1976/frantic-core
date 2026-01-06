@@ -11,8 +11,10 @@ var (
 	connectionPoolMaxSize int                    = 10                                                   // maximum number of connections
 	cfg                   *commonConfig.Settings = commonConfig.Get()                                   // configuration settings
 	dataValidator         *validator.Validate    = validator.New(validator.WithRequiredStructEnabled()) // data validator
-	inMemoryCache         map[string]any         = make(map[string]any)                                 // in-memory storage
+	inMemoryCache         map[string]cacheEntrys = make(map[string]cacheEntrys)                         // in-memory storage, indexde by table then by cache key
 )
+
+type cacheEntrys map[string]any
 
 // init initializes the database package
 func init() {

@@ -34,8 +34,9 @@ var cfg *commonConfig.Settings
 // Returns:
 //
 //	None
-func Initialise(ctx context.Context) {
+func Initialise(ctx context.Context, cached bool) {
 	logHandler.DatabaseLogger.Printf("Opening connection to %v", Domain)
+	logHandler.EventLogger.Printf("Initialising %v DAO Caching: %t", Domain, cached)
 
 	timing := timing.Start(Domain, actions.INITIALISE.GetCode(), "Initialise")
 	cfg = commonConfig.Get()
@@ -49,7 +50,7 @@ func Initialise(ctx context.Context) {
 	//
 	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace("BNK"), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
 
-	activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace("cheeseOnToast"), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
+	activeDB = database.Connect(TemplateStore{}, database.WithVerbose(false), database.WithCaching(cached), database.WithCacheKey(Fields.Key), database.WithNameSpace("cheeseOnToast"), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
 	initialised = true
 
 	//TODO: Add any initialisation code here

@@ -15,7 +15,7 @@ import (
 // connect establishes a database connection with the provided options
 // It applies default settings and overrides them with any specified options.
 // It also manages the connection pool to reuse existing connections.
-func connect(options ...Option) *DB {
+func connect(table any, options ...Option) *DB {
 	// Create default configuration
 	config := &connectionConfig{
 		withCaching:      false,
@@ -30,7 +30,7 @@ func connect(options ...Option) *DB {
 	}
 
 	// Clear the inmory cache
-	inMemoryCache = make(map[string]any)
+	inMemoryCache = make(map[string]cacheEntrys)
 
 	// Apply all provided options
 	for _, option := range options {
@@ -104,6 +104,16 @@ func connect(options ...Option) *DB {
 		logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%v] [%v] [codec=%v] %v", key, value.databaseName, value.connection.Node.Codec().Name(), value.initialised)
 	}
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opened [%v.db] data connection [codec=%v] %v", db.databaseName, db.connection.Node.Codec().Name(), db.initialised)
+
+	// Enable caching for the specified table if caching is enabled
+	if config.withCaching && table != nil {
+		enableCachingForTable(&db, table)
+		if err != nil {
+			logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Error enabling caching for table %v: %v", GetStructType(table), err.Error())
+			panic(commonErrors.WrapConnectError(err))
+		}
+	}
+
 	connect.Stop(1)
 	return &db
 }
@@ -126,17 +136,17 @@ func validate(data any, db *DB) error {
 
 // Connect establishes a database connection with the provided options
 // It is the primary function to initiate a connection using various configuration options.
-func Connect(options ...Option) *DB {
+func Connect(table any, options ...Option) *DB {
 	logHandler.DatabaseLogger.Printf("[CON] %d Options ", len(options))
-	return connect(options...)
+	return connect(table, options...)
 }
 
 // ConnectToNamedDB establishes a database connection to a named database
 // DEPRECATED: ConnectToNamedDB - Use Connect with WithNameSpace option instead
 func ConnectToNamedDB(name string, options ...Option) *DB {
 	logHandler.WarningLogger.Println("[CON] DEPRECATED: ConnectToNamedDB - Use Connect with WithNameSpace option instead")
-	options = append(options, WithNameSpace(name))
-	return connect(options...)
+	panic("Deprecated: ConnectToNamedDB - Use Connect with WithNameSpace option instead")
+	//return connect(options...)
 }
 
 // Disconnect closes the database connection and removes it from the connection pool

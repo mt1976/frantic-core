@@ -31,3 +31,9 @@ func PreLoad(ctx context.Context) error {
 	logHandler.CacheLogger.Printf("PreLoad [%+v] complete", Domain)
 	return err
 }
+
+func CacheSpew() {
+	logHandler.CacheLogger.Printf("CacheSpew [%+v]", Domain)
+	activeDB.CacheSpew()
+	logHandler.CacheLogger.Printf("CacheSpew [%+v] complete", Domain)
+}
