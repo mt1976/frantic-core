@@ -70,7 +70,7 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 
 	res, err := db.GetAll(to, options...)
 
-	logHandler.EventLogger.Printf("[CCH]<%v>{LOAD}{GET} COMPLETE [%+v] %v [...%v.db] on %v", GetStructType(to), GetStructType(to), len(res), db.Name, "PreLoadCache")
+	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD}{GET} COMPLETE [%+v] %v [...%v.db] on %v", GetStructType(to), GetStructType(to), len(res), db.Name, "PreLoadCache")
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 
 	db.cacheInitialised = true
 
-	logHandler.EventLogger.Printf("[CCH]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", len(res), db.withCaching, db.cacheInitialised, db.withCacheKey)
+	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", len(res), db.withCaching, db.cacheInitialised, db.withCacheKey)
 
 	return nil
 }
@@ -106,7 +106,7 @@ func (db *DB) isCachedEnabled(tableName string) bool {
 
 func enableCachingForTable(db *DB, table any) {
 	tableName := GetStructType(table)
-	logHandler.EventLogger.Printf("[CON]{CACHE} Enabling caching for table [%v] in database [%v]", tableName, db.Name)
+	logHandler.CacheLogger.Printf("[CON]{CACHE} Enabling caching for table [%v] in database [%v]", tableName, db.Name)
 	if db.cachedTables == nil {
 		db.cachedTables = make(map[string]bool)
 	}
@@ -115,26 +115,26 @@ func enableCachingForTable(db *DB, table any) {
 }
 
 func (db *DB) CacheSpew() {
-	logHandler.DatabaseLogger.Printf("[CON]{CACHE} Caching Status for Database [%v]:", db.Name)
+	logHandler.InfoLogger.Printf("[CON]{CACHE} Caching Status for Database [%v]:", db.Name)
 	if db.cachedTables == nil || len(db.cachedTables) == 0 {
-		logHandler.DatabaseLogger.Printf("[CON]{CACHE} No tables are currently cached in database [%v]", db.Name)
+		logHandler.InfoLogger.Printf("[CON]{CACHE} No tables are currently cached in database [%v]", db.Name)
 		return
 	}
 	for tableName := range db.cachedTables {
-		logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] is cached in database [%v]", tableName, db.Name)
+		logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] is cached in database [%v]", tableName, db.Name)
 	}
 	// Display A COUNT OF THE RECORDS IN THE CACHE
-	logHandler.DatabaseLogger.Printf("[CON]{CACHE} Cached Records Summary for Database [%v]:", db.Name)
+	logHandler.InfoLogger.Printf("[CON]{CACHE} Cached Records Summary for Database [%v]:", db.Name)
 	for tableName := range db.cachedTables {
 		inMemoryCacheEntry, exists := inMemoryCache[tableName]
 		if !exists {
-			logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] has 0 cached records in database [%v]", tableName, db.Name)
+			logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] has 0 cached records in database [%v]", tableName, db.Name)
 			continue
 		}
 		lenInMemoryCache := len(inMemoryCacheEntry)
-		logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, lenInMemoryCache, db.Name)
+		logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, lenInMemoryCache, db.Name)
 		//
-		logHandler.DatabaseLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, len(inMemoryCache), db.Name)
+		logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, len(inMemoryCache), db.Name)
 	}
 	// Additional logic to display cached records can be added here
 }
