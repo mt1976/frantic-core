@@ -308,7 +308,17 @@ func (db *DB) Update(data any) error {
 		return commonErrors.WrapError(err)
 	}
 	logHandler.DatabaseLogger.Printf("[UPD]<%v>{UPDATE} Update [%+v] [%v.db] - End", GetStructType(data), GetStructType(data), db.Name)
-	err = db.connection.Update(data)
+	if db.withCaching {
+		go func() {
+			err = db.connection.Update(data)
+			if err != nil {
+				logHandler.ErrorLogger.Printf("[UPD]<%v>{UPDATE} Update [%+v] [%v.db] - Error: %v", GetStructType(data), GetStructType(data), db.Name, err)
+				return
+			}
+		}()
+	} else {
+		err = db.connection.Update(data)
+	}
 	db.hydrateCache(err, data, "Update,", GetStructType(data))
 
 	return err
@@ -329,10 +339,12 @@ func (db *DB) Create(data any) error {
 		return commonErrors.WrapCreateError(err)
 	}
 	logHandler.DatabaseLogger.Printf("[NEW]<%v>{CREATE} Create [%+v] [%v.db] - End", GetStructType(data), GetStructType(data), db.Name)
+
 	err = db.connection.Save(data)
-
 	db.hydrateCache(err, data, "Create", GetStructType(data))
-
+	if err != nil {
+		logHandler.ErrorLogger.Printf("[NEW]<%v>{CREATE} Create [%+v] [%v.db] - Error: %v", GetStructType(data), GetStructType(data), db.Name, err)
+	}
 	return err
 }
 

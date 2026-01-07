@@ -2,6 +2,7 @@ package database
 
 import (
 	"reflect"
+	"time"
 
 	"github.com/asdine/storm/v3/index"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -106,35 +107,69 @@ func (db *DB) isCachedEnabled(tableName string) bool {
 
 func enableCachingForTable(db *DB, table any) {
 	tableName := GetStructType(table)
-	logHandler.CacheLogger.Printf("[CON]{CACHE} Enabling caching for table [%v] in database [%v]", tableName, db.Name)
+	logHandler.CacheLogger.Printf("Enabling caching for table [%v] in database [%v]", tableName, db.Name)
 	if db.cachedTables == nil {
 		db.cachedTables = make(map[string]bool)
 	}
 	db.cachedTables[tableName] = true
-	logHandler.CacheLogger.Printf("[CON]{CACHE} Caching enabled for table [%v] in database [%v]", tableName, db.Name)
+	logHandler.CacheLogger.Printf("Caching enabled for table [%v] in database [%v]", tableName, db.Name)
 }
 
 func (db *DB) CacheSpew() {
-	logHandler.InfoLogger.Printf("[CON]{CACHE} Caching Status for Database [%v]:", db.Name)
-	if db.cachedTables == nil || len(db.cachedTables) == 0 {
-		logHandler.InfoLogger.Printf("[CON]{CACHE} No tables are currently cached in database [%v]", db.Name)
+	logHandler.InfoLogger.Printf("Caching Status for Database [%v]:", db.Name)
+	if len(db.cachedTables) == 0 {
+		logHandler.InfoLogger.Printf("No tables are currently cached in database [%v]", db.Name)
 		return
 	}
+	msg := ". Cached Tables in Database [" + db.Name + "]: "
 	for tableName := range db.cachedTables {
-		logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] is cached in database [%v]", tableName, db.Name)
+		msg += tableName + " "
 	}
+	logHandler.InfoLogger.Println(msg)
 	// Display A COUNT OF THE RECORDS IN THE CACHE
-	logHandler.InfoLogger.Printf("[CON]{CACHE} Cached Records Summary for Database [%v]:", db.Name)
+	logHandler.InfoLogger.Printf(". Cached Records Summary for Database [%v]", db.Name)
 	for tableName := range db.cachedTables {
 		inMemoryCacheEntry, exists := inMemoryCache[tableName]
 		if !exists {
-			logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] has 0 cached records in database [%v]", tableName, db.Name)
+			logHandler.InfoLogger.Printf(". 	Table [%v] has 0 cached records in database [%v]", tableName, db.Name)
 			continue
 		}
-		lenInMemoryCache := len(inMemoryCacheEntry)
-		logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, lenInMemoryCache, db.Name)
 		//
-		logHandler.InfoLogger.Printf("[CON]{CACHE} Table [%v] has %d cached records in database [%v]", tableName, len(inMemoryCache), db.Name)
+		logHandler.InfoLogger.Printf(". 	Table [%v] has %d cached records in database [%v]", tableName, len(inMemoryCacheEntry), db.Name)
 	}
-	// Additional logic to display cached records can be added here
+}
+
+func (db *DB) Flush() error {
+	if !db.withCaching && !db.cacheInitialised {
+		logHandler.WarningLogger.Printf("Caching not enabled for [%v.db], skipping flush", db.Name)
+		return nil
+	}
+
+	recordCount := 0
+	tableCount := 0
+	start := time.Now()
+	// Scan the inMemoryCache and update only entries for this DB
+	for key, cacheEntry := range inMemoryCache {
+		logHandler.CacheLogger.Printf("{FLUSH} <%v> Scanning cache entry [%v] of type [%v]", db.Name, key, reflect.TypeOf(cacheEntry))
+		// Here we would need to check if the cache entry belongs to this DB
+		// For simplicity, assuming all entries belong to this DB
+		logHandler.CacheLogger.Printf("{FLUSH} <%v> Clearing cache entry [%v] of type [%v]", db.Name, key, reflect.TypeOf(cacheEntry))
+		// Write the records back to the database
+		for _, v := range cacheEntry {
+			logHandler.CacheLogger.Printf("{FLUSH} <%v> Writing back cached record of type [%v] to database", db.Name, reflect.TypeOf(v))
+			err := db.connection.Save(v)
+			if err != nil {
+				logHandler.ErrorLogger.Printf("{FLUSH} <%v> Error writing back cached record of type [%v] to database: %v", db.Name, reflect.TypeOf(v), err)
+			}
+			recordCount++
+		}
+		// Clear the cache entry
+		delete(inMemoryCache, key)
+		tableCount++
+		logHandler.CacheLogger.Printf("{FLUSH} <%v> Cleared cache entry [%v] of type [%v]", db.Name, key, reflect.TypeOf(cacheEntry))
+	}
+	dur := time.Since(start)
+	db.cacheInitialised = false
+	logHandler.EventLogger.Printf("{FLUSH}<%v> Flushed cache for [%v.db] - Total records flushed: %d across %d tables in %v", db.Name, db.Name, recordCount, tableCount, dur.String())
+	return nil
 }

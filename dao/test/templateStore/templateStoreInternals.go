@@ -78,10 +78,10 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 	}
 	var actionError error
 	if isCreateOperation {
-		logHandler.TraceLogger.Printf("Creating %v record %v", Domain, record.Key)
+		logHandler.TraceLogger.Printf("Creating %v record %v %v", Domain, record.Key, record.ID)
 		actionError = activeDB.Create(record)
 	} else {
-		logHandler.TraceLogger.Printf("Updating %v record %v", Domain, record.Key)
+		logHandler.TraceLogger.Printf("Updating %v record %v %v", Domain, record.Key, record.ID)
 		actionError = activeDB.Update(record)
 	}
 	if actionError != nil {

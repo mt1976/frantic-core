@@ -12,6 +12,8 @@ import (
 // The backup process is timed and logged.
 func (db *DB) Backup(loc string) {
 	timer := timing.Start(db.Name, actions.BACKUP.GetCode(), db.databaseName)
+	// Ensure all data is flushed to disk before backup
+	db.Flush()
 	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] data started... %v", db.Name, loc)
 	db.Disconnect()
 	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] disconnected", db.Name)

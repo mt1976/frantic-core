@@ -77,6 +77,14 @@ func IsInitialised() bool {
 // It ensures that any resources related to the database connection are properly released.
 func Close() {
 	logHandler.DatabaseLogger.Printf("Closing connection to %v", Domain)
+
+	flusherr2 := FlushCache()
+	if flusherr2 != nil {
+		logHandler.ErrorLogger.Printf("Error flushing cache: %v", flusherr2)
+	} else {
+		logHandler.InfoLogger.Printf("Cache flushed successfully")
+	}
+
 	if activeDB != nil {
 		activeDB.Disconnect()
 	}

@@ -37,3 +37,10 @@ func CacheSpew() {
 	activeDB.CacheSpew()
 	logHandler.CacheLogger.Printf("CacheSpew [%+v] complete", Domain)
 }
+
+func FlushCache() error {
+	logHandler.CacheLogger.Printf("FlushCache [%+v]", Domain)
+	err := activeDB.Flush()
+	logHandler.CacheLogger.Printf("FlushCache [%+v] complete", Domain)
+	return err
+}
