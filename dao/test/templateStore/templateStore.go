@@ -46,15 +46,15 @@ func Count() (int, error) {
 func CountWhere(field database.Field, value any) (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", Domain, field.String(), value)
 	clock := timing.Start(Domain, actions.COUNT.GetCode(), fmt.Sprintf("%v=%v", field.String(), value))
-	list, err := GetAllWhere(field, value)
+	count, err := activeDB.CountWhere(field, value, &TemplateStore{})
 	if err != nil {
 		logHandler.ErrorLogger.Print(err.Error())
 		clock.Stop(0)
 		return 0, err
 	}
-	logHandler.DatabaseLogger.Printf("COUNT RESULT %v WHERE (%v=%v) = %d", Domain, field.String(), value, len(list))
-	clock.Stop(len(list))
-	return len(list), nil
+	logHandler.DatabaseLogger.Printf("COUNT RESULT %v WHERE (%v=%v) = %d", Domain, field.String(), value, count)
+	clock.Stop(count)
+	return count, nil
 }
 
 // GetById retrieves a TemplateStore record from the database based on the specified ID.

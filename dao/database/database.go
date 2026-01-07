@@ -428,7 +428,7 @@ func (db *DB) CountWhere(fieldName Field, value any, to any) (int, error) {
 		logHandler.CacheLogger.Printf("[CNT]<%v>{SKIP} CountWhere (%+v=%+v)[%+v] [%v.db] - Caching Enabled", GetStructType(to), fieldName, value, GetStructType(to), db.Name)
 		// Range through inMemoryCache and count matching entries
 		count := 0
-		for _, v := range inMemoryCache {
+		for _, v := range inMemoryCache[GetStructType(to)] {
 			val := reflect.ValueOf(v).Elem().FieldByName(string(fieldName))
 			if val.IsValid() && val.Interface() == value {
 				count++

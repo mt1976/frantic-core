@@ -66,8 +66,7 @@ func templateJobProcessor(j jobs.Job) {
 
 	for templateEntryIndex, templateRecord := range templateEntries {
 		logHandler.ServiceLogger.Printf("[%v] %v(%v/%v) %v", jobs.CodedName(j), Domain, templateEntryIndex+1, notemplateEntries, templateRecord.Raw)
-		templateRecord.UpdateWithAction(context.TODO(), audit.GRANT, "Job Processing")
-		templateRecord.UpdateWithAction(context.TODO(), audit.SERVICE, "Job Processing "+j.Name())
+		templateRecord.UpdateWithAction(context.Background(), audit.SERVICE, "Job Processing "+j.Name())
 		count++
 	}
 	clock.Stop(count)
