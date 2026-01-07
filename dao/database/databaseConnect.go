@@ -6,7 +6,7 @@ import (
 
 	"github.com/asdine/storm/v3"
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/actions"
+
 	"github.com/mt1976/frantic-core/ioHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
@@ -84,7 +84,7 @@ func connect(table any, options ...Option) *DB {
 	db.indices = config.indices
 	db.cacheInitialised = false
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Opening [%v.db] data connection *%+v*", db.Name, db)
-	connect := timing.Start(db.Name, actions.CONNECT.GetCode(), db.databaseName)
+	connect := timing.Start(db.Name, "Connect", db.databaseName)
 	var err error
 	db.connection, err = storm.Open(db.databaseName, storm.BoltOptions(0666, nil))
 	if err != nil {
@@ -125,7 +125,7 @@ func connect(table any, options ...Option) *DB {
 // It uses a timing mechanism to log the duration of the validation process.
 // If validation fails, it logs the error and returns a wrapped validation error.
 func validate(data any, db *DB) error {
-	timer := timing.Start(db.Name, actions.VALIDATE.GetCode(), "")
+	timer := timing.Start(db.Name, "Validate", "")
 	logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} Validate [%+v] [%v.db]", GetStructType(data), db.Name)
 	err := commonErrors.HandleGoValidatorError(dataValidator.Struct(data))
 	if err != nil {
@@ -156,7 +156,7 @@ func ConnectToNamedDB(name string, options ...Option) *DB {
 // It uses a timing mechanism to log the duration of the disconnection process.
 // If disconnection fails, it logs the error and panics with a wrapped disconnect error.
 func (db *DB) Disconnect() {
-	timer := timing.Start(db.Name, actions.DISCONNECT.Code, db.databaseName)
+	timer := timing.Start(db.Name, "Disconnect", db.databaseName)
 	logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Disconnecting [%v.db] connection", db.Name)
 	err := db.connection.Close()
 	if err != nil {

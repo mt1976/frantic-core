@@ -2,7 +2,7 @@ package jobs
 
 import (
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/dao/actions"
+
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
 	"github.com/robfig/cron/v3"
@@ -13,7 +13,7 @@ var scheduledTasks *cron.Cron
 var appName string
 
 func Initialise(cfg *commonConfig.Settings) error {
-	clock := timing.Start(domain, actions.INITIALISE.GetCode(), "")
+	clock := timing.Start(domain, "Initialise", "")
 
 	logHandler.InfoLogger.Printf("[%v] %v - Initialise - Started", domain, appName)
 

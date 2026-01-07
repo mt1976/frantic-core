@@ -7,9 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mt1976/frantic-core/application"
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dateHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
@@ -18,6 +16,7 @@ import (
 // Audit package handles auditing of actions performed on data entities.
 var name = "Audit"
 var cfg *commonConfig.Settings
+var upperName = strings.ToUpper(name)
 
 func (a *Action) WithMessage(in string) Action {
 	a.description = in
@@ -28,7 +27,7 @@ func (a *Audit) Action(ctx context.Context, action Action) error {
 
 	message := action.popMessage()
 	timingMessage := fmt.Sprintf("Action: %v(%v) Message: %v", action.Code(), action.ShortName(), message)
-	clock := timing.Start(name, actions.AUDIT.GetCode(), timingMessage)
+	clock := timing.Start(name, "Audit", timingMessage)
 
 	auditTime := time.Now()
 	auditDisplay := dateHelpers.FormatAudit(auditTime)
@@ -37,7 +36,7 @@ func (a *Audit) Action(ctx context.Context, action Action) error {
 	if err != nil {
 		logHandler.WarningLogger.Printf("Action: %v(%v) Message: %v Error: %v", action.code, action.short, message, err)
 	}
-	auditHost := application.HostName()
+	auditHost := getHostName()
 
 	if auditUser == "" {
 		//	logHandler.WarningLogger.Printf("[%v] Error: %v", strings.ToUpper(name), "No Active User")
@@ -75,14 +74,13 @@ func (a *Audit) Action(ctx context.Context, action Action) error {
 	update.UpdateAction = action.code
 	update.UpdateNotes = message
 	// a.DBVersion = dao.Version
-	a.DBVersion = getDBVersion()
+	dbVersion := getDBVersion()
+	a.DBVersion = dbVersion
 	if !(action.Is(SERVICE) || action.Is(SILENT) || action.IsSilent()) {
 		a.Updates = append(a.Updates, update)
 	}
 
-	a.DBVersion = getDBVersion()
-
-	logHandler.AuditLogger.Printf(AUDITMSG, strings.ToUpper(name), action.code, auditDisplay, auditUser, auditHost, message)
+	logHandler.AuditLogger.Printf(AUDITMSG, upperName, action.code, auditDisplay, auditUser, auditHost, message)
 	clock.Stop(1)
 	return nil
 }

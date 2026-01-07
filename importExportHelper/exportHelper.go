@@ -11,7 +11,6 @@ import (
 	"github.com/gocarina/gocsv"
 	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/application"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/idHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -22,7 +21,7 @@ import (
 var SEP = "-"
 
 func ExportCSV[T any](exportName string, exportList []T, idField database.Field) error {
-	clock := timing.Start(exportName, actions.EXPORT.GetCode(), "")
+	clock := timing.Start(exportName, "Export", "")
 
 	logHandler.ExportLogger.Printf("Exporting %v record(s) as CSV '%v'", len(exportList), exportName)
 
@@ -76,7 +75,7 @@ func ExportCSV[T any](exportName string, exportList []T, idField database.Field)
 }
 
 func ExportJSON[T any](exportName string, exportList []T, idField database.Field) error {
-	clock := timing.Start(exportName, actions.EXPORT.GetCode(), "")
+	clock := timing.Start(exportName, "Export", "")
 
 	//if exportName == "" {
 	//	exportName = buildName(exportName, exportList, idField)

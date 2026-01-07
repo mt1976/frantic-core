@@ -1,7 +1,6 @@
 package database
 
 import (
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/ioHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
@@ -11,7 +10,7 @@ import (
 // It disconnects the database, performs the backup, and then reconnects.
 // The backup process is timed and logged.
 func (db *DB) Backup(loc string) {
-	timer := timing.Start(db.Name, actions.BACKUP.GetCode(), db.databaseName)
+	timer := timing.Start(db.Name, "Backup", db.databaseName)
 	// Ensure all data is flushed to disk before backup
 	db.Flush()
 	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] data started... %v", db.Name, loc)

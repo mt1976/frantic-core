@@ -16,7 +16,7 @@ import (
 	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao"
-	"github.com/mt1976/frantic-core/dao/actions"
+
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
@@ -38,9 +38,9 @@ import (
 func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity string, auditAction audit.Action, operation string) error {
 
 	isCreateOperation := false
-	if strings.EqualFold(operation, actions.CREATE.GetCode()) {
+	if strings.EqualFold(operation, "Create") {
 		isCreateOperation = true
-		if !strings.EqualFold(auditAction.Code(), actions.CREATE.GetCode()) {
+		if !strings.EqualFold(auditAction.Code(), "Create") {
 			return commonErrors.WrapDAOUpdateError(Domain, fmt.Errorf("invalid audit action '%v' for create event '%v'", auditAction.Code(), operation))
 		}
 	}
@@ -110,7 +110,7 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 //	[]TemplateStore: A slice of processed TemplateStore records.
 //	error: An error object if any issues occur during the post-retrieval processing; otherwise, nil.
 func postGetList(recordList *[]TemplateStore) ([]TemplateStore, error) {
-	clock := timing.Start(Domain, actions.PROCESS.GetCode(), "POSTGET")
+	clock := timing.Start(Domain, "Process", "POSTGET")
 	returnList := []TemplateStore{}
 	for _, record := range *recordList {
 		if err := record.postGet(); err != nil {

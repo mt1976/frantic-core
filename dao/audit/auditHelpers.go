@@ -2,13 +2,23 @@ package audit
 
 import (
 	"context"
-	"strings"
+	"sync"
 
 	"github.com/mt1976/frantic-core/application"
 	"github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/contextHandler"
 	"github.com/mt1976/frantic-core/logHandler"
 )
+
+var hostNameOnce sync.Once
+var cachedHostName string
+
+func getHostName() string {
+	hostNameOnce.Do(func() {
+		cachedHostName = application.HostName()
+	})
+	return cachedHostName
+}
 
 // getDBVersion retrieves the current database version
 func getDBVersion() int {
@@ -29,7 +39,7 @@ func (a *Audit) Spew() error {
 	if noAudit > 0 {
 		for i := range a.Updates {
 			upd := a.Updates[i]
-			logHandler.TraceLogger.Printf(AUDITMSG, strings.ToUpper(name), upd.UpdateAction, upd.UpdatedAtDisplay, upd.UpdatedBy, upd.UpdatedOn, upd.UpdateNotes)
+			logHandler.TraceLogger.Printf(AUDITMSG, upperName, upd.UpdateAction, upd.UpdatedAtDisplay, upd.UpdatedBy, upd.UpdatedOn, upd.UpdateNotes)
 		}
 	}
 	return nil
@@ -40,13 +50,13 @@ func getAuditUserCode(ctx context.Context) (string, error) {
 	defaultUser := cfg.GetServiceUser_UserCode()
 
 	if ctx == context.Background() {
-		usr := "svc_" + application.HostName()
+		usr := "svc_" + getHostName()
 		return usr, nil
 	}
 
 	// Implement the logic to get the user without importing the dao package
 	if ctx == context.TODO() || ctx == nil {
-		usr := "sys_" + application.HostName()
+		usr := "sys_" + getHostName()
 		return usr, nil
 	}
 

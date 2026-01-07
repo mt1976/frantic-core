@@ -16,7 +16,6 @@ import (
 	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/dao/lookup"
@@ -45,7 +44,7 @@ func Count() (int, error) {
 //   - error: An error object if any issues occur during the counting process; otherwise, nil.
 func CountWhere(field database.Field, value any) (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", Domain, field.String(), value)
-	clock := timing.Start(Domain, actions.COUNT.GetCode(), fmt.Sprintf("%v=%v", field.String(), value))
+	clock := timing.Start(Domain, "Count", fmt.Sprintf("%v=%v", field.String(), value))
 	count, err := activeDB.CountWhere(field, value, &TemplateStore{})
 	if err != nil {
 		logHandler.ErrorLogger.Print(err.Error())
@@ -101,7 +100,7 @@ func GetByKey(key any) (TemplateStore, error) {
 func GetBy(field database.Field, value any) (TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 
-	clock := timing.Start(Domain, actions.GET.GetCode(), fmt.Sprintf("%v=%v", field, value))
+	clock := timing.Start(Domain, "Get", fmt.Sprintf("%v=%v", field, value))
 
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised)
 
@@ -155,7 +154,7 @@ func GetAll() ([]TemplateStore, error) {
 	recordList := []TemplateStore{}
 	resultList := []TemplateStore{}
 
-	clock := timing.Start(Domain, actions.GETALL.GetCode(), "ALL")
+	clock := timing.Start(Domain, "GetAll", "ALL")
 	logHandler.DatabaseLogger.Printf("SELECT %v ALL", Domain)
 
 	recordListAny, errG := activeDB.GetAll(&recordList)
@@ -205,7 +204,7 @@ func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
 	//recordList := []TemplateStore{}
 	resultList := []TemplateStore{}
 
-	clock := timing.Start(Domain, actions.GETALL.GetCode(), fmt.Sprintf("%v=%v", field, value))
+	clock := timing.Start(Domain, "GetAllWhere", fmt.Sprintf("%v=%v", field, value))
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
 
@@ -303,7 +302,7 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 
 	dao.CheckDAOReadyState(Domain, audit.DELETE, initialised) // Check the DAO has been initialised, Mandatory.
 
-	clock := timing.Start(Domain, actions.DELETE.GetCode(), fmt.Sprintf("%v=%v", field.String(), value))
+	clock := timing.Start(Domain, "Delete", fmt.Sprintf("%v=%v", field.String(), value))
 
 	// if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
 	// 	logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, err).Error())
@@ -377,7 +376,7 @@ func (record *TemplateStore) Validate() error {
 // Returns:
 //   - error: An error object if any issues occur during the update process; otherwise, nil.
 func (record *TemplateStore) Update(ctx context.Context, note string) error {
-	return record.insertOrUpdate(ctx, note, actions.UPDATE.GetCode(), audit.UPDATE, actions.UPDATE.GetCode())
+	return record.insertOrUpdate(ctx, note, "Update", audit.UPDATE, "Update")
 }
 
 // UpdateWithAction updates the TemplateStore record in the database with a specified audit action.
@@ -390,7 +389,7 @@ func (record *TemplateStore) Update(ctx context.Context, note string) error {
 // Returns:
 //   - error: An error object if any issues occur during the update process; otherwise, nil.
 func (record *TemplateStore) UpdateWithAction(ctx context.Context, auditAction audit.Action, note string) error {
-	return record.insertOrUpdate(ctx, note, actions.UPDATE.GetCode(), auditAction, actions.UPDATE.GetCode())
+	return record.insertOrUpdate(ctx, note, "Update", auditAction, "Update")
 }
 
 // Create inserts a new TemplateStore record into the database.
@@ -402,7 +401,7 @@ func (record *TemplateStore) UpdateWithAction(ctx context.Context, auditAction a
 // Returns:
 //   - error: An error object if any issues occur during the creation process; otherwise, nil.
 func (record *TemplateStore) Create(ctx context.Context, note string) error {
-	return record.insertOrUpdate(ctx, note, actions.CREATE.GetCode(), audit.CREATE, actions.CREATE.GetCode())
+	return record.insertOrUpdate(ctx, note, "Create", audit.CREATE, "Create")
 }
 
 // Clone creates a duplicate of the current TemplateStore record in the database.
@@ -440,7 +439,7 @@ func GetLookup(field, value database.Field) (lookup.Lookup, error) {
 
 	dao.CheckDAOReadyState(Domain, audit.PROCESS, initialised) // Check the DAO has been initialised, Mandatory.
 
-	clock := timing.Start(Domain, actions.LOOKUP.GetCode(), "BUILD")
+	clock := timing.Start(Domain, "Lookup", "BUILD")
 
 	// Get all status
 	recordList, err := GetAll()
@@ -495,7 +494,7 @@ func ClearDown(ctx context.Context) error {
 
 	dao.CheckDAOReadyState(Domain, audit.PROCESS, initialised) // Check the DAO has been initialised, Mandatory.
 
-	clock := timing.Start(Domain, actions.CLEAR.GetCode(), "INITIALISE")
+	clock := timing.Start(Domain, "Clear", "INITIALISE")
 
 	// Delete all active session recordList
 	recordList, err := GetAll()

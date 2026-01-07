@@ -3,7 +3,6 @@ package maintenance
 import (
 	"time"
 
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/dateHelpers"
 	"github.com/mt1976/frantic-core/ioHelpers"
@@ -44,7 +43,7 @@ func performDatabaseBackup(job *DatabaseBackupJob) {
 	// Get a coded name for the job
 	name := jobs.CodedName(job)
 
-	j := timing.Start(name, actions.BACKUP.Code, job.Description())
+	j := timing.Start(name, "Backup", job.Description())
 
 	dateTime := time.Now().Format(dateHelpers.Format.BackupFolder)
 	logHandler.ServiceLogger.Printf("[%v] Backup Date: [%v]", domain, dateTime)

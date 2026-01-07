@@ -11,7 +11,6 @@ import (
 	"context"
 
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
@@ -36,9 +35,9 @@ var cfg *commonConfig.Settings
 //	None
 func Initialise(ctx context.Context, cached bool) {
 	logHandler.DatabaseLogger.Printf("Opening connection to %v", Domain)
-	logHandler.EventLogger.Printf("Initialising %v DAO Caching: %t", Domain, cached)
+	logHandler.TraceLogger.Printf("Initialising %v DAO Caching: %t", Domain, cached)
 
-	timing := timing.Start(Domain, actions.INITIALISE.GetCode(), "Initialise")
+	timing := timing.Start(Domain, "Initialise", "Initialise")
 	cfg = commonConfig.Get()
 	// For a specific database connection, use WithNameSpace("value"), otherwise don't specify a namespace
 	// Example:

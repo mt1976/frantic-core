@@ -7,7 +7,6 @@ package templateStore
 import (
 	"context"
 
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/jobs"
@@ -17,7 +16,7 @@ import (
 
 // Worker is a job that is scheduled to run at a predefined interval
 func Worker(j jobs.Job, db *database.DB) {
-	clock := timing.Start(jobs.CodedName(j), actions.INITIALISE.GetCode(), j.Description())
+	clock := timing.Start(jobs.CodedName(j), "Initialise", j.Description())
 	oldDB := activeDB
 	dbSwitched := false
 	// Overide the default database connection if one is passed
@@ -42,7 +41,7 @@ func Worker(j jobs.Job, db *database.DB) {
 // templateJobProcessor processes jobs related to the TemplateStore domain entity.
 // This function is triggered by the job scheduler to perform specific operations on TemplateStore records.
 func templateJobProcessor(j jobs.Job) {
-	clock := timing.Start(jobs.CodedName(j), actions.PROCESS.GetCode(), j.Description())
+	clock := timing.Start(jobs.CodedName(j), "Process", j.Description())
 	count := 0
 
 	//TODO: Add your job processing code here

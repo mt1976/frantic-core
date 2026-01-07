@@ -8,7 +8,6 @@ import (
 	"github.com/asdine/storm/v3/index"
 	"github.com/asdine/storm/v3/q"
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/timing"
 
 	"github.com/mt1976/frantic-core/logHandler"
@@ -230,7 +229,7 @@ func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
 	tableName := GetStructType(to)
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 
-	clock := timing.Start(tableName, actions.GETALL.GetCode(), fmt.Sprintf("%v=%v", field, value))
+	clock := timing.Start(tableName, "GetAll", fmt.Sprintf("%v=%v", field, value))
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
 	if err := IsValidFieldInStruct(field, to); err != nil {

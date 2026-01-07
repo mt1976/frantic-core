@@ -8,7 +8,6 @@ import (
 	"github.com/gregdel/pushover"
 	"github.com/mt1976/frantic-core/commonConfig"
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
 )
@@ -16,7 +15,7 @@ import (
 var domain = "Notification"
 
 func Send(inMessage, inTitle string, key int) error {
-	clock := timing.Start(domain, actions.MESSAGE.GetCode(), "Pushover Notification")
+	clock := timing.Start(domain, "Message", "Pushover Notification")
 	logHandler.CommunicationsLogger.Printf("[%v] Pushover - Sending...", domain)
 
 	cfg := commonConfig.Get()

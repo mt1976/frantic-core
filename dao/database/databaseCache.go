@@ -176,6 +176,6 @@ func (db *DB) Flush() error {
 	}
 	dur := time.Since(start)
 	db.cacheInitialised = false
-	logHandler.EventLogger.Printf("{FLUSH}<%v> Flushed cache for [%v.db] - Total records flushed: %d across %d tables in %v", db.Name, db.Name, recordCount, tableCount, dur.String())
+	logHandler.TraceLogger.Printf("{FLUSH}<%v> Flushed cache for [%v.db] - Total records flushed: %d across %d tables in %v", db.Name, db.Name, recordCount, tableCount, dur.String())
 	return nil
 }

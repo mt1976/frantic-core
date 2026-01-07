@@ -15,7 +15,7 @@ import (
 
 	"github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao"
-	"github.com/mt1976/frantic-core/dao/actions"
+
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/idHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -47,7 +47,7 @@ func Create(ctx context.Context, userName, uid, realName, email, gid string) (Te
 	dao.CheckDAOReadyState(Domain, audit.CREATE, initialised) // Check the DAO has been initialised, Mandatory.
 
 	//logHandler.InfoLogger.Printf("New %v (%v=%v)", domain, Fields.ID, field1)
-	clock := timing.Start(Domain, actions.CREATE.GetCode(), fmt.Sprintf("%v", userName))
+	clock := timing.Start(Domain, "Create", fmt.Sprintf("%v", userName))
 
 	sessionID := idHelpers.GetUUID()
 

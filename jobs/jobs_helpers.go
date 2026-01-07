@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorhill/cronexpr"
-	"github.com/mt1976/frantic-core/dao/actions"
+
 	"github.com/mt1976/frantic-core/dateHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/stringHelpers"
@@ -71,7 +71,7 @@ func CodedName(job Job) string {
 
 func AddJobToScheduler(j Job) {
 	//logHandler.ServiceLogger.Printf("[%v] Scheduling Job [%v] [%v]", domain, j.Name(), j.Schedule())
-	clock := timing.Start(domain, actions.SCHEDULE.GetCode(), j.Name())
+	clock := timing.Start(domain, "Schedule", j.Name())
 	// Start the job
 	jobID, err := scheduledTasks.AddFunc(j.Schedule(), j.Service())
 	if err != nil {
@@ -84,7 +84,7 @@ func AddJobToScheduler(j Job) {
 }
 
 func AddJobsToScheduler(jobs []Job) {
-	clock := timing.Start(domain, actions.SCHEDULE.GetCode(), "Jobs")
+	clock := timing.Start(domain, "Schedule", "Jobs")
 	// Schedule a list of jobs
 	for _, j := range jobs {
 		AddJobToScheduler(j)
@@ -93,7 +93,7 @@ func AddJobsToScheduler(jobs []Job) {
 }
 
 func StartScheduler() {
-	clock := timing.Start(domain, actions.START.GetCode(), "Scheduler")
+	clock := timing.Start(domain, "Start", "Scheduler")
 	logHandler.ServiceLogger.Printf("[%v] Scheduler - Starting", domain)
 	// Start the scheduler
 	scheduledTasks.Start()

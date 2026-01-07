@@ -7,7 +7,6 @@ import (
 
 	"github.com/mt1976/frantic-core/commonConfig"
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
 	"gopkg.in/gomail.v2"
@@ -31,7 +30,7 @@ const (
 // The function initializes and returns a gomail.Dialer object for sending emails.
 func Email_init() *gomail.Dialer {
 	//fmt.Println("Email Init")
-	clock := timing.Start("Email", actions.MESSAGE.GetCode(), "Initialise")
+	clock := timing.Start("Email", "Message", "Initialise")
 	logHandler.CommunicationsLogger.Printf("[%v] Email - Initialising...", domain)
 	set := commonConfig.Get()
 
@@ -57,7 +56,7 @@ func Email_init() *gomail.Dialer {
 // The function `SendEmail` sends an email with the specified recipient, subject, and body, using the
 // `gomail` package in Go.
 func SendEmail(to string, name string, subject string, body string) {
-	clock := timing.Start("Email", actions.MESSAGE.GetCode(), "Send")
+	clock := timing.Start("Email", "Message", "Send")
 	logHandler.CommunicationsLogger.Printf("[%v] Email - Sending...", domain)
 	set := commonConfig.Get()
 

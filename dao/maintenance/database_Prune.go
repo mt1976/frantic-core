@@ -7,7 +7,6 @@ import (
 
 	"github.com/mt1976/frantic-core/application"
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/dateHelpers"
 	"github.com/mt1976/frantic-core/ioHelpers"
@@ -48,7 +47,7 @@ func pruneExpiredBackups(job *DatabaseBackupCleanerJob) {
 	// Do something every day at midnight
 	name := jobs.CodedName(job)
 
-	j := timing.Start(job.Name(), actions.MAINTENANCE.GetCode(), job.Description())
+	j := timing.Start(job.Name(), "Maintenance", job.Description())
 	// Get Settings
 
 	retainBackupDays := settings.GetBackup_RetainForDays()

@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/gocarina/gocsv"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/paths"
 	"github.com/mt1976/frantic-core/timing"
@@ -13,7 +12,7 @@ import (
 
 func ImportCSV[T any](importName string, entryTypeToInsert T, importProcessor func(*T) (string, error)) error {
 
-	clock := timing.Start(importName, actions.IMPORT.GetCode(), "")
+	clock := timing.Start(importName, "Import", "")
 	// Create a slice of entryTypeToInsert to hold the data from the CSV file
 	insertEntriesList := []T{}
 

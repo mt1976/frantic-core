@@ -14,7 +14,6 @@ import (
 	"strconv"
 
 	"github.com/mt1976/frantic-core/dao"
-	"github.com/mt1976/frantic-core/dao/actions"
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/importExportHelper"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -28,7 +27,7 @@ func (record *TemplateStore) ExportRecordAsJSON(name string) {
 
 	ID := reflect.ValueOf(*record).FieldByName(Fields.ID.String())
 
-	clock := timing.Start(Domain, actions.EXPORT.GetCode(), fmt.Sprintf("%v", ID))
+	clock := timing.Start(Domain, "Export", fmt.Sprintf("%v", ID))
 
 	//ioHelpers.Dump(Domain, paths.Dumps(), name, fmt.Sprintf("%v", ID), record)
 	err := importExportHelper.ExportJSON(name, []TemplateStore{*record}, Fields.ID)
@@ -46,7 +45,7 @@ func ExportAllAsJSON(message string) {
 
 	dao.CheckDAOReadyState(Domain, audit.EXPORT, initialised) // Check the DAO has been initialised, Mandatory.
 
-	clock := timing.Start(Domain, actions.EXPORT.GetCode(), "ALL")
+	clock := timing.Start(Domain, "Export", "ALL")
 	recordList, _ := GetAll()
 	if len(recordList) == 0 {
 		logHandler.WarningLogger.Printf("[%v] %v data not found", Domain, Domain)
@@ -74,7 +73,7 @@ func (record *TemplateStore) ExportRecordAsCSV(name string) error {
 
 	ID := reflect.ValueOf(*record).FieldByName(Fields.ID.String())
 
-	clock := timing.Start(Domain, actions.EXPORT.GetCode(), fmt.Sprintf("%v", ID))
+	clock := timing.Start(Domain, "Export", fmt.Sprintf("%v", ID))
 	err := importExportHelper.ExportCSV(name, []TemplateStore{*record}, Fields.ID)
 	if err != nil {
 		logHandler.ExportLogger.Printf("Error exporting %v record %v: %v", Domain, ID, err.Error())
