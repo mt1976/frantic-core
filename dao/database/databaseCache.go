@@ -70,26 +70,11 @@ func (db *DB) PreLoadCache(to any, options ...func(*index.Options)) error {
 	db.cacheInitialised = false
 
 	res, err := db.GetAll(to, options...)
-
-	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD}{GET} COMPLETE [%+v] %v [...%v.db] on %v", GetStructType(to), GetStructType(to), len(res), db.Name, "PreLoadCache")
 	if err != nil {
 		return err
 	}
 
-	// res is []any containing concrete values (e.g. []TemplateStore)
-	for _, item := range res {
-		val := reflect.ValueOf(item)
-		var itemPtr any
-		if val.Kind() == reflect.Ptr {
-			itemPtr = item
-		} else {
-			ptr := reflect.New(val.Type())
-			ptr.Elem().Set(val)
-			itemPtr = ptr.Interface()
-		}
-		db.hydrateCache(err, itemPtr, "PreLoadCache", GetStructType(to))
-	}
-
+	// At this point GetAll has already hydrated the cache when caching is enabled.
 	db.cacheInitialised = true
 
 	logHandler.CacheLogger.Printf("[CCH]<%v>{LOAD} COMPLETE [%+v] [...%v.db] on %v - Cached %d entries - Cache: %t Initialised: %t %v", GetStructType(to), GetStructType(to), db.Name, "PreLoadCache", len(res), db.withCaching, db.cacheInitialised, db.withCacheKey)
@@ -150,13 +135,13 @@ func (db *DB) Flush() error {
 	start := time.Now()
 	// Scan the inMemoryCache and update only entries for this DB
 	for key, cacheEntry := range inMemoryCache {
-		logHandler.CacheLogger.Printf("{FLUSH} <%v> Scanning cache entry [%v] of type [%v]", db.Name, key, reflect.TypeOf(cacheEntry))
+		if db.verbose {
+			logHandler.CacheLogger.Printf("{FLUSH} <%v> Scanning cache entry [%v] of type [%v]", db.Name, key, reflect.TypeOf(cacheEntry))
+		}
 		// Here we would need to check if the cache entry belongs to this DB
 		// For simplicity, assuming all entries belong to this DB
-		logHandler.CacheLogger.Printf("{FLUSH} <%v> Clearing cache entry [%v] of type [%v]", db.Name, key, reflect.TypeOf(cacheEntry))
 		// Write the records back to the database
 		for _, v := range cacheEntry {
-			logHandler.CacheLogger.Printf("{FLUSH} <%v> Writing back cached record of type [%v] to database", db.Name, reflect.TypeOf(v))
 			err := db.connection.Save(v)
 			if err != nil {
 				logHandler.ErrorLogger.Printf("{FLUSH} <%v> Error writing back cached record of type [%v] to database: %v", db.Name, reflect.TypeOf(v), err)
@@ -166,7 +151,6 @@ func (db *DB) Flush() error {
 		// Clear the cache entry
 		delete(inMemoryCache, key)
 		tableCount++
-		logHandler.CacheLogger.Printf("{FLUSH} <%v> Cleared cache entry [%v] of type [%v]", db.Name, key, reflect.TypeOf(cacheEntry))
 	}
 	dur := time.Since(start)
 	db.cacheInitialised = false

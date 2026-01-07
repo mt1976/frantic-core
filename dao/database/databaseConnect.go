@@ -29,9 +29,6 @@ func connect(table any, options ...Option) *DB {
 		cacheInitialised: false,
 	}
 
-	// Clear the inmory cache
-	inMemoryCache = make(map[string]cacheEntrys)
-
 	// Apply all provided options
 	for _, option := range options {
 		option(config)
@@ -50,8 +47,10 @@ func connect(table any, options ...Option) *DB {
 	config.nameSpace = strings.ToLower(config.nameSpace)
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opening Connection to [%v.db] data (%v)", config.nameSpace, len(connectionPool))
 	// list the connection pool
-	for key, value := range connectionPool {
-		logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+	if config.verbose {
+		for key, value := range connectionPool {
+			logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+		}
 	}
 	// check if connection already exists
 	if connectionPool[config.nameSpace] != nil && connectionPool[config.nameSpace].Name == config.nameSpace {
@@ -93,15 +92,19 @@ func connect(table any, options ...Option) *DB {
 		logHandler.DatabaseLogger.Fatalf("[CON]{CONNECT} Opening [%v.db] connection Error=[%v]", strings.ToLower(db.databaseName), err.Error())
 		panic(commonErrors.WrapConnectError(err))
 	}
-	logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%+v]", connectionPool)
-	for key, value := range connectionPool {
-		logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+	if db.verbose {
+		logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%+v]", connectionPool)
+		for key, value := range connectionPool {
+			logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+		}
 	}
 	// Add to connection pool
 	addConnectionToPool(db, db.Name)
-	logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%+v]", connectionPool)
-	for key, value := range connectionPool {
-		logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%v] [%v] [codec=%v] %v", key, value.databaseName, value.connection.Node.Codec().Name(), value.initialised)
+	if db.verbose {
+		logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%+v]", connectionPool)
+		for key, value := range connectionPool {
+			logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%v] [%v] [codec=%v] %v", key, value.databaseName, value.connection.Node.Codec().Name(), value.initialised)
+		}
 	}
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opened [%v.db] data connection [codec=%v] %v", db.databaseName, db.connection.Node.Codec().Name(), db.initialised)
 
@@ -162,8 +165,10 @@ func (db *DB) Disconnect() {
 	}
 	releaseFromConnectionPool(db)
 	logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Closed [%v.db] connection", db.Name)
-	for key, value := range connectionPool {
-		logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+	if db.verbose {
+		for key, value := range connectionPool {
+			logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
+		}
 	}
 	timer.Stop(1)
 }
