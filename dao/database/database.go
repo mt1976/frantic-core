@@ -64,7 +64,7 @@ func (db *DB) get(field Field, value, to any) (any, error) {
 		// TODO: What this should do is look through the cache for the appropriate entry, and check if it can find one with the matching field/value
 		// Not just using the cache key
 
-		for key, val := range inMemoryCache {
+		for key, val := range inMemoryCache[GetStructType(to)] {
 			logHandler.CacheLogger.Printf("[GET]<%v>{CACHE SCAN} Checking cache entry [%v] of type [%v] against expected type [%v]", GetStructType(to), key, reflect.TypeOf(val), reflect.TypeOf(to))
 			// Val is a pointer to struct
 			valValue := reflect.ValueOf(val)
