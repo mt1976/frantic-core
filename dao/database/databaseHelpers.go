@@ -18,6 +18,9 @@ func GetFunctionName(temp interface{}) string {
 
 func GetStructType(data any) string {
 	rtnType := reflect.TypeOf(data).String()
+	base := rtnType
+
+	//base := rtnType
 	// If the type is a pointer, get the underlying type
 	if strings.Contains(rtnType, "*") {
 		rtnType = reflect.TypeOf(data).Elem().String()
@@ -26,6 +29,8 @@ func GetStructType(data any) string {
 	if strings.Contains(rtnType, ".") {
 		rtnType = strings.Split(rtnType, ".")[1]
 	}
+	logHandler.TraceLogger.Printf("{TYPE} Resolved Struct Type: %v (base: %v)", rtnType, base)
+
 	return rtnType
 }
 

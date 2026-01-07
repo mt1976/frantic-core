@@ -40,7 +40,7 @@ type TemplateStore struct {
 	ExampleDate   time.Time
 	ExampleString string
 	LastLogin     time.Time
-	LastHost      string
+	LastHost      string `storm:"index"`
 	// Last field is mandatory for all DAO entities
 	Audit audit.Audit `csv:"-"` // audit data
 }

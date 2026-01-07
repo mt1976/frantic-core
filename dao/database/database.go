@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/index"
 	"github.com/asdine/storm/v3/q"
 	"github.com/mt1976/frantic-core/commonErrors"
@@ -98,7 +99,7 @@ func (db *DB) get(field Field, value, to any) (any, error) {
 	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] - From Database", GetStructType(to), field, value, GetStructType(to), db.Name)
 
 	// [GET] from database
-	err := db.connection.One(string(field), value, to)
+	err := db.connection.One(field.String(), value, to)
 
 	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] - Completed", GetStructType(to), field, value, GetStructType(to), db.Name)
 	if err != nil {
@@ -226,42 +227,81 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
-	Domain := GetStructType(to)
-	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
+	tableName := GetStructType(to)
+	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 
-	clock := timing.Start(Domain, actions.GETALL.GetCode(), fmt.Sprintf("%v=%v", field, value))
+	clock := timing.Start(tableName, actions.GETALL.GetCode(), fmt.Sprintf("%v=%v", field, value))
 
 	//logHandler.DatabaseLogger.Printf("SELECT %v WHERE %v=%v", Domain, field, value)
 	if err := IsValidFieldInStruct(field, to); err != nil {
 		logHandler.ErrorLogger.Printf("Field validation error for field '%v': %v", field.String(), err)
+		clock.Stop(0)
 		return nil, err
 	}
 
 	if err := IsValidTypeForField(field, value, to); err != nil {
 		logHandler.ErrorLogger.Printf("Type validation error for field '%v': %v", field.String(), err)
+		clock.Stop(0)
 		return nil, err
 	}
 
-	//err := activeDB.Retrieve(field, value, &recordList)
-	var resultList []any
-	recordList, err := db.GetAll(to)
-	if err != nil {
-		logHandler.ErrorLogger.Print(err.Error())
-		return nil, err
-	}
-
-	logHandler.TraceLogger.Printf("Filter %v records", len(recordList))
-	count := 0
-
-	for _, record := range recordList {
-		if reflect.ValueOf(record).FieldByName(field.String()).Interface() == value {
-			count++
-			resultList = append(resultList, record)
+	// If caching is enabled and initialised, use the existing GetAll + in-memory filter,
+	// which operates on the in-memory cache and avoids hitting the database.
+	if db.withCaching && db.cacheInitialised {
+		var resultList []any
+		// Get all records from cache
+		allRecords := inMemoryCache[tableName]
+		// Filter records based on the specified field and value
+		for _, record := range allRecords {
+			reflectValue := reflect.ValueOf(record)
+			if reflectValue.Kind() == reflect.Ptr {
+				reflectValue = reflectValue.Elem()
+			}
+			fieldValue := reflectValue.FieldByName(field.String())
+			if fieldValue.IsValid() && fieldValue.Interface() == value {
+				resultList = append(resultList, record)
+			}
 		}
+		logHandler.TraceLogger.Printf("[GET]<%v>{WHERE}{HIT} (%v=%v) [%+v] [...%v.db] on %v - Returning %d cached entries", tableName, field.String(), value, tableName, db.Name, "GetAllWhere", len(resultList))
+		// Log the type of the records in the result list
+		//for i, rec := range resultList {
+		//	logHandler.EventLogger.Printf("[GET]<%v>{WHERE}{HIT} Result[%d] Type: %v", tableName, i, reflect.TypeOf(rec))
+		//}
+		clock.Stop(len(resultList))
+		return resultList, nil
+	}
+
+	// Otherwise, use Storm's indexed query to retrieve matching records directly.
+	query := db.connection.Select(q.Eq(field.String(), value))
+	err := query.Find(to)
+	if err != nil {
+		if err == storm.ErrNotFound {
+			clock.Stop(0)
+			return []any{}, nil
+		}
+		logHandler.ErrorLogger.Printf("Error querying %v where %v=%v: %v", tableName, field.String(), value, err)
+		clock.Stop(0)
+		return nil, err
+	}
+
+	sliceValue := reflect.ValueOf(to).Elem()
+	if sliceValue.Kind() != reflect.Slice {
+		logHandler.DatabaseLogger.Printf("[GET]<%v>{WHERE} - Expected slice pointer, got %v", tableName, sliceValue.Kind())
+		clock.Stop(0)
+		return nil, fmt.Errorf("GetAllWhere expected slice pointer, got %v", sliceValue.Kind())
+	}
+
+	resultList := make([]any, sliceValue.Len())
+	for i := 0; i < sliceValue.Len(); i++ {
+		resultList[i] = sliceValue.Index(i).Interface()
+	}
+
+	hydrateerr := db.hydrateCacheBulk(resultList)
+	if hydrateerr != nil {
+		logHandler.ErrorLogger.Printf("[CCH]<%v>{AddBulk} Error hydrating cache: %v", tableName, hydrateerr)
 	}
 
 	clock.Stop(len(resultList))
-
 	return resultList, nil
 }
 

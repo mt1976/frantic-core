@@ -28,6 +28,28 @@ func (db *DB) hydrateCache(err error, to any, action string, structType string) 
 	}
 }
 
+func (db *DB) hydrateCacheBulk(to []any) error {
+	if !db.withCaching {
+		logHandler.CacheLogger.Printf("[CCH]<%v>{AddBulk} CACHING NOT ENABLED [...%v.db] on %v", GetStructType(to), db.Name, "hydrateCacheBulk")
+		return nil
+	}
+	for _, item := range to {
+		cacheKeyValue := db.getCacheKeyValue(item)
+		table := GetStructType(item)
+		// Ensure the table map exists
+		if _, exists := inMemoryCache[table]; !exists {
+			inMemoryCache[table] = make(cacheEntrys)
+		}
+		// Add to the cache
+		cacheEntry := cacheEntrys(inMemoryCache[table])
+		cacheEntry[cacheKeyValue] = item
+		inMemoryCache[table] = cacheEntry
+
+		logHandler.CacheLogger.Printf("[CCH]<%v>{AddBulk} (%v=%v) [%+v] [...%v.db] on %v initialised: %t", GetStructType(item), db.withCacheKey, cacheKeyValue, GetStructType(item), db.Name, "hydrateCacheBulk", db.cacheInitialised)
+	}
+	return nil
+}
+
 // removeFromCache removes the specified data from the in-memory cache if caching is enabled
 // This is typically called after a delete operation
 func removeFromCache(db *DB, data any, action string, structType string) {

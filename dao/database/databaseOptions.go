@@ -8,7 +8,7 @@ import (
 type connectionConfig struct {
 	withCaching      bool
 	withCacheKey     Field
-	verbose          bool
+	Verbose          bool
 	timeout          int
 	poolSize         int
 	nameSpace        string
@@ -40,7 +40,7 @@ func WithCacheKey(field Field) Option {
 func WithVerbose(enabled bool) Option {
 	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithVerbose set to %v", enabled)
 	return func(c *connectionConfig) {
-		c.verbose = enabled
+		c.Verbose = enabled
 	}
 }
 

@@ -19,7 +19,7 @@ func connect(table any, options ...Option) *DB {
 	// Create default configuration
 	config := &connectionConfig{
 		withCaching:      false,
-		verbose:          false,
+		Verbose:          false,
 		timeout:          30,
 		poolSize:         connectionPoolMaxSize,
 		nameSpace:        "main",
@@ -36,7 +36,7 @@ func connect(table any, options ...Option) *DB {
 
 	// Log the applied configuration
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Configuration for %v.db: caching: %t, cacheKey: %v, verbose: %t, timeout: %d, poolSize: %d, nameSpace: %s, encryption: %t, indices: %v",
-		config.nameSpace, config.withCaching, config.withCacheKey, config.verbose, config.timeout, config.poolSize, config.nameSpace, config.withEncryption, config.indices)
+		config.nameSpace, config.withCaching, config.withCacheKey, config.Verbose, config.timeout, config.poolSize, config.nameSpace, config.withEncryption, config.indices)
 
 	if config.withCaching && config.withCacheKey == "" {
 		logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Caching enabled but no cache key provided for [%v.db]", config.nameSpace)
@@ -47,7 +47,7 @@ func connect(table any, options ...Option) *DB {
 	config.nameSpace = strings.ToLower(config.nameSpace)
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opening Connection to [%v.db] data (%v)", config.nameSpace, len(connectionPool))
 	// list the connection pool
-	if config.verbose {
+	if config.Verbose {
 		for key, value := range connectionPool {
 			logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
 		}
@@ -59,7 +59,7 @@ func connect(table any, options ...Option) *DB {
 		// Update configuration in case options have changed
 		rtn.withCaching = config.withCaching
 		rtn.withCacheKey = config.withCacheKey
-		rtn.verbose = config.verbose
+		rtn.verbose = config.Verbose
 		rtn.timeout = config.timeout
 		rtn.poolSize = config.poolSize
 		rtn.withEncryption = config.withEncryption
@@ -77,7 +77,7 @@ func connect(table any, options ...Option) *DB {
 	db.initialised = false
 	db.withCaching = config.withCaching
 	db.withCacheKey = config.withCacheKey
-	db.verbose = config.verbose
+	db.verbose = config.Verbose
 	db.timeout = config.timeout
 	db.poolSize = config.poolSize
 	db.withEncryption = config.withEncryption

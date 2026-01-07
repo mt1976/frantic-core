@@ -220,19 +220,24 @@ func GetAllWhere(field database.Field, value any) ([]TemplateStore, error) {
 	// }
 
 	//err := activeDB.Retrieve(field, value, &recordList)
-	logHandler.DatabaseLogger.Println("Call GetAllWhere")
+	//logHandler.DatabaseLogger.Println("Call GetAllWhere")
 	recordListAny, err := activeDB.GetAllWhere(field, value, &[]TemplateStore{})
 	if err != nil {
 		logHandler.ErrorLogger.Print(err.Error())
 		return nil, err
 	}
-	logHandler.DatabaseLogger.Println("Process returned records")
+	//logHandler.DatabaseLogger.Println("Process returned records")
 	for _, rec := range recordListAny {
-		ts, ok := rec.(TemplateStore)
-		if !ok {
-			return nil, fmt.Errorf("invalid record type returned from GetAllWhere")
+		//logHandler.InfoLogger.Printf("Processing record of type %v", database.GetStructType(rec))
+		if database.GetStructType(rec) != database.GetStructType(TemplateStore{}) {
+			logHandler.ErrorLogger.Printf("Invalid record type returned from GetAllWhere wanted %v, got %v", database.GetStructType(TemplateStore{}), database.GetStructType(rec))
+			panic(fmt.Sprintf("invalid record type returned from GetAllWhere wanted %v, got %v", database.GetStructType(TemplateStore{}), database.GetStructType(rec)))
 		}
-		resultList = append(resultList, ts)
+		if reflect.TypeOf(rec).Kind() == reflect.Ptr {
+			//	logHandler.InfoLogger.Printf("Dereferencing pointer to get TemplateStore value")
+			rec = reflect.ValueOf(rec).Elem().Interface()
+		}
+		resultList = append(resultList, rec.(TemplateStore))
 	}
 	// count := 0
 
@@ -336,7 +341,7 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 		return preDeleteErr
 	}
 	//logHandler.WarningLogger.Printf("Deleting %v record where %v=%v %v", Domain, field.String(), value, audit.DELETE.ShortName())
-	record.ExportRecordAsJSON(audit.DELETE.ShortName())
+	//record.ExportRecordAsJSON(audit.DELETE.ShortName())
 
 	if err := activeDB.Delete(&record); err != nil {
 		delErr := commonErrors.WrapDAODeleteError(Domain, field.String(), value, err)
