@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
 	"gopkg.in/gomail.v2"
@@ -73,7 +73,7 @@ func SendEmail(to string, name string, subject string, body string) {
 	// Send the email to Bob, Cora and Dan.
 	// This code block is sending the email using the `gomail` package.
 	if err := Emailer.DialAndSend(m); err != nil {
-		panic(commonErrors.WrapEmailError(err))
+		panic(ce.ErrEmailWrapper(err))
 	}
 	logHandler.CommunicationsLogger.Printf("[%v] Email - Sent to [%v] Subject [%v]", domain, to, subject)
 	clock.Stop(1)

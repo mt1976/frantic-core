@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/idHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/paths"
@@ -116,20 +116,20 @@ func CopyFile(src, dst string) error {
 	dst = clean(dst)
 
 	if srcfd, err = os.Open(src); err != nil {
-		return commonErrors.WrapOSError(err)
+		return ce.ErrOSWrapper(err)
 	}
 	defer srcfd.Close()
 
 	if dstfd, err = os.Create(dst); err != nil {
-		return commonErrors.WrapOSError(err)
+		return ce.ErrOSWrapper(err)
 	}
 	defer dstfd.Close()
 
 	if _, err = io.Copy(dstfd, srcfd); err != nil {
-		return commonErrors.WrapOSError(err)
+		return ce.ErrOSWrapper(err)
 	}
 	if srcinfo, err = os.Stat(src); err != nil {
-		return commonErrors.WrapOSError(err)
+		return ce.ErrOSWrapper(err)
 	}
 	return os.Chmod(dst, srcinfo.Mode())
 }
@@ -146,7 +146,7 @@ func Dir(path string) ([]string, error) {
 	// Get all folders in the backup directory
 	files, err := os.ReadDir(path)
 	if err != nil {
-		return nil, commonErrors.WrapOSError(err)
+		return nil, ce.ErrOSWrapper(err)
 	}
 	var folders []string
 	for _, file := range files {

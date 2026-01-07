@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -30,7 +30,7 @@ func GetFolders(path string) ([]string, error) {
 	// Get all folders in the backup directory
 	files, err := os.ReadDir(path)
 	if err != nil {
-		return nil, commonErrors.WrapOSError(err)
+		return nil, ce.ErrOSWrapper(err)
 	}
 	var folders []string
 	for _, file := range files {

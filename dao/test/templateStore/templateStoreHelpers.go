@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/goforj/godump"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -77,8 +77,8 @@ func templateClone(ctx context.Context, source TemplateStore) (TemplateStore, er
 func assertTemplateStore(result any, field database.Field, value any) (*TemplateStore, error) {
 	x, ok := result.(*TemplateStore)
 	if !ok {
-		return nil, commonErrors.WrapDAOReadError(Domain, field.String(), value,
-			fmt.Errorf("type assertion failed: expected *TemplateStore, got %T", result))
+		return nil, ce.ErrDAOAssertWrapper(Domain, field.String(), value,
+			ce.ErrInvalidTypeWrapper(field.String(), fmt.Sprintf("%T", result), "*TemplateStore"))
 	}
 	return x, nil
 }
@@ -203,10 +203,10 @@ func Login(ctx context.Context, sq string) error {
 
 func (u *TemplateStore) SetName(name string) error {
 	if name == "" {
-		return commonErrors.ErrorEmptyName
+		return ce.ErrEmptyName
 	}
 	if len(name) > 50 {
-		return commonErrors.ErrorNameTooLong
+		return ce.ErrNameTooLong
 	}
 	u.RealName = name
 	return nil

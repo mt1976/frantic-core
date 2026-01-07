@@ -185,7 +185,7 @@ func Lookup_LEI(inISIN string) (string, error) {
 			return result.Data[0].Attributes.Lei, nil
 		}
 	} else {
-		return "", commonErrors.WrapValidationError(err)
+		return "", commonErrors.ErrValidationWrapper(err)
 	}
 
 	return "", nil

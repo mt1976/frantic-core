@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -54,7 +54,7 @@ func Read(fileName string, path string) (string, error) {
 		logHandler.ErrorLogger.Fatal("Read Error : [", err, "]")
 	}
 	// Convert []byte to string and print to screen
-	return string(content), commonErrors.WrapReadError(err)
+	return string(content), ce.ErrReadWrapper(err)
 }
 
 // The Write function writes content to a file specified by fileName and path, and returns a boolean
@@ -71,7 +71,7 @@ func Write(fileName string, path string, content string) (bool, error) {
 	err := ioutil.WriteFile(filePath, message, 0644)
 	if err != nil {
 		logHandler.ErrorLogger.Fatalf("Write Error : [%v]", err)
-		return false, commonErrors.WrapWriteError(err)
+		return false, ce.ErrWriteWrapper(err)
 	}
 	return false, nil
 }
@@ -111,14 +111,14 @@ func Empty(dir string) error {
 	files, err := filepath.Glob(filepath.Join(dir, "*"))
 	if err != nil {
 		logHandler.InfoLogger.Println(err)
-		return commonErrors.WrapEmptyError(err)
+		return ce.ErrEmptyWrapper(err)
 	}
 	//	fmt.Println("do Clear", files)
 	for _, file := range files {
 		err = os.RemoveAll(file)
 		if err != nil {
 			logHandler.InfoLogger.Println(err)
-			return commonErrors.WrapError(err)
+			return ce.ErrEmptyWrapper(err)
 		}
 	}
 	return nil

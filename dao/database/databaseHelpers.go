@@ -38,7 +38,7 @@ func IsValidFieldInStruct(fromField Field, data any) error {
 	// Normalise the type: unwrap pointers, and if it's a slice/array, use the element type.
 	if data == nil {
 		logHandler.ErrorLogger.Printf("Cannot validate field '%v' on <nil> data", fromField.String())
-		return commonErrors.WrapInvalidFieldError(fromField.String())
+		return commonErrors.ErrInvalidFieldWrapper(fromField.String())
 	}
 
 	t := reflect.TypeOf(data)
@@ -60,13 +60,13 @@ func IsValidFieldInStruct(fromField Field, data any) error {
 
 	if t.Kind() != reflect.Struct {
 		logHandler.ErrorLogger.Printf("Type '%v' is not a struct; cannot validate field '%v'", t, fromField.String())
-		return commonErrors.WrapInvalidFieldError(fromField.String())
+		return commonErrors.ErrInvalidFieldWrapper(fromField.String())
 	}
 
 	if _, isValidField := t.FieldByName(fromField.String()); !isValidField {
 		logHandler.ErrorLogger.Printf("Field '%v' not found in struct '%v'", fromField.String(), t.Name())
-		logHandler.ErrorLogger.Println(commonErrors.WrapInvalidFieldError(fromField.String()))
-		return commonErrors.WrapInvalidFieldError(fromField.String())
+		logHandler.ErrorLogger.Println(commonErrors.ErrInvalidFieldWrapper(fromField.String()))
+		return commonErrors.ErrInvalidFieldWrapper(fromField.String())
 	}
 	logHandler.TraceLogger.Printf("Field '%v' is valid in struct '%v'", fromField.String(), t.Name())
 	return nil
@@ -75,7 +75,7 @@ func IsValidFieldInStruct(fromField Field, data any) error {
 func IsValidTypeForField(field Field, data, forStruct any) error {
 	if forStruct == nil {
 		logHandler.ErrorLogger.Printf("Cannot validate type for field '%v' on <nil> struct", field.String())
-		return commonErrors.WrapInvalidFieldError(field.String())
+		return commonErrors.ErrInvalidFieldWrapper(field.String())
 	}
 
 	// Normalise the type of forStruct: unwrap pointers, and if it's a slice/array, use the element type.
@@ -92,13 +92,13 @@ func IsValidTypeForField(field Field, data, forStruct any) error {
 
 	if st.Kind() != reflect.Struct {
 		logHandler.ErrorLogger.Printf("Type '%v' is not a struct; cannot validate type for field '%v'", st, field.String())
-		return commonErrors.WrapInvalidFieldError(field.String())
+		return commonErrors.ErrInvalidFieldWrapper(field.String())
 	}
 
 	structField, found := st.FieldByName(field.String())
 	if !found {
 		logHandler.ErrorLogger.Printf("Field '%v' not found in struct '%v' when validating type", field.String(), st.Name())
-		return commonErrors.WrapInvalidFieldError(field.String())
+		return commonErrors.ErrInvalidFieldWrapper(field.String())
 	}
 
 	dataType := "<nil>"
@@ -108,7 +108,7 @@ func IsValidTypeForField(field Field, data, forStruct any) error {
 	structFieldType := structField.Type.String()
 	if dataType != structFieldType {
 		logHandler.ErrorLogger.Printf("Type mismatch for field '%v': expected '%v', got '%v'", field.String(), structFieldType, dataType)
-		return commonErrors.WrapInvalidTypeError(field.String(), dataType, structFieldType)
+		return commonErrors.ErrInvalidTypeWrapper(field.String(), dataType, structFieldType)
 	}
 	logHandler.TraceLogger.Printf("Type for field '%v' is valid: expected '%v', got '%v'", field.String(), structFieldType, dataType)
 	return nil

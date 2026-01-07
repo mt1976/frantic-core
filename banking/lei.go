@@ -37,7 +37,7 @@ func NewLEI(lei string) (LEI, error) {
 	l := LEI{}
 	l.lei = lei
 	if !isValidLEI(lei) {
-		return LEI{}, commonErrors.WrapValidationError(fmt.Errorf("invalid LEI: %s", lei))
+		return LEI{}, commonErrors.ErrValidationWrapper(fmt.Errorf("invalid LEI: %s", lei))
 	}
 	return l, nil
 }

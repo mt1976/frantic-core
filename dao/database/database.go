@@ -132,7 +132,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Preparing to read into slice of type %v", GetStructType(to), sliceValue.Type())
 		if sliceValue.Kind() != reflect.Slice {
 			logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
-			return nil, fmt.Errorf("GetAll expected slice pointer, got %v", sliceValue.Kind())
+			return nil, commonErrors.ErrInvalidTypeWrapper("GetAll", string(GetStructType(to)), sliceValue.Kind().String())
 		}
 		elemType := sliceValue.Type().Elem()
 		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Slice element type is %v", GetStructType(to), elemType)
@@ -188,7 +188,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 	sliceValue := reflect.ValueOf(to).Elem()
 	if sliceValue.Kind() != reflect.Slice {
 		logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
-		return nil, fmt.Errorf("GetAll expected slice pointer, got %v", sliceValue.Kind())
+		return nil, commonErrors.ErrInvalidTypeWrapper("GetAll", string(GetStructType(to)), sliceValue.Kind().String())
 	}
 
 	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v] [...%v.db] on %v - Retrieved %d entries from DB", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
@@ -287,7 +287,7 @@ func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
 	if sliceValue.Kind() != reflect.Slice {
 		logHandler.DatabaseLogger.Printf("[GET]<%v>{WHERE} - Expected slice pointer, got %v", tableName, sliceValue.Kind())
 		clock.Stop(0)
-		return nil, fmt.Errorf("GetAllWhere expected slice pointer, got %v", sliceValue.Kind())
+		return nil, commonErrors.ErrInvalidTypeWrapper("GetAllWhere", tableName, sliceValue.Kind().String())
 	}
 
 	resultList := make([]any, sliceValue.Len())
@@ -344,7 +344,7 @@ func (db *DB) Update(data any) error {
 	err := validate(data, db)
 	if err != nil {
 		logHandler.DatabaseLogger.Printf("[UPD]<%v>{UPDATE} Update [%+v] [%v.db] - Error", GetStructType(data), GetStructType(data), db.Name)
-		return commonErrors.WrapError(err)
+		return commonErrors.ErrWrapper(err)
 	}
 	logHandler.DatabaseLogger.Printf("[UPD]<%v>{UPDATE} Update [%+v] [%v.db] - End", GetStructType(data), GetStructType(data), db.Name)
 	if db.withCaching {
@@ -375,7 +375,7 @@ func (db *DB) Create(data any) error {
 	err := validate(data, db)
 	if err != nil {
 		logHandler.DatabaseLogger.Printf("[NEW]<%v>{CREATE} Create [%+v] [%v.db] - Error", GetStructType(data), GetStructType(data), db.Name)
-		return commonErrors.WrapCreateError(err)
+		return commonErrors.ErrCreateWrapper(err)
 	}
 	logHandler.DatabaseLogger.Printf("[NEW]<%v>{CREATE} Create [%+v] [%v.db] - End", GetStructType(data), GetStructType(data), db.Name)
 

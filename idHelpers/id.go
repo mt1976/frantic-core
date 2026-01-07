@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/sha3"
 
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dateHelpers"
 	"github.com/mt1976/frantic-core/htmlHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -117,7 +117,7 @@ func GetUUIDv2WithPayload(payload string) (string, error) {
 	// Ensure payload is 16 bytes
 	length := 16
 	if len(payload) > length {
-		return "", commonErrors.WrapIDGenerationError(fmt.Errorf("payload must be %d bytes or less", length))
+		return "", ce.ErrIDGenerationWrapper(fmt.Errorf("payload must be %d bytes or less", length))
 	}
 	if len(payload) < 16 {
 		payload = fmt.Sprintf("%-16s", payload)
@@ -125,7 +125,7 @@ func GetUUIDv2WithPayload(payload string) (string, error) {
 	ksuid, err := ksuid.FromParts(time.Now(), []byte(payload))
 	if err != nil {
 		logHandler.ErrorLogger.Printf("Error generating KSUID: [%v]", err.Error())
-		return "", commonErrors.WrapIDGenerationError(err)
+		return "", ce.ErrIDGenerationWrapper(err)
 	}
 	return ksuid.String(), nil
 }

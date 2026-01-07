@@ -17,7 +17,7 @@ type UTI struct {
 func NewISO23897UTI(generatingEntity string) (UTI, error) {
 
 	if len(generatingEntity) != 20 {
-		return UTI{}, commonErrors.WrapValidationError(fmt.Errorf("generatingEntity is not 20 chars [%v][%s]", len(generatingEntity), generatingEntity))
+		return UTI{}, commonErrors.ErrValidationWrapper(fmt.Errorf("generatingEntity is not 20 chars [%v][%s]", len(generatingEntity), generatingEntity))
 	}
 
 	// Generate a random number using the current time as the seed
@@ -48,10 +48,10 @@ func (U *UTI) Set(in string) error {
 	U.uti = in
 	val, err := U.IsValid()
 	if err != nil || !val {
-		return commonErrors.WrapValidationError(fmt.Errorf("invalid UTI [%s]", in))
+		return commonErrors.ErrValidationWrapper(fmt.Errorf("invalid UTI [%s]", in))
 	}
 	if !val {
-		return commonErrors.WrapValidationError(fmt.Errorf("invalid UTI [%s]", in))
+		return commonErrors.ErrValidationWrapper(fmt.Errorf("invalid UTI [%s]", in))
 	}
 	return nil
 }
@@ -63,11 +63,11 @@ func (U *UTI) Get() string {
 func (U *UTI) IsValid() (bool, error) {
 	// Max length is 52
 	if len(U.uti) > 52 {
-		return false, commonErrors.WrapValidationError(fmt.Errorf("invalid UTI length [%s]", U.uti))
+		return false, commonErrors.ErrValidationWrapper(fmt.Errorf("invalid UTI length [%s]", U.uti))
 	}
 	// US Min length is 42
 	if len(U.uti) < 42 {
-		return false, commonErrors.WrapValidationError(fmt.Errorf("invalid UTI length [%s]", U.uti))
+		return false, commonErrors.ErrValidationWrapper(fmt.Errorf("invalid UTI length [%s]", U.uti))
 	}
 
 	//fmt.Printf("UTI: %s\n", U.Formatted())

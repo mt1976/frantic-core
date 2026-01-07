@@ -14,7 +14,7 @@ import (
 	"reflect"
 
 	"github.com/goforj/godump"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao"
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/dao/database"
@@ -107,7 +107,7 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 	if field == Fields.ID && reflect.TypeOf(value).Name() != "int" {
 		msg := "invalid data type. Expected type of %v is int"
 		logHandler.ErrorLogger.Printf(msg, value)
-		return TemplateStore{}, commonErrors.WrapDAOReadError(Domain, field.String(), value, fmt.Errorf(msg, value))
+		return TemplateStore{}, ce.ErrGetWrapper(Domain, field.String(), value, fmt.Errorf(msg, value))
 	}
 
 	// if err := database.IsValidFieldInStruct(field, TemplateStore{}); err != nil {
@@ -124,7 +124,7 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 	result, err := activeDB.Get(database.Field(field), value, &record)
 	if err != nil {
 		clock.Stop(0)
-		return TemplateStore{}, commonErrors.WrapRecordNotFoundError(Domain, field.String(), fmt.Sprintf("%v", value))
+		return TemplateStore{}, ce.ErrRecordNotFoundWrapper(Domain, field.String(), fmt.Sprintf("%v", value))
 	}
 
 	// Type assert the result to *TemplateStore
@@ -135,7 +135,7 @@ func GetBy(field database.Field, value any) (TemplateStore, error) {
 
 	if err := x.postGet(); err != nil {
 		clock.Stop(0)
-		return TemplateStore{}, commonErrors.WrapDAOReadError(Domain, field.String(), value, err)
+		return TemplateStore{}, ce.ErrGetWrapper(Domain, field.String(), value, err)
 	}
 
 	clock.Stop(1)
@@ -163,14 +163,14 @@ func GetAll() ([]TemplateStore, error) {
 
 	if errG != nil {
 		clock.Stop(0)
-		return []TemplateStore{}, commonErrors.WrapNotFoundError(Domain, errG)
+		return []TemplateStore{}, ce.ErrNotFoundWrapper(Domain, errG)
 	}
 
 	for _, rec := range recordListAny {
 		ts, ok := rec.(TemplateStore)
 		if !ok {
 			clock.Stop(0)
-			return []TemplateStore{}, fmt.Errorf("invalid record type returned from GetAll")
+			return []TemplateStore{}, ce.ErrInvalidTypeWrapper("GetAll", Domain, fmt.Sprintf("%T", rec))
 		}
 		resultList = append(resultList, ts)
 	}
@@ -319,7 +319,7 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 	record, err := GetBy(field, value)
 
 	if err != nil {
-		getErr := commonErrors.WrapDAODeleteError(Domain, field.String(), value, err)
+		getErr := ce.ErrDAODeleteWrapper(Domain, field.String(), value, err)
 		logHandler.ErrorLogger.Panic(getErr.Error(), err)
 		clock.Stop(0)
 		return getErr
@@ -327,7 +327,7 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 
 	auditErr := record.Audit.Action(ctx, audit.DELETE.WithMessage(note))
 	if auditErr != nil {
-		audErr := commonErrors.WrapDAOUpdateAuditError(Domain, value, auditErr)
+		audErr := ce.ErrDAOUpdateAuditWrapper(Domain, value, auditErr)
 		logHandler.ErrorLogger.Print(audErr.Error())
 		clock.Stop(0)
 		return audErr
@@ -335,7 +335,7 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 
 	preDeleteErr := record.preDeleteProcessing()
 	if preDeleteErr != nil {
-		logHandler.ErrorLogger.Print(commonErrors.WrapDAODeleteError(Domain, field.String(), value, preDeleteErr).Error())
+		logHandler.ErrorLogger.Print(ce.ErrDAODeleteWrapper(Domain, field.String(), value, preDeleteErr).Error())
 		clock.Stop(0)
 		return preDeleteErr
 	}
@@ -343,7 +343,7 @@ func DeleteBy(ctx context.Context, field database.Field, value any, note string)
 	//record.ExportRecordAsJSON(audit.DELETE.ShortName())
 
 	if err := activeDB.Delete(&record); err != nil {
-		delErr := commonErrors.WrapDAODeleteError(Domain, field.String(), value, err)
+		delErr := ce.ErrDAODeleteWrapper(Domain, field.String(), value, err)
 		logHandler.ErrorLogger.Panic(delErr.Error())
 		clock.Stop(0)
 		return delErr
@@ -444,7 +444,7 @@ func GetLookup(field, value database.Field) (lookup.Lookup, error) {
 	// Get all status
 	recordList, err := GetAll()
 	if err != nil {
-		lkpErr := commonErrors.WrapDAOLookupError(Domain, field.String(), value, err)
+		lkpErr := ce.ErrDAOLookupWrapper(Domain, field.String(), value, err)
 		logHandler.ErrorLogger.Print(lkpErr.Error())
 		clock.Stop(0)
 		return lookup.Lookup{}, lkpErr
@@ -499,9 +499,9 @@ func ClearDown(ctx context.Context) error {
 	// Delete all active session recordList
 	recordList, err := GetAll()
 	if err != nil {
-		logHandler.ErrorLogger.Print(commonErrors.WrapDAOInitialisationError(Domain, err).Error())
+		logHandler.ErrorLogger.Print(ce.ErrDAOInitialisationWrapper(Domain, err).Error())
 		clock.Stop(0)
-		return commonErrors.WrapDAOInitialisationError(Domain, err)
+		return ce.ErrDAOInitialisationWrapper(Domain, err)
 	}
 
 	//noRecords := len(recordList)
@@ -513,7 +513,7 @@ func ClearDown(ctx context.Context) error {
 
 		delErr := Delete(ctx, record.ID, fmt.Sprintf("Clearing %v %v @ initialisation ", Domain, record.ID))
 		if delErr != nil {
-			logHandler.ErrorLogger.Print(commonErrors.WrapDAOInitialisationError(Domain, delErr).Error())
+			logHandler.ErrorLogger.Print(ce.ErrDAOInitialisationWrapper(Domain, delErr).Error())
 			continue
 		}
 		count++

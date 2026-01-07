@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	ErrorEndDateBeforeStartDate = errors.New("end date is before start date")
-	ErrorEmptyName              = errors.New("name is empty")
-	ErrorNameTooLong            = errors.New("name is too long, max 50 characters") // Deprecated: use StringTooLongError
-	ErrorDuplicate              = errors.New("duplicate")
-	ErrorNegativeValue          = errors.New("negative value")
-	//ErrorNotFound               = errors.New("not found %w %w") // Deprecated: use NotFoundError
-	ErrorPasswordMismatch       = errors.New("password mismatch")
-	ErrorUserNotFound           = errors.New("user not found")
-	ErrorUserNotActive          = errors.New("user not active")
+	ErrEndDateBeforeStartDate = errors.New("end date is before start date")
+	ErrEmptyName              = errors.New("name is empty")
+	ErrNameTooLong            = errors.New("name is too long, max 50 characters") // Deprecated: use StringTooLongError
+	ErrDuplicate              = errors.New("duplicate")
+	ErrNegativeValue          = errors.New("negative value")
+	//ErrNotFound               = errors.New("not found %w %w") // Deprecated: use NotFoundError
+	ErrPasswordMismatch         = errors.New("password mismatch")
+	ErrUserNotFound             = errors.New("user not found")
+	ErrUserNotActive            = errors.New("user not active")
 	ErrNoTranslation            = errors.New("no translation available")
 	ErrNoMessageToTranslate     = errors.New("no message to translate")
 	ErrProtocolIsRequired       = errors.New("protocol is required")
@@ -32,46 +32,60 @@ var (
 	ErrOriginIsRequired         = errors.New("no origin defined, and origin identifier is required")
 	ErrInvalidOrigin            = errors.New("invalid origin")
 	ErrContextCannotGetUserCode = errors.New("cannot get user from context")
+
+	// Generic, commonly reused sentinel errors for DAO / database usage.
+	// These are intended to be wrapped with context using the helper
+	// functions below (e.g. WrapNotFoundError, WrapDAOInitialisationError).
+	ErrNotFound          = errors.New("not found")
+	ErrValidationFailed  = errors.New("validation failed")
+	ErrInvalidField      = errors.New("invalid field")
+	ErrInvalidType       = errors.New("invalid type")
+	ErrDAONotInitialised = errors.New("dao not initialised")
+	ErrDAOInitialisation = errors.New("dao initialisation failed")
+	ErrDBConnect         = errors.New("database connect failed")
+	ErrDBDisconnect      = errors.New("database disconnect failed")
+	ErrDBQuery           = errors.New("database query failed")
+	ErrNotImplemented    = errors.New("not implemented")
 )
 
-func WrapStringTooLongErr(err error, ln int) error {
+func ErrStringLengthExceededWrapper(err error, ln int) error {
 	return fmt.Errorf("string too long, max %d characters error (%w)", ln, err)
 }
 
-func WrapNotFoundError(table string, err error) error {
+func ErrNotFoundWrapper(table string, err error) error {
 	return fmt.Errorf("%v not found (%w)", table, err)
 }
-func WrapReadError(err error) error {
+func ErrReadWrapper(err error) error {
 	return fmt.Errorf("read error (%w)", err)
 }
-func WrapWriteError(err error) error {
+func ErrWriteWrapper(err error) error {
 	return fmt.Errorf("write error (%w)", err)
 }
-func WrapEmptyError(err error) error {
+func ErrEmptyWrapper(err error) error {
 	return fmt.Errorf("empty error (%w)", err)
 }
-func WrapClearError(err error) error {
+func ErrClearWrapper(err error) error {
 	return fmt.Errorf("clear error (%w)", err)
 }
-func WrapUpdateError(err error) error {
+func ErrUpdateWrapper(err error) error {
 	return fmt.Errorf("update error (%w)", err)
 }
-func WrapCreateError(err error) error {
+func ErrCreateWrapper(err error) error {
 	return fmt.Errorf("create error (%w)", err)
 }
-func WrapDeleteError(err error) error {
+func ErrDeleteWrapper(err error) error {
 	return fmt.Errorf("delete error (%w)", err)
 }
-func WrapDropError(err error) error {
+func ErrDropWrapper(err error) error {
 	return fmt.Errorf("drop error (%w)", err)
 }
-func WrapValidationError(err error) error {
+func ErrValidationWrapper(err error) error {
 	return fmt.Errorf("validate error (%w)", err)
 }
-func WrapDisconnectError(err error) error {
+func ErrDisconnectWrapper(err error) error {
 	return fmt.Errorf("disconnect error (%w)", err)
 }
-func WrapConnectError(err error) error {
+func ErrConnectWrapper(err error) error {
 	return fmt.Errorf("connect error (%w)", err)
 }
 func HandleGoValidatorError(err error) error {
@@ -94,94 +108,98 @@ func HandleGoValidatorError(err error) error {
 	// }
 	// return nil
 }
-func WrapEmailError(err error) error {
+func ErrEmailWrapper(err error) error {
 	return fmt.Errorf("send email error (%w)", err)
 }
-func WrapIDGenerationError(err error) error {
+func ErrIDGenerationWrapper(err error) error {
 	return fmt.Errorf("ID generation error (%w)", err)
 }
 
-func WrapOSError(err error) error {
+func ErrOSWrapper(err error) error {
 	return fmt.Errorf("OS error (%w)", err)
 }
 
-func WrapErrorForMocking(err error) error {
+func ErrMockingWrapper(err error) error {
 	return fmt.Errorf("mocking error (%w)", err)
 }
 
-func WrapNotificationError(err error) error {
+func ErrNotificationWrapper(err error) error {
 	return fmt.Errorf("notification error (%w)", err)
 }
 
-func WrapFunctionalError(err error, f string) error {
+func ErrFunctionalWrapper(err error, f string) error {
 	return fmt.Errorf("functional error - %v (%w)", f, err)
 }
 
-func WrapError(err error) error {
+func ErrWrapper(err error) error {
 	logHandler.WarningLogger.Println("It is not advised to wrap errors without a specific error message")
 	return fmt.Errorf("error (%w)", err)
 }
 
-func WrapInvalidFilterError(err error, f string) error {
+func ErrInvalidFilterWrapper(err error, f string) error {
 	return fmt.Errorf("invalid filter [%v] (%w)", f, err)
 }
 
-func WrapInvalidHttpReturnStatusError(s string) error {
+func ErrInvalidHttpReturnStatusWrapper(s string) error {
 	return fmt.Errorf("inavalid/unsupported http return status [%v]", s)
 }
 
-func WrapInvalidHttpReturnStatusWithMessageError(status, message string) error {
+func ErrInvalidHttpReturnStatusWithMessageWrapper(status, message string) error {
 	return fmt.Errorf("inavalid/unsupported http return status [%v] (%v)", status, message)
 }
 
-func WrapInvalidFieldError(f string) error {
+func ErrInvalidFieldWrapper(f string) error {
 	return fmt.Errorf("invalid field %v", f)
 }
 
-func WrapInvalidTypeError(f, d, s string) error {
+func ErrInvalidTypeWrapper(f, d, s string) error {
 	return fmt.Errorf("invalid type for field %v (%v != %v)", f, d, s)
 }
 
-func WrapRecordNotFoundError(table, field, id string) error {
+func ErrRecordNotFoundWrapper(table, field, id string) error {
 	return fmt.Errorf("%v not found where (%v=%v)", table, field, id)
 }
 
-func WrapDAOUpdateAuditError(table string, id any, auditErr error) error {
+func ErrDAOUpdateAuditWrapper(table string, id any, auditErr error) error {
 	return fmt.Errorf("updating %v audit failed (ID=%v) %e", table, id, auditErr)
 }
 
-func WrapDAOCreateError(table string, id any, createErr error) error {
+func ErrDAOCreateWrapper(table string, id any, createErr error) error {
 	return fmt.Errorf("creating %v failed (ID=%v) %e", table, id, createErr)
 }
 
-func WrapDAOInitialisationError(table string, initErr error) error {
+func ErrDAOInitialisationWrapper(table string, initErr error) error {
 	return fmt.Errorf("initialising %v failed %e", table, initErr)
 }
 
-func WrapDAOCaclulationError(table string, calcErr error) error {
+func ErrDAOCaclulationWrapper(table string, calcErr error) error {
 	return fmt.Errorf("calculating %v failed %e", table, calcErr)
 }
 
-func WrapDAOValidationError(table string, valErr error) error {
+func ErrDAOValidationWrapper(table string, valErr error) error {
 	return fmt.Errorf("validating %v failed %e", table, valErr)
 }
 
-func WrapDAOUpdateError(table string, updateErr error) error {
+func ErrDAOUpdateWrapper(table string, updateErr error) error {
 	return fmt.Errorf("updating %v failed %e", table, updateErr)
 }
 
-func WrapDAODeleteError(table, field string, value any, deleteErr error) error {
+func ErrDAODeleteWrapper(table, field string, value any, deleteErr error) error {
 	return fmt.Errorf("deleting %v failed (%v=%v) %e", table, field, value, deleteErr)
 }
 
-func WrapDAOReadError(table, field string, value any, readErr error) error {
+func ErrGetWrapper(table, field string, value any, readErr error) error {
 	return fmt.Errorf("reading %v failed (%v=%v) %e", table, field, value, readErr)
 }
 
-func WrapDAOLookupError(table, field string, value any, lookupErr error) error {
+func ErrDAOAssertWrapper(table, field string, value any, assetErr error) error {
+	return fmt.Errorf("asserting %v failed (%v=%v) %e", table, field, value, assetErr)
+}
+
+func ErrDAOLookupWrapper(table, field string, value any, lookupErr error) error {
 	return fmt.Errorf("builing looking up for %v failed (key=%v,value=%v) %e", table, field, value, lookupErr)
 }
 
-func WrapDAONotInitialisedError(table, action string) error {
+func ErrDAONotInitialisedWrapper(table, action string) error {
 	return fmt.Errorf("%v DAO not initialised (Action=%v)", table, action)
 }

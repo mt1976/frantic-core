@@ -7,7 +7,7 @@ import (
 
 	"github.com/gregdel/pushover"
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
 )
@@ -69,7 +69,7 @@ func Send(inMessage, inTitle string, key int) error {
 	_, err := app.SendMessage(message, recipient)
 	if err != nil {
 		logHandler.WarningLogger.Printf("[%v] Error=[%v]", strings.ToUpper(domain), err.Error())
-		return commonErrors.WrapNotificationError(err)
+		return ce.ErrNotificationWrapper(err)
 	}
 
 	clock.Stop(1)

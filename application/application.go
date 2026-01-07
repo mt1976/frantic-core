@@ -48,7 +48,7 @@ func HostName() string {
 	hn, err := os.Hostname()
 	if err != nil {
 		logHandler.ErrorLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
-		panic(commonErrors.WrapOSError(err))
+		panic(commonErrors.ErrOSWrapper(err))
 	}
 	return strings.ToLower(hn)
 }
@@ -61,7 +61,7 @@ func hostname_windows() string {
 
 	if err != nil {
 		logHandler.ErrorLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
-		panic(commonErrors.WrapOSError(err))
+		panic(commonErrors.ErrOSWrapper(err))
 	}
 	rtn := string(hostname)
 	rtn = strings.ToLower(strings.TrimSuffix(rtn, "\n"))

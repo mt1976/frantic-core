@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/asdine/storm/v3"
@@ -40,7 +39,7 @@ func connect(table any, options ...Option) *DB {
 
 	if config.withCaching && config.withCacheKey == "" {
 		logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Caching enabled but no cache key provided for [%v.db]", config.nameSpace)
-		panic(fmt.Errorf("caching enabled but no cache key provided"))
+		panic(commonErrors.ErrDBConnect)
 	}
 
 	// Ensure the name is lowercase
@@ -90,7 +89,7 @@ func connect(table any, options ...Option) *DB {
 	if err != nil {
 		connect.Stop(0)
 		logHandler.DatabaseLogger.Fatalf("[CON]{CONNECT} Opening [%v.db] connection Error=[%v]", strings.ToLower(db.databaseName), err.Error())
-		panic(commonErrors.WrapConnectError(err))
+		panic(commonErrors.ErrConnectWrapper(err))
 	}
 	if db.verbose {
 		logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%+v]", connectionPool)
@@ -113,7 +112,7 @@ func connect(table any, options ...Option) *DB {
 		enableCachingForTable(&db, table)
 		if err != nil {
 			logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Error enabling caching for table %v: %v", GetStructType(table), err.Error())
-			panic(commonErrors.WrapConnectError(err))
+			panic(commonErrors.ErrConnectWrapper(err))
 		}
 	}
 
@@ -131,7 +130,7 @@ func validate(data any, db *DB) error {
 	if err != nil {
 		logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} error validating %v %v [%v.db]", err.Error(), GetStructType(data), db.Name)
 		timer.Stop(0)
-		return commonErrors.WrapValidationError(err)
+		return commonErrors.ErrValidationWrapper(err)
 	}
 	timer.Stop(1)
 	return nil
@@ -161,7 +160,7 @@ func (db *DB) Disconnect() {
 	err := db.connection.Close()
 	if err != nil {
 		logHandler.DatabaseLogger.Panicf("[CON]{DISCONNECT} Closing [%v.db] %v ", db.Name, err.Error())
-		panic(commonErrors.WrapDisconnectError(err))
+		panic(commonErrors.ErrDisconnectWrapper(err))
 	}
 	releaseFromConnectionPool(db)
 	logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Closed [%v.db] connection", db.Name)

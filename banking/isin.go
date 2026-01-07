@@ -49,7 +49,7 @@ func (I *ISIN) String() string {
 func (I *ISIN) Set(in string) error {
 	I.value = in
 	if !I.IsValid() {
-		return commonErrors.WrapValidationError(fmt.Errorf("invalid ISIN [%s]", in))
+		return commonErrors.ErrValidationWrapper(fmt.Errorf("invalid ISIN [%s]", in))
 	}
 	return nil
 }

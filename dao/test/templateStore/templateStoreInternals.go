@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/goforj/godump"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao"
 
 	"github.com/mt1976/frantic-core/dao/audit"
@@ -41,7 +41,7 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 	if strings.EqualFold(operation, "Create") {
 		isCreateOperation = true
 		if !strings.EqualFold(auditAction.Code(), "Create") {
-			return commonErrors.WrapDAOUpdateError(Domain, fmt.Errorf("invalid audit action '%v' for create event '%v'", auditAction.Code(), operation))
+			return ce.ErrDAOUpdateWrapper(Domain, ce.ErrValidationFailed)
 		}
 	}
 
@@ -51,19 +51,19 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 	if isCreateOperation {
 		if err := record.checkForDuplicate(); err != nil {
 			clock.Stop(0)
-			return commonErrors.WrapDAOCreateError(Domain, record.ID, err)
+			return ce.ErrDAOCreateWrapper(Domain, record.ID, err)
 		}
 	}
 
 	if calculationError := record.defaultProcessing(); calculationError != nil {
-		rtnErr := commonErrors.WrapDAOCaclulationError(Domain, calculationError)
+		rtnErr := ce.ErrDAOCaclulationWrapper(Domain, calculationError)
 		logHandler.ErrorLogger.Print(rtnErr.Error())
 		clock.Stop(0)
 		return rtnErr
 	}
 
 	if validationError := record.validationProcessing(); validationError != nil {
-		valErr := commonErrors.WrapDAOValidationError(Domain, validationError)
+		valErr := ce.ErrDAOValidationWrapper(Domain, validationError)
 		logHandler.ErrorLogger.Print(valErr.Error())
 		clock.Stop(0)
 		return valErr
@@ -71,7 +71,7 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 
 	auditErr := record.Audit.Action(ctx, auditAction.WithMessage(note))
 	if auditErr != nil {
-		audErr := commonErrors.WrapDAOUpdateAuditError(Domain, record.ID, auditErr)
+		audErr := ce.ErrDAOUpdateAuditWrapper(Domain, record.ID, auditErr)
 		logHandler.ErrorLogger.Print(audErr.Error())
 		clock.Stop(0)
 		return audErr
@@ -88,7 +88,7 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 
 		godump.Dump(record)
 
-		updErr := commonErrors.WrapDAOUpdateError(Domain, actionError)
+		updErr := ce.ErrDAOUpdateWrapper(Domain, actionError)
 		logHandler.ErrorLogger.Panic(updErr.Error(), actionError)
 		clock.Stop(0)
 		return updErr
@@ -168,5 +168,5 @@ func (record *TemplateStore) checkForDuplicate() error {
 	}
 
 	logHandler.WarningLogger.Printf("Duplicate %v, %v already in use", Domain, record.ID)
-	return commonErrors.ErrorDuplicate
+	return ce.ErrDuplicate
 }

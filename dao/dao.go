@@ -8,7 +8,7 @@ import (
 
 	"github.com/asdine/storm/v3"
 	"github.com/mt1976/frantic-core/commonConfig"
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
@@ -84,7 +84,7 @@ func GetDBNameFromPath(t string) string {
 
 func CheckDAOReadyState(table string, action audit.Action, isDaoReady bool) {
 	if !isDaoReady {
-		err := commonErrors.WrapDAONotInitialisedError(table, action.Description())
+		err := ce.ErrDAONotInitialisedWrapper(table, action.Description())
 		logHandler.ErrorLogger.Panic(err)
 	}
 }
@@ -137,7 +137,7 @@ func (i *Int) Int() int {
 		return 0
 	}
 	if err != nil {
-		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidTypeError("Int", i.Value, "int"))
+		logHandler.ErrorLogger.Panic(ce.ErrInvalidTypeWrapper("Int", i.Value, "int"))
 	}
 	return val
 }
@@ -225,7 +225,7 @@ func (f *Float) Float() float64 {
 	}
 	val, err := strconv.ParseFloat(f.Value, 64)
 	if err != nil {
-		logHandler.ErrorLogger.Panic(commonErrors.WrapInvalidTypeError("Float", f.Value, "float64"))
+		logHandler.ErrorLogger.Panic(ce.ErrInvalidTypeWrapper("Float", f.Value, "float64"))
 	}
 	return val
 }

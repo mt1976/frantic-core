@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mt1976/frantic-core/commonErrors"
+	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/mockData"
 )
@@ -156,12 +156,12 @@ func GetLadder(pivotDate time.Time, ccy ...string) ([]FinDate, int, error) {
 		thisTenor, err := NewTenor(ladder.Code)
 		if err != nil {
 			logHandler.ErrorLogger.Printf("error [%v]\n", err.Error())
-			return DateList, 0, commonErrors.WrapFunctionalError(err, "tenor validation")
+			return DateList, 0, ce.ErrFunctionalWrapper(err, "tenor validation")
 		}
 		date, err := GetDateFromTenor(thisTenor, pivotDate, ccy...)
 		if err != nil {
 			logHandler.ErrorLogger.Printf("error [%v]\n", err.Error())
-			return DateList, 0, commonErrors.WrapFunctionalError(err, "tenor -> date calculation")
+			return DateList, 0, ce.ErrFunctionalWrapper(err, "tenor -> date calculation")
 		}
 		//fmt.Printf("thisTenor: [%v] [%v] -> [%v]\n", ladder.Code, thisTenor.String(), date.Format("2006-01-02"))
 		di := FinDate{}
@@ -246,7 +246,7 @@ func GetTenorFromDate(inDate, baseDate time.Time, ccy ...string) (Tenor, error) 
 		// }
 	}
 	logHandler.ErrorLogger.Printf("no tenor found [%v] [%v]", inDate, baseDate)
-	return Tenor{}, commonErrors.WrapFunctionalError(fmt.Errorf("no tenor found"), fmt.Sprintf("no tenor found for [%v][%v]", inDate, baseDate))
+	return Tenor{}, ce.ErrFunctionalWrapper(fmt.Errorf("no tenor found"), fmt.Sprintf("no tenor found for [%v][%v]", inDate, baseDate))
 }
 
 func dFormat(d time.Time) string {

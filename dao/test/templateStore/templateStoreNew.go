@@ -69,14 +69,14 @@ func Create(ctx context.Context, userName, uid, realName, email, gid string) (Te
 	auditErr := record.Audit.Action(ctx, audit.CREATE.WithMessage(fmt.Sprintf("New %v created %v", Domain, userName)))
 	if auditErr != nil {
 		// Log and panic if there is an error creating the status instance
-		logHandler.ErrorLogger.Panic(commonErrors.WrapDAOUpdateAuditError(Domain, record.ID, auditErr))
+		logHandler.ErrorLogger.Panic(commonErrors.ErrDAOUpdateAuditWrapper(Domain, record.ID, auditErr))
 	}
 
 	// Save the status instance to the database
 	writeErr := activeDB.Create(&record)
 	if writeErr != nil {
 		// Log and panic if there is an error creating the status instance
-		logHandler.ErrorLogger.Panic(commonErrors.WrapDAOCreateError(Domain, record.ID, writeErr))
+		logHandler.ErrorLogger.Panic(commonErrors.ErrDAOCreateWrapper(Domain, record.ID, writeErr))
 		//	panic(writeErr)
 	}
 
