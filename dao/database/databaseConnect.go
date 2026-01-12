@@ -56,14 +56,15 @@ func connect(table any, options ...Option) *DB {
 		logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Connection already open [%v], using connection pool [%v] [codec=%v]", connectionPool[config.nameSpace].Name, connectionPool[config.nameSpace].databaseName, connectionPool[config.nameSpace].connection.Node.Codec().Name())
 		rtn := connectionPool[config.nameSpace]
 		// Update configuration in case options have changed
-		rtn.withCaching = config.withCaching
-		rtn.withCacheKey = config.withCacheKey
-		rtn.verbose = config.Verbose
-		rtn.timeout = config.timeout
-		rtn.poolSize = config.poolSize
-		rtn.withEncryption = config.withEncryption
-		rtn.indices = config.indices
-		rtn.cacheInitialised = config.cacheInitialised
+		//rtn.withCaching = config.withCaching
+		//rtn.withCacheKey = config.withCacheKey
+		// rtn.verbose = config.Verbose
+		// rtn.timeout = config.timeout
+		// rtn.poolSize = config.poolSize
+		// rtn.withEncryption = config.withEncryption
+		// rtn.indices = config.indices
+		//rtn.cacheInitialised = config.cacheInitialised
+
 		return rtn
 	}
 
@@ -74,15 +75,15 @@ func connect(table any, options ...Option) *DB {
 	db.Name = config.nameSpace
 	db.databaseName = ioHelpers.GetDBFileName(db.Name)
 	db.initialised = false
-	db.withCaching = config.withCaching
-	db.withCacheKey = config.withCacheKey
+	// db.withCaching = config.withCaching
+	// db.withCacheKey = config.withCacheKey
 	db.verbose = config.Verbose
 	db.timeout = config.timeout
 	db.poolSize = config.poolSize
 	db.withEncryption = config.withEncryption
-	db.indices = config.indices
-	db.cacheInitialised = false
-	logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Opening [%v.db] data connection *%+v*", db.Name, db)
+	//db.indices = config.indices
+	// db.cacheInitialised = false
+	// logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Opening [%v.db] data connection *%+v*", db.Name, db)
 	connect := timing.Start(db.Name, "Connect", db.databaseName)
 	var err error
 	db.connection, err = storm.Open(db.databaseName, storm.BoltOptions(0666, nil))

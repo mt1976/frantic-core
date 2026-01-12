@@ -59,7 +59,7 @@ func (db *DB) Get(field Field, value, to any) (any, error) {
 func (db *DB) get(field Field, value, to any) (any, error) {
 	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), field, value, GetStructType(to), db.Name, db)
 
-	if db.withCaching {
+	if db.isCaching(to) {
 
 		// TODO: What this should do is look through the cache for the appropriate entry, and check if it can find one with the matching field/value
 		// Not just using the cache key
@@ -123,32 +123,32 @@ func (db *DB) get(field Field, value, to any) (any, error) {
 //   - []any: A slice of all retrieved records.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
-	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
+	logHandler.InfoLogger.Printf("[GET]<%v>{ALL} [%+v][%+v] [%v.db] caching: %t initialised: %t", GetStructType(to), GetStructType(to), options, db.Name, db.withCaching, db.cacheInitialised)
 
-	if db.withCaching && db.cacheInitialised {
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+	if db.isCaching(to) && db.isCacheInitialised(to) {
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning from cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 		// return all cached entries of the appropriate type
 		sliceValue := reflect.ValueOf(to).Elem()
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Preparing to read into slice of type %v", GetStructType(to), sliceValue.Type())
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL} - Preparing to read into slice of type %v", GetStructType(to), sliceValue.Type())
 		if sliceValue.Kind() != reflect.Slice {
-			logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
+			logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL} - Expected slice when reading from cache, got %v", GetStructType(to), sliceValue.Kind())
 			return nil, commonErrors.ErrInvalidTypeWrapper("GetAll", string(GetStructType(to)), sliceValue.Kind().String())
 		}
 		elemType := sliceValue.Type().Elem()
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Slice element type is %v", GetStructType(to), elemType)
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL} - Slice element type is %v", GetStructType(to), elemType)
 		// Clear the slice before populating
 		sliceValue.Set(reflect.MakeSlice(sliceValue.Type(), 0, 0))
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Iterating through in-memory cache with %d entries", GetStructType(to), len(inMemoryCache))
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL} - Iterating through in-memory cache with %d entries", GetStructType(to), len(inMemoryCache))
 
 		// Get the entries for this table from the in-memory cache
 		entries, found := inMemoryCache[GetStructType(to)]
 		if !found {
-			logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - No cached entries found for type %v", GetStructType(to), GetStructType(to))
+			logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL} - No cached entries found for type %v", GetStructType(to), GetStructType(to))
 			return nil, nil
 		}
 
 		// Iterate through the cached entries and add matching types to the result slice
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL} - Found %d cached entries for type %v", GetStructType(to), len(entries), GetStructType(to))
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL} - Found %d cached entries for type %v", GetStructType(to), len(entries), GetStructType(to))
 		for _, v := range entries {
 			cachedValue := reflect.ValueOf(v)
 			//	logHandler.EventLogger.Printf("[GET]<%v>{ALL} Checking cached entry [%v] of type [%v] against expected type [%v]", GetStructType(to), i, cachedValue.Type(), elemType)
@@ -158,23 +158,23 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 			}
 		}
 
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 
 		// Convert the typed slice (e.g. []TemplateStore) into []any
 		result := make([]any, sliceValue.Len())
 		for i := 0; i < sliceValue.Len(); i++ {
 			result[i] = sliceValue.Index(i).Interface()
 		}
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL}{HIT} [%+v] [...%v.db] on %v - Returning %d cached entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 		return result, nil
 	}
 
-	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v] [%v.db] - From Database %+v", GetStructType(to), GetStructType(to), db.Name, options)
+	logHandler.InfoLogger.Printf("DATABASE[GET]<%v>{ALL} [%+v] [%v.db] - From Database %+v", GetStructType(to), GetStructType(to), db.Name, options)
 	// [GET] from database
 	err := db.connection.All(to, options...)
 	if err != nil {
 		// On error, do not attempt to use or populate the cache
-		logHandler.ErrorLogger.Printf("[GET]<%v>{ALL}{ERR} [%+v] [...%v.db] on %v - Error from DB: %v", GetStructType(to), GetStructType(to), db.Name, "GetAll", err)
+		logHandler.InfoLogger.Printf("DATABASE[GET]<%v>{ALL}{ERR} [%+v] [...%v.db] on %v - Error from DB: %v", GetStructType(to), GetStructType(to), db.Name, "GetAll", err)
 		return nil, err
 	}
 
@@ -182,20 +182,20 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 	//logHandler.TraceLogger.Printf("[GET]<%v>{ALL} [%+v] [%v.db] - Pausing before processing", GetStructType(to), GetStructType(to), db.Name)
 	//time.Sleep(1 * time.Second)
 
-	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v] [%v.db] - Completed", GetStructType(to), GetStructType(to), db.Name)
+	logHandler.InfoLogger.Printf("DATABASE[GET]<%v>{ALL} [%+v] [%v.db] - Completed", GetStructType(to), GetStructType(to), db.Name)
 
 	// Use reflection to iterate through the slice without assuming its concrete type
 	sliceValue := reflect.ValueOf(to).Elem()
 	if sliceValue.Kind() != reflect.Slice {
-		logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
+		logHandler.InfoLogger.Printf("DATABASE[GET]<%v>{ALL} - Expected slice, got %v", GetStructType(to), sliceValue.Kind())
 		return nil, commonErrors.ErrInvalidTypeWrapper("GetAll", string(GetStructType(to)), sliceValue.Kind().String())
 	}
 
-	logHandler.DatabaseLogger.Printf("[GET]<%v>{ALL} [%+v] [...%v.db] on %v - Retrieved %d entries from DB", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
+	logHandler.InfoLogger.Printf("DATABASE[GET]<%v>{ALL} [%+v] [...%v.db] on %v - Retrieved %d entries from DB", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 
 	// Optionally hydrate cache if caching is enabled and initialised
-	if db.withCaching && db.cacheInitialised {
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{POPULATE} [%+v] [...%v.db] on %v - Populating Cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+	if db.isCaching(to) {
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL}{POPULATE} [%+v] [...%v.db] on %v - Populating Cache", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 		for i := 0; i < sliceValue.Len(); i++ {
 			item := sliceValue.Index(i)
 			// Get the address of the item so we can pass it to hydrateCache
@@ -203,7 +203,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 			db.hydrateCache(err, itemPtr, "GetAll", GetStructType(to))
 		}
 	} else {
-		logHandler.CacheLogger.Printf("[GET]<%v>{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", GetStructType(to), GetStructType(to), db.Name, "GetAll")
+		logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL}{SKIP} [%+v] [...%v.db] on %v - Caching Disabled or Not Initialised", GetStructType(to), GetStructType(to), db.Name, "GetAll")
 	}
 
 	// Convert the typed slice (e.g. []TemplateStore) into []any
@@ -212,7 +212,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 		result[i] = sliceValue.Index(i).Interface()
 	}
 
-	logHandler.TraceLogger.Printf("[GET]<%v>{ALL} [%+v] [...%v.db] on %v - Returning %d entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
+	logHandler.InfoLogger.Printf("CACHE[GET]<%v>{ALL} [%+v] [...%v.db] on %v - Returning %d entries", GetStructType(to), GetStructType(to), db.Name, "GetAll", sliceValue.Len())
 	return result, nil
 }
 
@@ -246,10 +246,10 @@ func (db *DB) GetAllWhere(field Field, value, to any) ([]any, error) {
 
 	// If caching is enabled and initialised, use the existing GetAll + in-memory filter,
 	// which operates on the in-memory cache and avoids hitting the database.
-	if db.withCaching && db.cacheInitialised {
+	if db.isCaching(to) && db.isCacheInitialised(to) {
 		var resultList []any
 		// Get all records from cache
-		allRecords := inMemoryCache[tableName]
+		allRecords := db.getCachedEntries(tableName)
 		// Filter records based on the specified field and value
 		for _, record := range allRecords {
 			reflectValue := reflect.ValueOf(record)
@@ -347,7 +347,7 @@ func (db *DB) Update(data any) error {
 		return commonErrors.ErrWrapper(err)
 	}
 	logHandler.DatabaseLogger.Printf("[UPD]<%v>{UPDATE} Update [%+v] [%v.db] - End", GetStructType(data), GetStructType(data), db.Name)
-	if db.withCaching {
+	if db.isCaching(data) {
 		go func() {
 			err = db.connection.Update(data)
 			if err != nil {
@@ -397,7 +397,7 @@ func (db *DB) Create(data any) error {
 //   - error: An error object if any issues occur during the counting process; otherwise, nil.
 func (db *DB) Count(data any) (int, error) {
 	logHandler.DatabaseLogger.Printf("[CNT]<%v>{COUNT} Count [%+v] [%v.db]", GetStructType(data), GetStructType(data), db.Name)
-	if db.withCaching {
+	if db.isCaching(data) {
 		logHandler.CacheLogger.Printf("[CNT]<%v>{SKIP} Count [%+v] [%v.db] - Caching Enabled", GetStructType(data), GetStructType(data), db.Name)
 		return len(inMemoryCache[GetStructType(data)]), nil
 	}
@@ -423,7 +423,7 @@ func (db *DB) CountWhere(fieldName Field, value any, to any) (int, error) {
 		logHandler.DatabaseLogger.Printf("[CNT]<%v>{COUNT} CountWhere (%+v=%+v)[%+v] [%v.db] - Error", GetStructType(to), fieldName, value, GetStructType(to), db.Name)
 		return 0, err
 	}
-	if db.withCaching {
+	if db.isCaching(to) {
 		logHandler.CacheLogger.Printf("[CNT]<%v>{SKIP} CountWhere (%+v=%+v)[%+v] [%v.db] - Caching Enabled", GetStructType(to), fieldName, value, GetStructType(to), db.Name)
 		// Range through inMemoryCache and count matching entries
 		count := 0
