@@ -1,19 +1,20 @@
 package database
 
 import (
+	"github.com/mt1976/frantic-core/dao/fields"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
 // connectionConfig holds the configuration options for database connections
 type connectionConfig struct {
 	withCaching      bool
-	withCacheKey     Field
+	withCacheKey     fields.Field
 	Verbose          bool
 	timeout          int
 	poolSize         int
 	nameSpace        string
 	withEncryption   bool
-	indices          []Field
+	indices          []fields.Field
 	cacheInitialised bool
 }
 
@@ -28,9 +29,9 @@ func WithCaching(enabled bool) Option {
 	}
 }
 
-// WithCacheKey sets the cache key field for the database connection
-func WithCacheKey(field Field) Option {
-	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithCacheKey set to %v", field)
+// WithCacheKey sets the cache key fields.Fields.Field for the database connection
+func WithCacheKey(field fields.Field) Option {
+	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithCacheKey set to %v", field.String())
 	return func(c *connectionConfig) {
 		c.withCacheKey = field
 	}
@@ -76,26 +77,5 @@ func WithEncryption(enabled bool) Option {
 	logHandler.WarningLogger.Printf("WithEncryption is not yet implemented")
 	return func(c *connectionConfig) {
 		c.withEncryption = enabled
-	}
-}
-
-// WithIndices sets the indices for the database connection
-// Used to create indices on fields for faster querying.
-// Reserved for Future use.
-func WithIndices(indices []Field) Option {
-	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithIndices set to %v", indices)
-	logHandler.WarningLogger.Printf("WithIndices is not yet implemented")
-	return func(c *connectionConfig) {
-		c.indices = indices
-	}
-}
-
-// WithIndex adds a single index field for the database connection
-// Used to create an index on a field for faster querying.
-// Reserved for Future use.
-func WithIndex(field Field) Option {
-	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithIndex added %v", field)
-	return func(c *connectionConfig) {
-		c.indices = append(c.indices, field)
 	}
 }

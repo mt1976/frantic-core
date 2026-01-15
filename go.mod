@@ -11,7 +11,6 @@ require (
 	github.com/robfordww/finident v0.2.1
 	github.com/segmentio/ksuid v1.0.4
 	github.com/trisacrypto/lei v1.0.0
-	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
 	golang.org/x/term v0.38.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1

@@ -12,7 +12,7 @@ import (
 func (db *DB) Backup(loc string) {
 	timer := timing.Start(db.Name, "Backup", db.databaseName)
 	// Ensure all data is flushed to disk before backup
-	db.Flush()
+	//db.Flush()
 	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] data started... %v", db.Name, loc)
 	db.Disconnect()
 	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] disconnected", db.Name)

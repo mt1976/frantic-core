@@ -41,15 +41,15 @@ func Initialise(ctx context.Context, cached bool) {
 	cfg = commonConfig.Get()
 	// For a specific database connection, use WithNameSpace("value"), otherwise don't specify a namespace
 	// Example:
-	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
+	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithIndex(field.Field(Fields.RealName)), database.WithIndex(field.Field(Fields.UserName)))
 	// Example to connect to a named database from config:
 	//
-	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace(cfg.DatabaseNamespace), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
+	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace(cfg.DatabaseNamespace), database.WithIndex(field.Field(Fields.RealName)), database.WithIndex(field.Field(Fields.UserName)))
 	// Example to connect to a specific named database
 	//
-	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace("BNK"), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
+	//			activeDB = database.Connect(database.WithVerbose(false), database.WithCaching(true), database.WithCacheKey(Fields.Key), database.WithNameSpace("BNK"), database.WithIndex(field.Field(Fields.RealName)), database.WithIndex(field.Field(Fields.UserName)))
 
-	activeDB = database.Connect(TemplateStore{}, database.WithVerbose(false), database.WithCaching(cached), database.WithCacheKey(Fields.Key), database.WithNameSpace("cheeseOnToast"), database.WithIndex(database.Field(Fields.RealName)), database.WithIndex(database.Field(Fields.UserName)))
+	activeDB = database.Connect(TemplateStore{}, database.WithVerbose(false), database.WithCaching(cached), database.WithCacheKey(Fields.Key), database.WithNameSpace("cheeseOnToast"))
 	initialised = true
 
 	//TODO: Add any initialisation code here

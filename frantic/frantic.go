@@ -1,8 +1,9 @@
 package frantic
 
 import (
-	"fmt"
 	"strings"
+
+	ce "github.com/mt1976/frantic-core/commonErrors"
 )
 
 type Identity struct {
@@ -31,7 +32,7 @@ func New(name string) (Identity, error) {
 
 	parts := strings.Split(name, "-")
 	if len(parts) != 2 {
-		return Identity{}, fmt.Errorf("name must have only two parts, separated by a - or _ character")
+		return Identity{}, ce.ErrInvalidIdentityFormat
 	}
 
 	rtn := Identity{}
@@ -93,7 +94,7 @@ func ValidateIdentityOrigin(name string) error {
 	}
 
 	if !found {
-		return fmt.Errorf("invalid this is not a valid origin")
+		return ce.ErrInvalidOriginFormat
 	}
 	return nil
 }
@@ -105,10 +106,10 @@ func sanitizeName(name string) string {
 
 func validateName(name string) error {
 	if len(name) < 5 {
-		return fmt.Errorf("name must contain a - or _ character")
+		return ce.ErrMissingSeparator
 	}
 	if !strings.Contains(name, "-") || !strings.Contains(name, "_") {
-		return fmt.Errorf("name must contain a - or _ character")
+		return ce.ErrMissingSeparator
 	}
 	return nil
 }

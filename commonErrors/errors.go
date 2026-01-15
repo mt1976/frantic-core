@@ -46,6 +46,27 @@ var (
 	ErrDBDisconnect      = errors.New("database disconnect failed")
 	ErrDBQuery           = errors.New("database query failed")
 	ErrNotImplemented    = errors.New("not implemented")
+
+	// Cache related errors
+	ErrCacheNotEnabled      = errors.New("caching not enabled")
+	ErrCacheNoKeyDefined    = errors.New("no key defined")
+	ErrCacheDoesNotExist    = errors.New("cache does not exist")
+	ErrCacheRecordNotFound  = errors.New("record not found in cache")
+
+	// Message related errors
+	ErrKeyRequired    = errors.New("key is required")
+	ErrCodeRequired   = errors.New("code is required")
+	ErrSourceRequired = errors.New("source is required")
+
+	// Financial errors
+	ErrNoCurrencyProvided = errors.New("no currency provided")
+	ErrNoTenorProvided    = errors.New("no tenor provided")
+	ErrInvalidTenor       = errors.New("invalid tenor")
+
+	// Frantic identity errors
+	ErrInvalidIdentityFormat = errors.New("name must have only two parts, separated by a - or _ character")
+	ErrMissingSeparator      = errors.New("name must contain a - or _ character")
+	ErrInvalidOriginFormat   = errors.New("invalid this is not a valid origin")
 )
 
 func ErrStringLengthExceededWrapper(err error, ln int) error {
@@ -202,4 +223,51 @@ func ErrDAOLookupWrapper(table, field string, value any, lookupErr error) error 
 
 func ErrDAONotInitialisedWrapper(table, action string) error {
 	return fmt.Errorf("%v DAO not initialised (Action=%v)", table, action)
+}
+
+// Cache error wrappers
+func ErrCacheNotEnabledWrapper(operation, key, structType string) error {
+	return fmt.Errorf("cannot %v %v to %v (%w)", operation, key, structType, ErrCacheNotEnabled)
+}
+
+func ErrCacheNoKeyDefinedWrapper(operation, table string) error {
+	return fmt.Errorf("cannot %v record %v cache for %v (%w)", operation, getPreposition(operation), table, ErrCacheNoKeyDefined)
+}
+
+func ErrCacheDoesNotExistWrapper(table string) error {
+	return fmt.Errorf("no cache exists for table %v (%w)", table, ErrCacheDoesNotExist)
+}
+
+func ErrCacheRecordNotFoundWrapper(table string, key any) error {
+	return fmt.Errorf("no record found in cache for table %v with key %v (%w)", table, key, ErrCacheRecordNotFound)
+}
+
+// Helper function to get the correct preposition
+func getPreposition(operation string) string {
+	switch operation {
+	case "add":
+		return "to"
+	case "remove":
+		return "from"
+	default:
+		return "in"
+	}
+}
+
+// Message error wrappers
+func ErrKeyRequiredWrapper(messageType string) error {
+	return fmt.Errorf("%v key is required (%w)", messageType, ErrKeyRequired)
+}
+
+func ErrCodeRequiredWrapper(messageType string) error {
+	return fmt.Errorf("%v code is required (%w)", messageType, ErrCodeRequired)
+}
+
+func ErrSourceRequiredWrapper(messageType string) error {
+	return fmt.Errorf("%v source is required (%w)", messageType, ErrSourceRequired)
+}
+
+// Financial error wrappers
+func ErrInvalidTenorWrapper(tenor string) error {
+	return fmt.Errorf("invalid tenor [%s] (%w)", tenor, ErrInvalidTenor)
 }

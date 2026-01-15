@@ -1,8 +1,9 @@
 package messageHelpers
 
 import (
-	"fmt"
 	"log"
+
+	ce "github.com/mt1976/frantic-core/commonErrors"
 )
 
 type BehaviourMessage struct {
@@ -31,7 +32,7 @@ func (m *DeclareMessage) Response(payload any) DeclareMessage {
 func (m *BehaviourMessage) Validate(log *log.Logger) error {
 	if m.Key == "" {
 		log.Printf("[%v] Behaviour Key is required", "frantic-core")
-		return fmt.Errorf("behaviour Key is required")
+		return ce.ErrKeyRequiredWrapper("behaviour")
 	}
 
 	if m.Source == "" {

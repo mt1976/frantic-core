@@ -27,20 +27,20 @@ import (
 //   - error: An error object if any issues occur during the preload process; otherwise, nil.
 func PreLoad(ctx context.Context) error {
 	logHandler.CacheLogger.Printf("PreLoad [%+v]", Domain)
-	err := activeDB.PreLoadCache(&[]TemplateStore{})
+	//err := activeDB.PreLoadCache(&[]TemplateStore{})
 	logHandler.CacheLogger.Printf("PreLoad [%+v] complete", Domain)
-	return err
+	return nil
 }
 
 func CacheSpew() {
 	logHandler.CacheLogger.Printf("CacheSpew [%+v]", Domain)
-	activeDB.CacheSpew()
+	//activeDB.CacheSpew()
 	logHandler.CacheLogger.Printf("CacheSpew [%+v] complete", Domain)
 }
 
 func FlushCache() error {
 	logHandler.CacheLogger.Printf("FlushCache [%+v]", Domain)
-	err := activeDB.Flush()
+	//err := activeDB.Flush()
 	logHandler.CacheLogger.Printf("FlushCache [%+v] complete", Domain)
-	return err
+	return nil
 }

@@ -11,9 +11,8 @@ package templateStore
 import (
 	"time"
 
-	"github.com/mt1976/frantic-core/dao"
 	audit "github.com/mt1976/frantic-core/dao/audit"
-	"github.com/mt1976/frantic-core/dao/database"
+	"github.com/mt1976/frantic-core/dao/fields"
 )
 
 var Domain = "Template"
@@ -33,10 +32,10 @@ type TemplateStore struct {
 	UserCode      string `storm:"index" validate:"required,min=5"`
 	Email         string
 	Notes         string `validate:"max=75"`
-	Active        dao.StormBool
-	ExampleInt    dao.Int
-	ExampleFloat  dao.Float
-	ExampleBool   dao.Bool
+	Active        fields.Bool
+	ExampleInt    fields.Int
+	ExampleFloat  fields.Float
+	ExampleBool   fields.Bool
 	ExampleDate   time.Time
 	ExampleString string
 	LastLogin     time.Time
@@ -48,26 +47,26 @@ type TemplateStore struct {
 // Fields provides a structured way to reference model field names.
 type fieldNames struct {
 	// First four fields are mandatory for all DAO entities
-	ID    database.Field
-	Key   database.Field
-	Raw   database.Field
-	Audit database.Field
+	ID    fields.Field
+	Key   fields.Field
+	Raw   fields.Field
+	Audit fields.Field
 	// Add your domain entity fields below
-	UID           database.Field
-	GID           database.Field
-	RealName      database.Field
-	UserName      database.Field
-	UserCode      database.Field
-	Email         database.Field
-	Notes         database.Field
-	Active        database.Field
-	ExampleInt    database.Field
-	ExampleFloat  database.Field
-	ExampleBool   database.Field
-	ExampleDate   database.Field
-	ExampleString database.Field
-	LastLogin     database.Field
-	LastHost      database.Field
+	UID           fields.Field
+	GID           fields.Field
+	RealName      fields.Field
+	UserName      fields.Field
+	UserCode      fields.Field
+	Email         fields.Field
+	Notes         fields.Field
+	Active        fields.Field
+	ExampleInt    fields.Field
+	ExampleFloat  fields.Field
+	ExampleBool   fields.Field
+	ExampleDate   fields.Field
+	ExampleString fields.Field
+	LastLogin     fields.Field
+	LastHost      fields.Field
 }
 
 // Fields provides a structured way to reference model field names.

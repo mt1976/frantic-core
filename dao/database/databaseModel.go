@@ -4,10 +4,6 @@ import (
 	"github.com/asdine/storm/v3"
 )
 
-// Field represents a database field used for queries
-type field string
-type Field field
-
 // DB represents a database connection and its configuration
 type DB struct {
 	connection   *storm.DB
@@ -24,8 +20,4 @@ type DB struct {
 	//	cacheInitialised bool
 	// cachedTables  map[string]bool
 	// cacheKeyField map[string]Field
-}
-
-func (f Field) String() string {
-	return string(f)
 }

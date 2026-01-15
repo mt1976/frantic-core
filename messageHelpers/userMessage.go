@@ -1,8 +1,9 @@
 package messageHelpers
 
 import (
-	"fmt"
 	"log"
+
+	ce "github.com/mt1976/frantic-core/commonErrors"
 )
 
 type UserMessage struct {
@@ -51,11 +52,11 @@ func (m *UserMessage) Response(payload any) UserMessage {
 func (m *UserMessage) Validate(log *log.Logger) error {
 	if m.Key == "" {
 		log.Printf("[%v] user Key is required", "frantic-core")
-		return fmt.Errorf("user Key is required")
+		return ce.ErrKeyRequiredWrapper("user")
 	}
 	if m.Code == "" {
 		log.Printf("[%v] user Code is required", "frantic-core")
-		return fmt.Errorf("user Code is required")
+		return ce.ErrCodeRequiredWrapper("user")
 	}
 	if m.Source == "" {
 		log.Printf("[%v] user Source is required", "frantic-core")

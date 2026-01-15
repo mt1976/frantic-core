@@ -5,6 +5,7 @@ import (
 
 	"github.com/asdine/storm/v3"
 	"github.com/mt1976/frantic-core/commonErrors"
+	"github.com/mt1976/frantic-core/dao/fields"
 
 	"github.com/mt1976/frantic-core/ioHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -23,7 +24,7 @@ func connect(table any, options ...Option) *DB {
 		poolSize:         connectionPoolMaxSize,
 		nameSpace:        "main",
 		withEncryption:   false,
-		indices:          []Field{},
+		indices:          []fields.Field{},
 		withCacheKey:     "ID",
 		cacheInitialised: false,
 	}
@@ -108,14 +109,14 @@ func connect(table any, options ...Option) *DB {
 	}
 	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opened [%v.db] data connection [codec=%v] %v", db.databaseName, db.connection.Node.Codec().Name(), db.initialised)
 
-	// Enable caching for the specified table if caching is enabled
-	if config.withCaching && table != nil {
-		enableCachingForTable(&db, table)
-		if err != nil {
-			logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Error enabling caching for table %v: %v", GetStructType(table), err.Error())
-			panic(commonErrors.ErrConnectWrapper(err))
-		}
-	}
+	// // Enable caching for the specified table if caching is enabled
+	// if config.withCaching && table != nil {
+	// 	enableCachingForTable(&db, table)
+	// 	if err != nil {
+	// 		logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Error enabling caching for table %v: %v", GetStructType(table), err.Error())
+	// 		panic(commonErrors.ErrConnectWrapper(err))
+	// 	}
+	// }
 
 	connect.Stop(1)
 	return &db

@@ -43,13 +43,13 @@ func GetDateFromTenor(tenor Tenor, tradeDate time.Time, ccy ...string) (time.Tim
 	if len(ccy) == 0 {
 		//xlogs.Warn("no currency provided")
 		logHandler.ErrorLogger.Printf("no currency provided")
-		return time.Now(), fmt.Errorf("no currency provided")
+		return time.Now(), ce.ErrNoCurrencyProvided
 	}
 
 	if tenor.term == "" {
 		//xlogs.Warn("no tenor provided")
 		logHandler.ErrorLogger.Printf("no tenor provided")
-		return time.Now(), fmt.Errorf("no tenor provided")
+		return time.Now(), ce.ErrNoTenorProvided
 	}
 
 	//fmt.Printf("GetDateFromTenor Tenor [%v] Trade Date [%v] Ccys %v [%v]\n", tenor.String(), tradeDate.Format("2006-01-02"), ccy, len(ccy))
@@ -59,7 +59,7 @@ func GetDateFromTenor(tenor Tenor, tradeDate time.Time, ccy ...string) (time.Tim
 
 	if !mockData.IsValidPeriod(tenor.String()) {
 		logHandler.ErrorLogger.Printf("invalid tenor [%s]", tenor.String())
-		return time.Now(), fmt.Errorf("invalid tenor [%s]", tenor.String())
+		return time.Now(), ce.ErrInvalidTenorWrapper(tenor.String())
 	}
 
 	spotDays := 0
@@ -140,7 +140,7 @@ func GetLadder(pivotDate time.Time, ccy ...string) ([]FinDate, int, error) {
 	//fmt.Printf("GetLadder pivotDate: [%v] [%v]\n", pivotDate, ccy)
 	if len(ccy) == 0 {
 		logHandler.ErrorLogger.Printf("no currency provided")
-		return []FinDate{}, 0, fmt.Errorf("no currency provided")
+		return []FinDate{}, 0, ce.ErrNoCurrencyProvided
 	}
 	var DateList []FinDate
 	//rateLadder := xmock.Ladder
@@ -191,7 +191,7 @@ func GetTenorFromDate(inDate, baseDate time.Time, ccy ...string) (Tenor, error) 
 
 	if len(ccy) == 0 {
 		logHandler.ErrorLogger.Printf("no currency provided")
-		return Tenor{}, fmt.Errorf("no currency provided")
+		return Tenor{}, ce.ErrNoCurrencyProvided
 	}
 
 	if inDate.Before(baseDate) {

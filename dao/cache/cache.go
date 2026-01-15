@@ -1,9 +1,10 @@
 package cache
 
 import (
-	"fmt"
+	"reflect"
 
-	"github.com/mt1976/frantic-core/dao/database"
+	ce "github.com/mt1976/frantic-core/commonErrors"
+	"github.com/mt1976/frantic-core/dao/fields"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -11,7 +12,7 @@ import (
 func Enable(data any) error {
 	Cache.tablesActive[GetStructType(data)] = false
 	Cache.cache[GetStructType(data)] = make(entrys)
-	Cache.indices[GetStructType(data)] = []database.Field{}
+	Cache.indices[GetStructType(data)] = []fields.Field{}
 	Cache.key[GetStructType(data)] = ""
 	return nil
 }
@@ -29,7 +30,7 @@ func Disable(data any) error {
 	table := GetStructType(data)
 	Cache.tablesActive[table] = false
 	Cache.cache[table] = make(entrys)
-	Cache.indices[table] = []database.Field{}
+	Cache.indices[table] = []fields.Field{}
 	Cache.key[table] = ""
 	return nil
 }
@@ -66,20 +67,20 @@ func IsDeInitialised(data any) bool {
 	return IsDisabled(data)
 }
 
-func AddKey(data any, key database.Field) error {
+func AddKey(data any, key fields.Field) error {
 
 	if !IsEnabled(data) {
-		return fmt.Errorf("cannot add key %v to %v - caching not enabled", key.String(), GetStructType(data))
+		return ce.ErrCacheNotEnabledWrapper("add key", key.String(), GetStructType(data))
 	}
 
 	Cache.key[GetStructType(data)] = key
 	return nil
 }
 
-func AddIndex(data any, key database.Field) error {
+func AddIndex(data any, key fields.Field) error {
 
 	if !IsEnabled(data) {
-		return fmt.Errorf("cannot add index %v to %v - caching not enabled", key.String(), GetStructType(data))
+		return ce.ErrCacheNotEnabledWrapper("add index", key.String(), GetStructType(data))
 	}
 
 	// Find the index in the list of indices
@@ -95,48 +96,125 @@ func AddIndex(data any, key database.Field) error {
 	return nil
 }
 
-func RemoveIndex(data any, key database.Field) error {
-	// TODO: Write Code
+func RemoveIndex(data any, key fields.Field) error {
+	if !IsEnabled(data) {
+		return ce.ErrCacheNotEnabledWrapper("remove index", key.String(), GetStructType(data))
+	}
+
+	// Find the index in the list of indices
+	indesList := Cache.indices[GetStructType(data)]
+	for i, existingIndex := range indesList {
+		if existingIndex.String() == key.String() {
+			// Remove the index from the slice
+			Cache.indices[GetStructType(data)] = append(indesList[:i], indesList[i+1:]...)
+			return nil
+		}
+	}
+	logHandler.WarningLogger.Printf("index %v does not exist for %v", key.String(), GetStructType(data))
 
 	return nil
 }
 
 func Add(data any) error {
-	// TODO: Write Code
+	table := GetStructType(data)
+	keyField, exists := Cache.key[table]
+	if !exists || keyField.String() == "" {
+		return ce.ErrCacheNoKeyDefinedWrapper("add", table)
+	}
+
+	// Lets get the key value and build the cache entry
+	// Get the key value, by using reflection to get the field value
+	key := reflect.ValueOf(data).FieldByName(keyField.String()).Interface()
+
+	Cache.cache[table][key] = data
 
 	return nil
 }
 
 func Load(data []any) error {
-	// TODO: Write Code
+	// Range through the data and add each record to the cache
+	for _, record := range data {
+		err := Add(record)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
 func Remove(data any) error {
-	// TODO: Write Code
+	// Fine and remove the record from the cache
+	table := GetStructType(data)
+	keyField, exists := Cache.key[table]
+	if !exists || keyField.String() == "" {
+		return ce.ErrCacheNoKeyDefinedWrapper("remove", table)
+	}
+
+	// Get the key value, by using reflection to get the field value
+	key := reflect.ValueOf(data).FieldByName(keyField.String()).Interface()
+
+	delete(Cache.cache[table], key)
+
+	return nil
+}
+
+func RemoveByKey(data any, key any) error {
+	// Find and remove the record from the cache
+	table := GetStructType(data)
+	_, exists := Cache.key[table]
+	if !exists {
+		return ce.ErrCacheNoKeyDefinedWrapper("remove", table)
+	}
+
+	delete(Cache.cache[table], key)
 
 	return nil
 }
 
 func Update(data any) error {
-	// TODO: Write Code
-
-	return nil
+	return Add(data)
 }
 
-func Get(data any, key database.Field) (any, error) {
-	// TODO: Write Code
-	var rtn any
-	return rtn, nil
+func Get(data any, key any) (any, error) {
+	// Find and return the record from the cache
+	table := GetStructType(data)
+	inMemoryCacheEntry, exists := Cache.cache[table]
+	if !exists {
+		return nil, ce.ErrCacheDoesNotExistWrapper(table)
+	}
+
+	record, exists := inMemoryCacheEntry[key]
+	if !exists {
+		return nil, ce.ErrCacheRecordNotFoundWrapper(table, key)
+	}
+
+	return record, nil
 }
 
 func GetAll(data any) ([]any, error) {
+	// Get all records from the cache
+	table := GetStructType(data)
+	inMemoryCacheEntry, exists := Cache.cache[table]
+	if !exists {
+		return nil, ce.ErrCacheDoesNotExistWrapper(table)
+	}
+
+	// Range through the cache and build the return slice
 	var rtn []any
+	for _, record := range inMemoryCacheEntry {
+		rtn = append(rtn, record)
+	}
 	return rtn, nil
 }
 
 func Count(data any) (int, error) {
-	//TODO: Write Code
-	return 0, nil
+	// Get count of records from the cache
+	table := GetStructType(data)
+	inMemoryCacheEntry, exists := Cache.cache[table]
+	if !exists {
+		return 0, ce.ErrCacheDoesNotExistWrapper(table)
+	}
+
+	return len(inMemoryCacheEntry), nil
 }

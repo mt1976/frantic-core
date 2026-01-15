@@ -18,4 +18,5 @@ func init() {
 
 	connectionPoolMaxSize = cfg.GetDatabase_PoolSize()
 	logHandler.DatabaseLogger.Printf("[CON] Database Connection Pool Size [%v]", connectionPoolMaxSize)
+
 }
