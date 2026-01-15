@@ -1,60 +1,96 @@
 package cache
 
 import (
+	"fmt"
+
 	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
 // Enable enables caching for a table, but does not initialise it.
 func Enable(data any) error {
-	Cache.tables[GetStructType(data)] = false
+	Cache.tablesActive[GetStructType(data)] = false
+	Cache.cache[GetStructType(data)] = make(entrys)
+	Cache.indices[GetStructType(data)] = []database.Field{}
+	Cache.key[GetStructType(data)] = ""
 	return nil
+}
+
+func IsEnabled(data any) bool {
+	table := GetStructType(data)
+	enabled, exists := Cache.tablesActive[table]
+	if !exists {
+		return false
+	}
+	return enabled
 }
 
 func Disable(data any) error {
 	table := GetStructType(data)
-	delete(Cache.tables, table)
-	delete(Cache.indices, table)
-	delete(Cache.keys, table)
-	delete(Cache.cache, table)
+	Cache.tablesActive[table] = false
+	Cache.cache[table] = make(entrys)
+	Cache.indices[table] = []database.Field{}
+	Cache.key[table] = ""
 	return nil
 }
 
-func IsCaching(data any) (bool, error) {
-	// TODO: Write Code
-	return true, nil
+func IsDisabled(data any) bool {
+	table := GetStructType(data)
+	enabled, exists := Cache.tablesActive[table]
+	if !exists {
+		return true
+	}
+	return !enabled
+}
+
+func Initialise(data any) error {
+	table := GetStructType(data)
+	Cache.tablesActive[table] = true
+	return nil
+}
+
+func IsInitialised(data any) bool {
+	table := GetStructType(data)
+	enabled, exists := Cache.tablesActive[table]
+	if !exists {
+		return false
+	}
+	return enabled
+}
+
+func DeInitialise(data any) error {
+	return Disable(data)
+}
+
+func IsDeInitialised(data any) bool {
+	return IsDisabled(data)
 }
 
 func AddKey(data any, key database.Field) error {
 
-	ok, err := IsCaching(data)
-
-	if err != nil {
-		return err
+	if !IsEnabled(data) {
+		return fmt.Errorf("cannot add key %v to %v - caching not enabled", key.String(), GetStructType(data))
 	}
 
-	if ok {
-		Cache.keys[GetStructType(data)] = key
-	} else {
-		logHandler.WarningLogger.Printf("cannot add key %v to %v", key.String(), GetStructType(data))
-	}
+	Cache.key[GetStructType(data)] = key
 	return nil
 }
 
 func AddIndex(data any, key database.Field) error {
 
-	ok, err := IsCaching(data)
-
-	if err != nil {
-		return err
+	if !IsEnabled(data) {
+		return fmt.Errorf("cannot add index %v to %v - caching not enabled", key.String(), GetStructType(data))
 	}
 
-	if ok {
-		//TODO : Prevent duplicates
-		Cache.indices[GetStructType(data)] = append(Cache.indices[GetStructType(data)], key)
-	} else {
-		logHandler.WarningLogger.Printf("cannot add key %v to %v", key.String(), GetStructType(data))
+	// Find the index in the list of indices
+	indesList := Cache.indices[GetStructType(data)]
+	for _, existingIndex := range indesList {
+		if existingIndex.String() == key.String() {
+			logHandler.WarningLogger.Printf("index %v already exists for %v", key.String(), GetStructType(data))
+			return nil
+		}
 	}
+	Cache.indices[GetStructType(data)] = append(Cache.indices[GetStructType(data)], key)
 
 	return nil
 }

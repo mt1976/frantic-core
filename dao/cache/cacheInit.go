@@ -7,6 +7,6 @@ func init() {
 	Cache := cache{}
 	Cache.cache = make(map[string]entrys)
 	Cache.indices = make(map[string][]database.Field)
-	Cache.keys = make(map[string]database.Field)
-	Cache.tables = make(map[string]bool)
+	Cache.key = make(map[string]database.Field)
+	Cache.tablesActive = make(map[string]bool)
 }
