@@ -48,10 +48,11 @@ var (
 	ErrNotImplemented    = errors.New("not implemented")
 
 	// Cache related errors
-	ErrCacheNotEnabled      = errors.New("caching not enabled")
-	ErrCacheNoKeyDefined    = errors.New("no key defined")
-	ErrCacheDoesNotExist    = errors.New("cache does not exist")
-	ErrCacheRecordNotFound  = errors.New("record not found in cache")
+	ErrCacheNotEnabled     = errors.New("caching not enabled")
+	ErrCacheNoKeyDefined   = errors.New("no key defined")
+	ErrCacheDoesNotExist   = errors.New("cache does not exist")
+	ErrCacheRecordNotFound = errors.New("record not found in cache")
+	ErrCacheNilData        = errors.New("cannot operate on nil data")
 
 	// Message related errors
 	ErrKeyRequired    = errors.New("key is required")
@@ -240,6 +241,10 @@ func ErrCacheDoesNotExistWrapper(table string) error {
 
 func ErrCacheRecordNotFoundWrapper(table string, key any) error {
 	return fmt.Errorf("no record found in cache for table %v with key %v (%w)", table, key, ErrCacheRecordNotFound)
+}
+
+func ErrCacheNilDataWrapper(operation string) error {
+	return fmt.Errorf("cannot %v <nil> data to cache (%w)", operation, ErrCacheNilData)
 }
 
 // Helper function to get the correct preposition

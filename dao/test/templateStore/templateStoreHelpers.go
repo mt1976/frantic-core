@@ -145,7 +145,7 @@ func assertTemplateStore(result any, field fields.Field, value any) (*TemplateSt
 
 // Insert additional functions below this line
 
-func Login(ctx context.Context, sq string) error {
+func Login(ctx context.Context, sq string) (TemplateStore, error) {
 
 	//	logHandler.EventLogger.Printf("TemplateStore Login Initiated")
 
@@ -162,13 +162,13 @@ func Login(ctx context.Context, sq string) error {
 	if err != nil || len(usrList) == 0 {
 		if err != nil {
 			logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), temp.UserName)
-			return err
+			return TemplateStore{}, err
 		}
 		//	logHandler.InfoLogger.Printf("User=[%v] does not exist, creating", temp.UserName)
 		usr, err = Add(ctx, sq)
 		if err != nil {
 			logHandler.ErrorLogger.Printf("Warning=[%v] User=[%v]", err.Error(), temp.UserName)
-			return err
+			return TemplateStore{}, err
 		}
 	}
 	//logHandler.InfoLogger.Printf("Login UserCode=[%v] Count=[%v]", temp.UserCode, len(usrList))
@@ -181,7 +181,7 @@ func Login(ctx context.Context, sq string) error {
 			err = u.UpdateWithAction(ctx, audit.LOGIN, fmt.Sprintf("User %v logged in", u.UserName))
 			if err != nil {
 				logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), u.UserName)
-				return err
+				return TemplateStore{}, err
 			}
 			//logHandler.InfoLogger.Printf("User [%v] logged in successfully", u.UserName)
 		}
@@ -194,11 +194,11 @@ func Login(ctx context.Context, sq string) error {
 		err = usr.UpdateWithAction(ctx, audit.LOGIN, fmt.Sprintf("User %v logged in", usr.UserName))
 		if err != nil {
 			logHandler.WarningLogger.Printf("Warning=[%v] User=[%v]", err.Error(), usr.UserName)
-			return err
+			return TemplateStore{}, err
 		}
 		//logHandler.InfoLogger.Printf("User [%v] logged in successfully", usr.UserName)
 	}
-	return nil
+	return usr, nil
 }
 
 func (u *TemplateStore) SetName(name string) error {

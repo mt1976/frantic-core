@@ -18,6 +18,7 @@ func GetFunctionName(temp interface{}) string {
 }
 
 func GetStructType(data any) string {
+	logHandler.TraceLogger.Printf("Resolving Struct Type for data: %v", data)
 	rtnType := reflect.TypeOf(data).String()
 	base := rtnType
 

@@ -1,26 +1,51 @@
 package cache
 
-import "github.com/mt1976/frantic-core/logHandler"
+import (
+	"time"
 
-func CacheSpew() {
-	logHandler.WarningLogger.Println("Caching Status")
+	"github.com/dustin/go-humanize"
+	"github.com/mt1976/frantic-core/logHandler"
+)
+
+func Spew() {
+
+	//godump.Dump(Cache)
+	//fmt.Printf("Cache Dump: %+v", Cache)
+
+	logHandler.InfoBanner("Cache", "Report", "Starting Cache Report")
 	if len(Cache.tablesActive) == 0 {
-		logHandler.WarningLogger.Println("No tables are currently cached")
+		logHandler.InfoLogger.Println("No tables are currently cached")
 	}
 	msg := ". Cached Tables: "
 	for tableName := range Cache.tablesActive {
 		msg += tableName + " "
 	}
-	logHandler.WarningLogger.Println(msg)
+
+	if len(Cache.tablesActive) == 0 {
+		logHandler.InfoBanner("Cache", "Report", "End Report")
+		return
+	}
+	logHandler.InfoLogger.Println(msg)
+
+	logHandler.InfoLogger.Println(". Cached Keys Summary")
+	for tableName, keyField := range Cache.key {
+		logHandler.InfoLogger.Printf(". 	Table [%v] has Key Field [%v]", tableName, keyField.String())
+	}
+
 	// Display A COUNT OF THE RECORDS IN THE CACHE
-	logHandler.WarningLogger.Println(". Cached Records Summary")
+	logHandler.InfoLogger.Println(". Cached Records Summary")
 	for tableName := range Cache.tablesActive {
-		inMemoryCacheEntry, exists := Cache.cache[tableName]
+		cachedEntry, exists := Cache.cache[tableName]
 		if !exists {
 			logHandler.WarningLogger.Printf(". 	Table [%v] has 0 cached records", tableName)
 			continue
 		}
+		cacheExpiry := Cache.expiry[tableName]
 		//
-		logHandler.WarningLogger.Printf(". 	Table [%v] has %d cached records", tableName, len(inMemoryCacheEntry))
+		logHandler.InfoLogger.Printf(". 	Table [%v] has [%d] cached records and expiry set to [%v]", tableName, len(cachedEntry), cacheExpiry)
+		for key, record := range cachedEntry {
+			logHandler.InfoLogger.Printf(".       %v>%v: %v - expires: %v(%v)", tableName, Cache.key[tableName].String(), key, record.cacheTimestamp.Format(time.RFC3339Nano), humanize.Time(record.cacheTimestamp))
+		}
 	}
+	logHandler.InfoBanner("Cache", "Report", "End Report")
 }
