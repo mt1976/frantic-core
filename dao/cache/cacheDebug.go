@@ -13,9 +13,16 @@ func Spew() {
 	//fmt.Printf("Cache Dump: %+v", Cache)
 
 	logHandler.InfoBanner("Cache", "Report", "Starting Cache Report")
+
 	if len(Cache.tablesActive) == 0 {
 		logHandler.InfoLogger.Println("No tables are currently cached")
 	}
+
+	logHandler.InfoLogger.Printf("Cache created at: %v", Cache.created.Format(time.RFC3339Nano))
+	logHandler.InfoLogger.Printf("Cache updated at: %v", Cache.updated.Format(time.RFC3339Nano))
+	logHandler.InfoLogger.Printf("Cache Age: %v", humanize.Time(Cache.created))
+	logHandler.InfoLogger.Printf("Cache Last Updated: %v", humanize.Time(Cache.updated))
+	logHandler.InfoLogger.Println("")
 	msg := ". Cached Tables: "
 	for tableName := range Cache.tablesActive {
 		msg += tableName + " "
@@ -47,5 +54,19 @@ func Spew() {
 			logHandler.InfoLogger.Printf(".       %v>%v: %v - expires: %v(%v)", tableName, Cache.key[tableName].String(), key, record.cacheTimestamp.Format(time.RFC3339Nano), humanize.Time(record.cacheTimestamp))
 		}
 	}
+	created, updated, noTables, noCacheEntries := Stats()
+	logHandler.InfoLogger.Println("")
+	logHandler.InfoLogger.Printf("Cache Stats - Created: %v, Updated: %v, Tables: %v, Entries: %v", created.Format(time.RFC3339Nano), updated.Format(time.RFC3339Nano), noTables, noCacheEntries)
+
 	logHandler.InfoBanner("Cache", "Report", "End Report")
+}
+
+func Stats() (created time.Time, updated time.Time, noTables int64, noCacheEntries int64) {
+	// Loop through Cache.cache to count total entries
+	var totalEntries int64 = 0
+	for _, entries := range Cache.cache {
+		totalEntries += int64(len(entries))
+	}
+	return Cache.created, Cache.updated, int64(len(Cache.tablesActive)), totalEntries
+	//
 }

@@ -13,7 +13,8 @@ const defaultCacheExpiry = 100 * 365 * 24 * time.Hour // 100 years
 func Initialise() {
 	// Initialise global cache maps.
 	// Note: do not use ':=' here, that would shadow the package-level Cache.
-	Cache.at = time.Now()
+	Cache.created = time.Now()
+	Cache.updated = time.Time{}
 	Cache.cache = make(map[string]entrys)
 	Cache.indices = make(map[string][]fields.Field)
 	Cache.key = make(map[string]fields.Field)

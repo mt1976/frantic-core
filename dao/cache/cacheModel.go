@@ -7,7 +7,8 @@ import (
 )
 
 type cache struct {
-	at           time.Time
+	created      time.Time
+	updated      time.Time
 	tablesActive map[string]bool
 	key          map[string]fields.Field
 	indices      map[string][]fields.Field

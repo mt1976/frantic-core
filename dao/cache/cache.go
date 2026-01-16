@@ -180,11 +180,13 @@ func AddEntry(data any) error {
 		record := dataCache{cacheTimestamp: time.Now().Add(expiryDuration), dataRecord: data}
 		Cache.cache[table][key] = record
 		Cache.count[table] = 1
+		Cache.updated = time.Now()
 		return nil
 	}
 	record := dataCache{cacheTimestamp: time.Now().Add(expiryDuration), dataRecord: data}
 	Cache.cache[table][key] = record
 	Cache.count[table]++
+	Cache.updated = time.Now()
 	logHandler.InfoLogger.Printf("Cache Entry for Table [%v] added with Key [%v], expiry [%v] %v", table, key, record.cacheTimestamp.Format(time.RFC3339Nano), humanize.Time(record.cacheTimestamp))
 	return nil
 }
@@ -214,6 +216,7 @@ func RemoveEntry(data any) error {
 
 	delete(Cache.cache[table], key)
 	Cache.count[table]--
+	Cache.updated = time.Now()
 
 	return nil
 }
@@ -228,7 +231,7 @@ func RemoveByKey(data any, key any) error {
 
 	delete(Cache.cache[table], key)
 	Cache.count[table]--
-
+	Cache.updated = time.Now()
 	return nil
 }
 
