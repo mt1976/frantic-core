@@ -20,4 +20,5 @@ func Initialise() {
 	Cache.tablesActive = make(map[string]bool)
 	Cache.count = make(map[string]int64)
 	Cache.expiry = make(map[string]time.Duration)
+	Cache.synchroniser = make(map[string]func(any) error)
 }

@@ -11,16 +11,16 @@ import (
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
-// Enable enables caching for a table, but does not initialise it.
-func Enable(data any) error {
-	Cache.tablesActive[GetStructType(data)] = false
-	Cache.cache[GetStructType(data)] = make(entrys)
-	Cache.indices[GetStructType(data)] = []fields.Field{}
-	Cache.key[GetStructType(data)] = ""
-	Cache.count[GetStructType(data)] = 0
-	Cache.expiry[GetStructType(data)] = defaultCacheExpiry
-	return nil
-}
+// // Enable enables caching for a table, but does not initialise it.
+// func Enable(data any) error {
+// 	Cache.tablesActive[GetStructType(data)] = false
+// 	Cache.cache[GetStructType(data)] = make(entrys)
+// 	Cache.indices[GetStructType(data)] = []fields.Field{}
+// 	Cache.key[GetStructType(data)] = ""
+// 	Cache.count[GetStructType(data)] = 0
+// 	Cache.expiry[GetStructType(data)] = defaultCacheExpiry
+// 	return nil
+// }
 
 func IsEnabled(data any) bool {
 	table := GetStructType(data)
@@ -58,6 +58,7 @@ func Activate(data any) error {
 	Cache.key[table] = ""
 	Cache.count[table] = 0
 	Cache.expiry[table] = defaultCacheExpiry
+	Cache.synchroniser[table] = nil
 	//	godump.Dump(Cache)
 	logHandler.InfoLogger.Printf("Cache for Table [%v] Activated", table)
 	return nil
