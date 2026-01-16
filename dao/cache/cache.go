@@ -2,6 +2,7 @@ package cache
 
 import (
 	"reflect"
+	"runtime"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -98,7 +99,7 @@ func GetExpiry(data any) (time.Duration, error) {
 	return Cache.expiry[GetStructType(data)], nil
 }
 
-func AddKey(data any, key fields.Field) error {
+func RegisterCacheKey(data any, key fields.Field) error {
 	logHandler.InfoLogger.Printf("Adding Cache Key [%v] for Table [%v]", key.String(), GetStructType(data))
 	if !IsEnabled(data) {
 		return ce.ErrCacheNotEnabledWrapper("add key", key.String(), GetStructType(data))
@@ -299,4 +300,40 @@ func FindByIndex(data any, index fields.Field, value any) ([]any, error) {
 	}
 
 	return rtn, nil
+}
+
+func RegisterSynchroniser(data any, synchroniser func(any) error) {
+	Cache.synchroniser = make(map[string]func(any) error)
+	table := GetStructType(data)
+	Cache.synchroniser[table] = synchroniser
+	// Get the name of the function passed in
+	funcname := runtime.FuncForPC(reflect.ValueOf(synchroniser).Pointer()).Name()
+	logHandler.WarningLogger.Printf("Registered Function %v as Synchroniser for Table [%v]", funcname, table)
+	//
+}
+
+func SynchroniseCache(data any) error {
+	table := GetStructType(data)
+	//	logHandler.InfoLogger.Printf("Flushing Cache for Table [%v]", table)
+	inMemoryCacheEntry, exists := Cache.cache[table]
+	if !exists {
+		return ce.ErrCacheDoesNotExistWrapper(table)
+	}
+
+	synchroniserFunc, exists := Cache.synchroniser[table]
+	if !exists {
+		return ce.ErrCacheNoSynchroniserDefinedWrapper(table)
+	}
+	count := len(inMemoryCacheEntry)
+	countIndex := 0
+	for _, record := range inMemoryCacheEntry {
+		err := synchroniserFunc(record.dataRecord)
+		if err != nil {
+			return err
+		}
+		countIndex++
+	}
+
+	logHandler.InfoLogger.Printf("Cache for Table [%v] synchronised (%d/%d)", table, countIndex, count)
+	return nil
 }

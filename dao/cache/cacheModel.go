@@ -14,6 +14,7 @@ type cache struct {
 	cache        map[string]entrys // in-memory storage, indexde by table then by cache key
 	count        map[string]int64
 	expiry       map[string]time.Duration
+	synchroniser map[string]func(any) error
 }
 
 type entrys map[any]dataCache // Map indexed by keyfield, storing one record per slot

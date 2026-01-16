@@ -33,6 +33,7 @@ var (
 	BACKUP       Action
 	LOGIN        Action
 	LOGOUT       Action
+	SYNC         Action
 )
 
 func init() {
@@ -54,4 +55,5 @@ func init() {
 	BACKUP = Action{code: "BACKUP", description: "Backup Data", silent: true, short: "BACKUP"}
 	LOGIN = Action{code: "LOGIN", description: "User Login", silent: false, short: "LOGIN"}
 	LOGOUT = Action{code: "LOGOUT", description: "User Logout", silent: false, short: "LOGOUT"}
+	SYNC = Action{code: "SYNC", description: "Data Synchronisation", silent: false, short: "SYNC"}
 }

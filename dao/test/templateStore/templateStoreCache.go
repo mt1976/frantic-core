@@ -11,6 +11,7 @@ package templateStore
 import (
 	"context"
 
+	"github.com/mt1976/frantic-core/dao/cache"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -40,7 +41,7 @@ func CacheSpew() {
 
 func FlushCache() error {
 	logHandler.CacheLogger.Printf("FlushCache [%+v]", Domain)
-	//err := activeDB.Flush()
+	err := cache.SynchroniseCache(TemplateStore{})
 	logHandler.CacheLogger.Printf("FlushCache [%+v] complete", Domain)
-	return nil
+	return err
 }

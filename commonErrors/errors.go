@@ -276,3 +276,11 @@ func ErrSourceRequiredWrapper(messageType string) error {
 func ErrInvalidTenorWrapper(tenor string) error {
 	return fmt.Errorf("invalid tenor [%s] (%w)", tenor, ErrInvalidTenor)
 }
+
+func ErrCacheNoFlusherDefinedWrapper(table string) error {
+	return fmt.Errorf("no cache flusher defined for table %v (%w)", table, ErrCacheNoKeyDefined)
+}
+
+func ErrCacheNoSynchroniserDefinedWrapper(table string) error {
+	return fmt.Errorf("no cache synchroniser defined for table %v (%w)", table, ErrCacheNoKeyDefined)
+}
