@@ -380,23 +380,6 @@ func (record *TemplateStore) Update(ctx context.Context, note string) error {
 	return record.insertOrUpdate(ctx, note, "Update", audit.UPDATE, "Update")
 }
 
-// Sync returns a function that flushes the cache for TemplateStore records.
-//
-// Returns:
-//   - error: An error object if any issues occur during the cache flush process; otherwise, nil.
-func Sync(ctx context.Context) func(any) error {
-	logHandler.InfoLogger.Printf("Defining Flush function for %v", Domain)
-	return func(data any) error {
-		// Lets update the record in the db from the cache
-		// The any parameter is expected to be of type *TemplateStore
-		// Type assert the any parameter to *TemplateStore
-
-		record := data.(TemplateStore)
-		logHandler.InfoLogger.Printf("Flushing cache for %v Key: %v", Domain, record.Key)
-		return record.UpdateWithAction(ctx, audit.SYNC, "Cache Flush Update")
-	}
-}
-
 // UpdateWithAction updates the TemplateStore record in the database with a specified audit action.
 //
 // Parameters:

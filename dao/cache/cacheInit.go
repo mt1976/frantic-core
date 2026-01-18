@@ -15,11 +15,12 @@ func Initialise() {
 	// Note: do not use ':=' here, that would shadow the package-level Cache.
 	Cache.created = time.Now()
 	Cache.updated = time.Time{}
-	Cache.cache = make(map[string]entrys)
-	Cache.indices = make(map[string][]fields.Field)
-	Cache.key = make(map[string]fields.Field)
-	Cache.tablesActive = make(map[string]bool)
-	Cache.count = make(map[string]int64)
-	Cache.expiry = make(map[string]time.Duration)
-	Cache.synchroniser = make(map[string]func(any) error)
+	Cache.cache = make(map[entity]entrys)
+	Cache.indices = make(map[entity][]fields.Field)
+	Cache.key = make(map[entity]fields.Field)
+	Cache.tablesActive = make(map[entity]bool)
+	Cache.count = make(map[entity]int64)
+	Cache.expiry = make(map[entity]time.Duration)
+	Cache.synchroniser = make(map[entity]func(any) error)
+	Cache.hydrator = make(map[entity]func() ([]any, error))
 }

@@ -53,6 +53,7 @@ var (
 	ErrCacheDoesNotExist   = errors.New("cache does not exist")
 	ErrCacheRecordNotFound = errors.New("record not found in cache")
 	ErrCacheNilData        = errors.New("cannot operate on nil data")
+	ErrCacheNoHydrator     = errors.New("no hydrator defined")
 
 	// Message related errors
 	ErrKeyRequired    = errors.New("key is required")
@@ -283,4 +284,8 @@ func ErrCacheNoFlusherDefinedWrapper(table string) error {
 
 func ErrCacheNoSynchroniserDefinedWrapper(table string) error {
 	return fmt.Errorf("no cache synchroniser defined for table %v (%w)", table, ErrCacheNoKeyDefined)
+}
+
+func ErrCacheNoHydratorDefinedWrapper(table string) error {
+	return fmt.Errorf("no cache hydrator defined for table %v (%w)", table, ErrCacheNoHydrator)
 }

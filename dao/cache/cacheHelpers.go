@@ -17,7 +17,7 @@ func GetFunctionName(temp interface{}) string {
 	return strs[len(strs)-1]
 }
 
-func GetStructType(data any) string {
+func GetStructType(data any) entity {
 	logHandler.TraceLogger.Printf("Resolving Struct Type for data: %v", data)
 	rtnType := reflect.TypeOf(data).String()
 	base := rtnType
@@ -33,7 +33,7 @@ func GetStructType(data any) string {
 	}
 	logHandler.TraceLogger.Printf("{TYPE} Resolved Struct Type: %v (base: %v)", rtnType, base)
 
-	return rtnType
+	return entity(rtnType)
 }
 
 func IsValidFieldInStruct(fromField fields.Field, data any) error {
@@ -114,4 +114,8 @@ func IsValidTypeForField(field fields.Field, data, forStruct any) error {
 	}
 	logHandler.TraceLogger.Printf("Type for field '%v' is valid: expected '%v', got '%v'", field.String(), structFieldType, dataType)
 	return nil
+}
+
+func (e *entity) String() string {
+	return string(*e)
 }

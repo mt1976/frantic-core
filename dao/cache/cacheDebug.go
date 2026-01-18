@@ -25,7 +25,7 @@ func Spew() {
 	logHandler.InfoLogger.Println("")
 	msg := ". Cached Tables: "
 	for tableName := range Cache.tablesActive {
-		msg += tableName + " "
+		msg += string(tableName) + " "
 	}
 
 	if len(Cache.tablesActive) == 0 {
