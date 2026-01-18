@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"reflect"
 	"runtime"
 	"time"
@@ -251,28 +252,35 @@ func Update(data any) error {
 	return AddEntry(data)
 }
 
-func Get(data any, key any) (any, error) {
+func Get[T any](data T, key any) (T, error) {
 	// Find and return the record from the cache
+	var zero T
 	table := GetStructType(data)
 	inMemoryCacheEntry, exists := Cache.cache[table]
 	if !exists {
-		return nil, ce.ErrCacheDoesNotExistWrapper(table.String())
+		return zero, ce.ErrCacheDoesNotExistWrapper(table.String())
 	}
 
 	if !isKeyRegistered(table) {
 		logHandler.WarningLogger.Printf("No Key registered for Table [%v]", table)
-		return nil, ce.ErrCacheNoKeyDefinedWrapper("get", table.String())
+		return zero, ce.ErrCacheNoKeyDefinedWrapper("get", table.String())
 	}
 
 	record, exists := inMemoryCacheEntry[key]
 	if !exists {
-		return nil, ce.ErrCacheRecordNotFoundWrapper(table.String(), key)
+		return zero, ce.ErrCacheRecordNotFoundWrapper(table.String(), key)
 	}
 
-	return record.dataRecord, nil
+	targetType := reflect.TypeOf((*T)(nil)).Elem()
+	converted, ok := coerceCacheValue[T](record.dataRecord, targetType)
+	if !ok {
+		return zero, fmt.Errorf("cache contains unexpected type for table %v: got %T, want %v", table.String(), record.dataRecord, targetType)
+	}
+
+	return converted, nil
 }
 
-func GetAll(data any) ([]any, error) {
+func GetAll[T any](data T) ([]T, error) {
 	// Get all records from the cache
 	table := GetStructType(data)
 	inMemoryCacheEntry, exists := Cache.cache[table]
@@ -285,12 +293,69 @@ func GetAll(data any) ([]any, error) {
 		return nil, ce.ErrCacheNoKeyDefinedWrapper("getall", table.String())
 	}
 
-	// Range through the cache and build the return slice
-	var rtn []any
+	// Range through the cache and build a strongly-typed return slice.
+	targetType := reflect.TypeOf((*T)(nil)).Elem()
+	rtn := make([]T, 0, len(inMemoryCacheEntry))
 	for _, record := range inMemoryCacheEntry {
-		rtn = append(rtn, record.dataRecord)
+		converted, ok := coerceCacheValue[T](record.dataRecord, targetType)
+		if !ok {
+			return nil, fmt.Errorf("cache contains unexpected type for table %v: got %T, want %v", table.String(), record.dataRecord, targetType)
+		}
+		rtn = append(rtn, converted)
 	}
+
 	return rtn, nil
+}
+
+func coerceCacheValue[T any](value any, targetType reflect.Type) (T, bool) {
+	var zero T
+	if value == nil {
+		return zero, false
+	}
+	if v, ok := value.(T); ok {
+		return v, true
+	}
+
+	rv := reflect.ValueOf(value)
+	if !rv.IsValid() {
+		return zero, false
+	}
+
+	// Direct assign/convert.
+	if rv.Type().AssignableTo(targetType) {
+		v, ok := rv.Interface().(T)
+		return v, ok
+	}
+	if rv.Type().ConvertibleTo(targetType) {
+		converted := rv.Convert(targetType).Interface()
+		v, ok := converted.(T)
+		return v, ok
+	}
+
+	// Pointer/value bridging.
+	if rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		ev := rv.Elem()
+		if ev.IsValid() {
+			if ev.Type().AssignableTo(targetType) {
+				v, ok := ev.Interface().(T)
+				return v, ok
+			}
+			if ev.Type().ConvertibleTo(targetType) {
+				converted := ev.Convert(targetType).Interface()
+				v, ok := converted.(T)
+				return v, ok
+			}
+		}
+	}
+	if targetType.Kind() == reflect.Ptr && rv.Type().AssignableTo(targetType.Elem()) {
+		pv := reflect.New(targetType.Elem())
+		pv.Elem().Set(rv)
+		converted := pv.Interface()
+		v, ok := converted.(T)
+		return v, ok
+	}
+
+	return zero, false
 }
 
 func Count(data any) (int64, error) {
@@ -304,12 +369,13 @@ func Count(data any) (int64, error) {
 	return Cache.count[table], nil
 }
 
-func FindByKey(data any, key any) (any, error) {
+
+func FindByKey[T any](data T, key any) (T, error) {
 	// Find and return the record from the cache
 	return Get(data, key)
 }
 
-func FindByIndex(data any, index fields.Field, value any) ([]any, error) {
+func FindByIndex[T any](data T, index fields.Field, value any) ([]T, error) {
 	// Find and return the record(s) from the cache by index
 	table := GetStructType(data)
 	inMemoryCacheEntry, exists := Cache.cache[table]
@@ -322,12 +388,35 @@ func FindByIndex(data any, index fields.Field, value any) ([]any, error) {
 		return nil, ce.ErrCacheNoKeyDefinedWrapper("findbyindex", table.String())
 	}
 
-	var rtn []any
+	targetType := reflect.TypeOf((*T)(nil)).Elem()
+	rtn := make([]T, 0)
 	for _, record := range inMemoryCacheEntry {
-		v := reflect.ValueOf(record.dataRecord).FieldByName(index.String()).Interface()
-		if v == value {
-			rtn = append(rtn, record.dataRecord)
+		rv := reflect.ValueOf(record.dataRecord)
+		if !rv.IsValid() {
+			continue
 		}
+		if rv.Kind() == reflect.Ptr {
+			if rv.IsNil() {
+				continue
+			}
+			rv = rv.Elem()
+		}
+		if rv.Kind() != reflect.Struct {
+			continue
+		}
+		fv := rv.FieldByName(index.String())
+		if !fv.IsValid() {
+			continue
+		}
+		if fv.Interface() != value {
+			continue
+		}
+
+		converted, ok := coerceCacheValue[T](record.dataRecord, targetType)
+		if !ok {
+			return nil, fmt.Errorf("cache contains unexpected type for table %v: got %T, want %v", table.String(), record.dataRecord, targetType)
+		}
+		rtn = append(rtn, converted)
 	}
 
 	return rtn, nil
