@@ -153,7 +153,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 	// Populate cache if enabled
 	if cache.IsEnabled(to) {
 		logHandler.InfoLogger.Printf("[GET] %v ALL [%+v] [...%v.db] - Populating Cache", entities.GetStructType(to), options, db.Name)
-		err = cache.Load(result)
+		err = cache.AddEntries(result)
 		if err != nil {
 			logHandler.ErrorLogger.Printf("[GET] %v ALL [%+v] [...%v.db] - Error populating Cache: %v", entities.GetStructType(to), options, db.Name, err)
 			return nil, err
@@ -233,7 +233,7 @@ func (db *DB) GetAllWhere(field entities.Field, value, to any) ([]any, error) {
 	// Populate cache if enabled
 	if cache.IsEnabled(to) {
 		logHandler.DatabaseLogger.Printf("[GET] %v WHERE %v=%v - Populating Cache", tableName, field.String(), value)
-		err = cache.Load(resultList)
+		err = cache.AddEntries(resultList)
 		if err != nil {
 			logHandler.ErrorLogger.Printf("[GET] %v WHERE %v=%v - Error populating Cache: %v", tableName, field.String(), value, err)
 			return nil, err

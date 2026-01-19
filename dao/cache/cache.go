@@ -211,7 +211,7 @@ func AddEntry(data any) error {
 	return nil
 }
 
-func Load(data []any) error {
+func AddEntries(data []any) error {
 	// Range through the data and add each record to the cache
 	for _, record := range data {
 		err := AddEntry(record)
