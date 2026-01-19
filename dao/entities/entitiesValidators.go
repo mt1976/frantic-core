@@ -1,4 +1,4 @@
-package database
+package entities
 
 import (
 	"reflect"
@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -17,7 +16,8 @@ func GetFunctionName(temp interface{}) string {
 	return strs[len(strs)-1]
 }
 
-func GetStructType(data any) string {
+func GetStructType(data any) Table {
+	logHandler.TraceLogger.Printf("Resolving Struct Type for data: %v", data)
 	rtnType := reflect.TypeOf(data).String()
 	base := rtnType
 
@@ -32,13 +32,13 @@ func GetStructType(data any) string {
 	}
 	logHandler.TraceLogger.Printf("{TYPE} Resolved Struct Type: %v (base: %v)", rtnType, base)
 
-	return rtnType
+	return Table(rtnType)
 }
 
-func IsValidFieldInStruct(fromField entities.Field, data any) error {
+func IsValidFieldInStruct(fromField Field, data any) error {
 	// Normalise the type: unwrap pointers, and if it's a slice/array, use the element type.
 	if data == nil {
-		logHandler.ErrorLogger.Printf("Cannot validate fields.Field '%v' on <nil> data", fromField.String())
+		logHandler.ErrorLogger.Printf("Cannot validate field '%v' on <nil> data", fromField.String())
 		return commonErrors.ErrInvalidFieldWrapper(fromField.String())
 	}
 
@@ -49,7 +49,7 @@ func IsValidFieldInStruct(fromField entities.Field, data any) error {
 	}
 
 	if t.Kind() == reflect.Slice || t.Kind() == reflect.Array {
-		logHandler.TraceLogger.Printf("Validating fields.Field '%v' against slice/array element type '%v'", fromField.String(), t.Elem())
+		logHandler.TraceLogger.Printf("Validating Field '%v' against slice/array element type '%v'", fromField.String(), t.Elem())
 		t = t.Elem()
 		for t.Kind() == reflect.Ptr {
 			// Handle slices of pointers to structs
@@ -57,10 +57,10 @@ func IsValidFieldInStruct(fromField entities.Field, data any) error {
 		}
 	}
 
-	logHandler.TraceLogger.Printf("Validating fields.Field '%v' in Struct type '%v'", fromField.String(), t.Name())
+	logHandler.TraceLogger.Printf("Validating Field '%v' in Struct type '%v'", fromField.String(), t.Name())
 
 	if t.Kind() != reflect.Struct {
-		logHandler.ErrorLogger.Printf("Type '%v' is not a struct; cannot validate fields.Field '%v'", t, fromField.String())
+		logHandler.ErrorLogger.Printf("Type '%v' is not a struct; cannot validate field '%v'", t, fromField.String())
 		return commonErrors.ErrInvalidFieldWrapper(fromField.String())
 	}
 
@@ -73,9 +73,9 @@ func IsValidFieldInStruct(fromField entities.Field, data any) error {
 	return nil
 }
 
-func IsValidTypeForField(field entities.Field, data, forStruct any) error {
+func IsValidTypeForField(field Field, data, forStruct any) error {
 	if forStruct == nil {
-		logHandler.ErrorLogger.Printf("Cannot validate type for fields.Field '%v' on <nil> struct", field.String())
+		logHandler.ErrorLogger.Printf("Cannot validate type for field '%v' on <nil> struct", field.String())
 		return commonErrors.ErrInvalidFieldWrapper(field.String())
 	}
 

@@ -17,7 +17,6 @@ import (
 	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao"
 	"github.com/mt1976/frantic-core/dao/audit"
-	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/dao/lookup"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -184,7 +183,7 @@ func GetAll() ([]TemplateStore, error) {
 
 	clock.Stop(len(resultList))
 
-	logHandler.DatabaseLogger.Printf("RETRIEVED %v records from %v", len(resultList), database.GetStructType(recordList))
+	logHandler.DatabaseLogger.Printf("RETRIEVED %v records from %v", len(resultList), entities.GetStructType(recordList))
 
 	return resultList, nil
 }
@@ -228,10 +227,10 @@ func GetAllWhere(field entities.Field, value any) ([]TemplateStore, error) {
 	}
 	//logHandler.DatabaseLogger.Println("Process returned records")
 	for _, rec := range recordListAny {
-		//logHandler.InfoLogger.Printf("Processing record of type %v", database.GetStructType(rec))
-		if database.GetStructType(rec) != database.GetStructType(TemplateStore{}) {
-			logHandler.ErrorLogger.Printf("Invalid record type returned from GetAllWhere wanted %v, got %v", database.GetStructType(TemplateStore{}), database.GetStructType(rec))
-			panic(fmt.Sprintf("invalid record type returned from GetAllWhere wanted %v, got %v", database.GetStructType(TemplateStore{}), database.GetStructType(rec)))
+		//logHandler.InfoLogger.Printf("Processing record of type %v", entities.GetStructType(rec))
+		if entities.GetStructType(rec) != entities.GetStructType(TemplateStore{}) {
+			logHandler.ErrorLogger.Printf("Invalid record type returned from GetAllWhere wanted %v, got %v", entities.GetStructType(TemplateStore{}), entities.GetStructType(rec))
+			panic(fmt.Sprintf("invalid record type returned from GetAllWhere wanted %v, got %v", entities.GetStructType(TemplateStore{}), entities.GetStructType(rec)))
 		}
 		if reflect.TypeOf(rec).Kind() == reflect.Ptr {
 			//	logHandler.InfoLogger.Printf("Dereferencing pointer to get TemplateStore value")

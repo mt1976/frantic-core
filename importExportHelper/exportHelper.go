@@ -11,7 +11,6 @@ import (
 	"github.com/gocarina/gocsv"
 	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/application"
-	"github.com/mt1976/frantic-core/dao/database"
 	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/idHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -152,7 +151,7 @@ func buildNameForRecord[T any](baseName string, record T, idField entities.Field
 func exportJSON[T any](exportName string, where paths.FileSystemPath, record T) {
 
 	logHandler.TraceLogger.Printf("Exporting %v.json", exportName)
-	logHandler.ExportLogger.Printf("Exporting %v %v.json", database.GetStructType(record), exportName)
+	logHandler.ExportLogger.Printf("Exporting %v %v.json", entities.GetStructType(record), exportName)
 	exportFile := openTargetFile(exportName, exportString, logHandler.ExportLogger, "json", where.String())
 	defer exportFile.Close()
 

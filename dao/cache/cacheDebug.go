@@ -67,7 +67,7 @@ func SpewFor(tableName entities.Table) {
 //
 //	cache.SpewForType(templateStoreV2.TemplateStore{})
 func SpewForType(data any) {
-	spewForEntity(GetStructType(data))
+	spewForEntity(entities.GetStructType(data))
 }
 
 func spewForEntity(table entities.Table) {

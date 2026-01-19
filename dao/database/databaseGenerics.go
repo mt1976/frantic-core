@@ -27,7 +27,7 @@ func GetTyped[T any](db *DB, field entities.Field, value any) (T, error) {
 		return zero, commonErrors.ErrInvalidTypeWrapper("GetTyped", fmt.Sprintf("%T", record), "non-pointer struct")
 	}
 
-	logHandler.DatabaseLogger.Printf("[GET_TYPED]<%v> (%+v=%+v) [%v.db]", GetStructType(record), field.String(), value, db.Name)
+	logHandler.DatabaseLogger.Printf("[GET_TYPED]<%v> (%+v=%+v) [%v.db]", entities.GetStructType(record), field.String(), value, db.Name)
 	if err := db.connection.One(field.String(), value, &record); err != nil {
 		return zero, err
 	}
@@ -43,7 +43,7 @@ func GetAllTyped[T any](db *DB, options ...func(*index.Options)) ([]T, error) {
 		return nil, commonErrors.ErrInvalidTypeWrapper("GetAllTyped", fmt.Sprintf("%T", record), "non-pointer struct")
 	}
 
-	logHandler.DatabaseLogger.Printf("[GETALL_TYPED]<%v> [%v.db]", GetStructType(record), db.Name)
+	logHandler.DatabaseLogger.Printf("[GETALL_TYPED]<%v> [%v.db]", entities.GetStructType(record), db.Name)
 	result := []T{}
 	if err := db.connection.All(&result, options...); err != nil {
 		return nil, err
@@ -60,14 +60,14 @@ func GetAllWhereTyped[T any](db *DB, field entities.Field, value any) ([]T, erro
 		return nil, commonErrors.ErrInvalidTypeWrapper("GetAllWhereTyped", fmt.Sprintf("%T", record), "non-pointer struct")
 	}
 
-	if err := IsValidFieldInStruct(field, record); err != nil {
+	if err := entities.IsValidFieldInStruct(field, record); err != nil {
 		return nil, err
 	}
-	if err := IsValidTypeForField(field, value, record); err != nil {
+	if err := entities.IsValidTypeForField(field, value, record); err != nil {
 		return nil, err
 	}
 
-	logHandler.DatabaseLogger.Printf("[GETALLWHERE_TYPED]<%v> WHERE (%+v=%+v) [%v.db]", GetStructType(record), field.String(), value, db.Name)
+	logHandler.DatabaseLogger.Printf("[GETALLWHERE_TYPED]<%v> WHERE (%+v=%+v) [%v.db]", entities.GetStructType(record), field.String(), value, db.Name)
 	result := []T{}
 	query := db.connection.Select(q.Eq(field.String(), value))
 	if err := query.Find(&result); err != nil {

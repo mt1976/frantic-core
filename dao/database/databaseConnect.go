@@ -114,7 +114,7 @@ func connect(table any, options ...Option) *DB {
 	// if config.withCaching && table != nil {
 	// 	enableCachingForTable(&db, table)
 	// 	if err != nil {
-	// 		logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Error enabling caching for table %v: %v", GetStructType(table), err.Error())
+	// 		logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Error enabling caching for table %v: %v", entities.GetStructType(table), err.Error())
 	// 		panic(commonErrors.ErrConnectWrapper(err))
 	// 	}
 	// }
@@ -128,10 +128,10 @@ func connect(table any, options ...Option) *DB {
 // If validation fails, it logs the error and returns a wrapped validation error.
 func validate(data any, db *DB) error {
 	timer := timing.Start(db.Name, "Validate", "")
-	logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} Validate [%+v] [%v.db]", GetStructType(data), db.Name)
+	logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} Validate [%+v] [%v.db]", entities.GetStructType(data), db.Name)
 	err := commonErrors.HandleGoValidatorError(dataValidator.Struct(data))
 	if err != nil {
-		logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} error validating %v %v [%v.db]", err.Error(), GetStructType(data), db.Name)
+		logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} error validating %v %v [%v.db]", err.Error(), entities.GetStructType(data), db.Name)
 		timer.Stop(0)
 		return commonErrors.ErrValidationWrapper(err)
 	}
