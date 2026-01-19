@@ -28,7 +28,7 @@ func (record *TemplateStore) ExportRecordAsJSON(name string) {
 
 // ExportAllAsJSON exports all TemplateStore records as JSON files.
 func ExportAllAsJSON(message string) {
-	dao.CheckDAOReadyState(tableName, audit.EXPORT, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.EXPORT, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "Export", "ALL")
 	recordList, _ := GetAll()

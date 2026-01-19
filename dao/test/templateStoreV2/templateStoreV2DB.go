@@ -10,8 +10,8 @@ import (
 	"github.com/mt1976/frantic-core/timing"
 )
 
-var activeDB *database.DB
-var dbIsReady bool
+var activeDBConnection *database.DB
+var databaseConnectionActive bool
 var cfg *commonConfig.Settings
 
 // Initialise opens the database connection for TemplateStoreV2 and optionally enables caching.
@@ -23,8 +23,8 @@ func Initialise(ctx context.Context, cached bool) {
 	cfg = commonConfig.Get()
 	_ = cfg
 
-	activeDB = database.Connect(TemplateStore{}, database.WithVerbose(false), database.WithCaching(cached), database.WithCacheKey(Fields.Key), database.WithNameSpace("cheeseOnToast"))
-	dbIsReady = true
+	activeDBConnection = database.Connect(TemplateStore{}, database.WithVerbose(false), database.WithCaching(cached), database.WithCacheKey(Fields.Key), database.WithNameSpace("cheeseOnToast"))
+	databaseConnectionActive = true
 
 	clock.Stop(1)
 	logHandler.DatabaseLogger.Printf("Opened connection to %v", tableName)
@@ -32,7 +32,7 @@ func Initialise(ctx context.Context, cached bool) {
 
 // IsInitialised reports whether the DAO has an active database connection.
 func IsInitialised() bool {
-	return dbIsReady
+	return databaseConnectionActive
 }
 
 // Close flushes the cache (if enabled) and closes the active database connection.
@@ -46,16 +46,16 @@ func Close() {
 		logHandler.InfoLogger.Printf("Cache flushed successfully")
 	}
 
-	if activeDB != nil {
-		activeDB.Disconnect()
+	if activeDBConnection != nil {
+		activeDBConnection.Disconnect()
 	}
-	dbIsReady = false
+	databaseConnectionActive = false
 	logHandler.DatabaseLogger.Printf("Closed connection to %v", tableName)
 }
 
 // GetDatabaseConnections returns a function that supplies the database connections used by this DAO.
 func GetDatabaseConnections() func() ([]*database.DB, error) {
 	return func() ([]*database.DB, error) {
-		return []*database.DB{activeDB}, nil
+		return []*database.DB{activeDBConnection}, nil
 	}
 }

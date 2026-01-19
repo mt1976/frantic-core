@@ -18,14 +18,14 @@ import (
 // Count returns the total number of records in the table.
 func Count() (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v", tableName)
-	return activeDB.Count(&TemplateStore{})
+	return activeDBConnection.Count(&TemplateStore{})
 }
 
 // CountWhere returns the number of records matching a field/value filter.
 func CountWhere(field entities.Field, value any) (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", tableName, field.String(), value)
 	clock := timing.Start(tableName, "Count", fmt.Sprintf("%v=%v", field.String(), value))
-	count, err := activeDB.CountWhere(field, value, &TemplateStore{})
+	count, err := activeDBConnection.CountWhere(field, value, &TemplateStore{})
 	if err != nil {
 		clock.Stop(0)
 		return 0, err
@@ -39,7 +39,7 @@ func GetBy(field entities.Field, value any) (TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 	clock := timing.Start(tableName, "Get", fmt.Sprintf("%v=%v", field, value))
 
-	dao.CheckDAOReadyState(tableName, audit.GET, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.GET, databaseConnectionActive)
 
 	if field == Fields.ID && reflect.TypeOf(value).Name() != "int" {
 		msg := "invalid data type. Expected type of %v is int"
@@ -47,7 +47,7 @@ func GetBy(field entities.Field, value any) (TemplateStore, error) {
 		return TemplateStore{}, ce.ErrGetWrapper(tableName, field.String(), value, fmt.Errorf(msg, value))
 	}
 
-	record, err := database.GetTyped[TemplateStore](activeDB, field, value)
+	record, err := database.GetTyped[TemplateStore](activeDBConnection, field, value)
 	if err != nil {
 		clock.Stop(0)
 		return TemplateStore{}, ce.ErrRecordNotFoundWrapper(tableName, field.String(), fmt.Sprintf("%v", value))
@@ -64,10 +64,10 @@ func GetBy(field entities.Field, value any) (TemplateStore, error) {
 // GetAll returns all TemplateStore records.
 func GetAll() ([]TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v ALL", tableName)
-	dao.CheckDAOReadyState(tableName, audit.GET, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.GET, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "GetAll", "ALL")
-	records, err := database.GetAllTyped[TemplateStore](activeDB)
+	records, err := database.GetAllTyped[TemplateStore](activeDBConnection)
 	if err != nil {
 		clock.Stop(0)
 		return nil, ce.ErrNotFoundWrapper(tableName, err)
@@ -84,10 +84,10 @@ func GetAll() ([]TemplateStore, error) {
 // GetAllWhere returns all records matching a field/value filter.
 func GetAllWhere(field entities.Field, value any) ([]TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
-	dao.CheckDAOReadyState(tableName, audit.GET, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.GET, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "GetAllWhere", fmt.Sprintf("%v=%v", field, value))
-	records, err := database.GetAllWhereTyped[TemplateStore](activeDB, field, value)
+	records, err := database.GetAllWhereTyped[TemplateStore](activeDBConnection, field, value)
 	if err != nil {
 		clock.Stop(0)
 		return nil, err
@@ -109,7 +109,7 @@ func Delete(ctx context.Context, id int, note string) error {
 // DeleteBy deletes a record by field/value.
 func DeleteBy(ctx context.Context, field entities.Field, value any, note string) error {
 	logHandler.DatabaseLogger.Printf("DELETE %v WHERE %v=%v", tableName, field, value)
-	dao.CheckDAOReadyState(tableName, audit.DELETE, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.DELETE, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "Delete", fmt.Sprintf("%v=%v", field.String(), value))
 
@@ -129,7 +129,7 @@ func DeleteBy(ctx context.Context, field entities.Field, value any, note string)
 		return ce.ErrDAODeleteWrapper(tableName, field.String(), value, err)
 	}
 
-	if err := activeDB.Delete(&record); err != nil {
+	if err := activeDBConnection.Delete(&record); err != nil {
 		clock.Stop(0)
 		return ce.ErrDAODeleteWrapper(tableName, field.String(), value, err)
 	}
@@ -171,7 +171,7 @@ func GetDefaultLookup() (lookup.Lookup, error) {
 
 // GetLookup builds a lookup of key/value pairs from all records.
 func GetLookup(field, value entities.Field) (lookup.Lookup, error) {
-	dao.CheckDAOReadyState(tableName, audit.PROCESS, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.PROCESS, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "Lookup", "BUILD")
 
@@ -199,14 +199,14 @@ func GetLookup(field, value entities.Field) (lookup.Lookup, error) {
 // Drop drops the underlying database bucket/table for this entity.
 func Drop() error {
 	logHandler.DatabaseLogger.Printf("DROP %v", tableName)
-	return activeDB.Drop(TemplateStore{})
+	return activeDBConnection.Drop(TemplateStore{})
 }
 
 // ClearDown deletes all records from this table.
 func ClearDown(ctx context.Context) error {
 	logHandler.DatabaseLogger.Printf("CLEARFILE %v", tableName)
 
-	dao.CheckDAOReadyState(tableName, audit.PROCESS, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.PROCESS, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "Clear", "INITIALISE")
 

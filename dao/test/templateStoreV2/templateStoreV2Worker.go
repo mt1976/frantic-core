@@ -13,13 +13,13 @@ import (
 // Worker is a job that is scheduled to run at a predefined interval.
 func Worker(j jobs.Job, db *database.DB) {
 	clock := timing.Start(jobs.CodedName(j), "Initialise", j.Description())
-	oldDB := activeDB
+	oldDB := activeDBConnection
 	dbSwitched := false
 
 	if db != nil {
-		if activeDB.Name != db.Name {
+		if activeDBConnection.Name != db.Name {
 			logHandler.EventLogger.Printf("Switching to %v.db", db.Name)
-			activeDB = db
+			activeDBConnection = db
 			dbSwitched = true
 		}
 	}
@@ -27,8 +27,8 @@ func Worker(j jobs.Job, db *database.DB) {
 	jobProcessor(j)
 
 	if dbSwitched {
-		logHandler.EventLogger.Printf("Switching back to %v.db from %v.db", oldDB.Name, activeDB.Name)
-		activeDB = oldDB
+		logHandler.EventLogger.Printf("Switching back to %v.db from %v.db", oldDB.Name, activeDBConnection.Name)
+		activeDBConnection = oldDB
 	}
 	clock.Stop(1)
 }

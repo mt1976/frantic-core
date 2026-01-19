@@ -23,7 +23,7 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 		}
 	}
 
-	dao.CheckDAOReadyState(tableName, auditAction, dbIsReady)
+	dao.CheckDAOReadyState(tableName, auditAction, databaseConnectionActive)
 
 	clock := timing.Start(tableName, activity, fmt.Sprintf("%v", record.ID))
 	if isCreateOperation {
@@ -58,10 +58,10 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 	var actionError error
 	if isCreateOperation {
 		logHandler.TraceLogger.Printf("Creating %v record %v %v", tableName, record.Key, record.ID)
-		actionError = activeDB.Create(record)
+		actionError = activeDBConnection.Create(record)
 	} else {
 		logHandler.TraceLogger.Printf("Updating %v record %v %v", tableName, record.Key, record.ID)
-		actionError = activeDB.Update(record)
+		actionError = activeDBConnection.Update(record)
 	}
 	if actionError != nil {
 		godump.Dump(record)
@@ -106,7 +106,7 @@ func (record *TemplateStore) postGet() error {
 
 // checkForDuplicate checks whether the record key already exists.
 func (record *TemplateStore) checkForDuplicate() error {
-	dao.CheckDAOReadyState(tableName, audit.PROCESS, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.PROCESS, databaseConnectionActive)
 
 	responseRecord, err := GetBy(Fields.Key, record.Key)
 	if err != nil {

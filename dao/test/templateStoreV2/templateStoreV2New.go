@@ -20,7 +20,7 @@ func New() TemplateStore {
 
 // Create constructs and inserts a new TemplateStore record.
 func Create(ctx context.Context, userName, uid, realName, email, gid string) (TemplateStore, error) {
-	dao.CheckDAOReadyState(tableName, audit.CREATE, dbIsReady)
+	dao.CheckDAOReadyState(tableName, audit.CREATE, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "Create", fmt.Sprintf("%v", userName))
 
@@ -44,7 +44,7 @@ func Create(ctx context.Context, userName, uid, realName, email, gid string) (Te
 		logHandler.ErrorLogger.Panic(commonErrors.ErrDAOUpdateAuditWrapper(tableName, record.ID, auditErr))
 	}
 
-	writeErr := activeDB.Create(&record)
+	writeErr := activeDBConnection.Create(&record)
 	if writeErr != nil {
 		logHandler.ErrorLogger.Panic(commonErrors.ErrDAOCreateWrapper(tableName, record.ID, writeErr))
 	}
