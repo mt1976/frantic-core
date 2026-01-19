@@ -13,6 +13,7 @@ import (
 	"github.com/mt1976/frantic-core/timing"
 )
 
+// insertOrUpdate performs shared validation/audit and then creates or updates the record.
 func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity string, auditAction audit.Action, operation string) error {
 	isCreateOperation := false
 	if strings.EqualFold(operation, "Create") {
@@ -74,6 +75,7 @@ func (record *TemplateStore) insertOrUpdate(ctx context.Context, note, activity 
 	return nil
 }
 
+// postGetList runs post-get processing for each record in the list.
 func postGetList(recordList []TemplateStore) ([]TemplateStore, error) {
 	clock := timing.Start(tableName, "Process", "POSTGET")
 	returnList := []TemplateStore{}
@@ -88,6 +90,7 @@ func postGetList(recordList []TemplateStore) ([]TemplateStore, error) {
 	return returnList, nil
 }
 
+// postGet runs upgrade/default/validation processing after a record is loaded.
 func (record *TemplateStore) postGet() error {
 	if upgradeError := record.upgradeProcessing(); upgradeError != nil {
 		return upgradeError
@@ -101,6 +104,7 @@ func (record *TemplateStore) postGet() error {
 	return record.postGetProcessing()
 }
 
+// checkForDuplicate checks whether the record key already exists.
 func (record *TemplateStore) checkForDuplicate() error {
 	dao.CheckDAOReadyState(tableName, audit.PROCESS, dbIsReady)
 

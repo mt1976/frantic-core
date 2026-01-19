@@ -16,6 +16,7 @@ import (
 // It applies default settings and overrides them with any specified options.
 // It also manages the connection pool to reuse existing connections.
 func connect(table any, options ...Option) *DB {
+	_ = table // currently unused
 	// Create default configuration
 	config := &connectionConfig{
 		withCaching:      false,

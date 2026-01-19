@@ -70,10 +70,12 @@ func ExportAllAsCSV(msg string) error {
 	return importExportHelper.ExportCSV(msg, exportListData, Fields.ID)
 }
 
+// ImportAllFromCSV imports records for this table from a CSV file.
 func ImportAllFromCSV() error {
 	return importExportHelper.ImportCSV(tableName, &TemplateStore{}, templateImportProcessor)
 }
 
+// templateImportProcessor is called for each CSV row during import.
 func templateImportProcessor(inOriginal **TemplateStore) (string, error) {
 	importedData := **inOriginal
 	stringField1 := strconv.Itoa(importedData.ID)

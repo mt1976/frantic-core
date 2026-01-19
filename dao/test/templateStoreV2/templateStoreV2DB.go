@@ -14,6 +14,7 @@ var activeDB *database.DB
 var dbIsReady bool
 var cfg *commonConfig.Settings
 
+// Initialise opens the database connection for TemplateStoreV2 and optionally enables caching.
 func Initialise(ctx context.Context, cached bool) {
 	logHandler.DatabaseLogger.Printf("Opening connection to %v", tableName)
 	logHandler.TraceLogger.Printf("Initialising %v DAO Caching: %t", tableName, cached)
@@ -29,10 +30,12 @@ func Initialise(ctx context.Context, cached bool) {
 	logHandler.DatabaseLogger.Printf("Opened connection to %v", tableName)
 }
 
+// IsInitialised reports whether the DAO has an active database connection.
 func IsInitialised() bool {
 	return dbIsReady
 }
 
+// Close flushes the cache (if enabled) and closes the active database connection.
 func Close() {
 	logHandler.DatabaseLogger.Printf("Closing connection to %v", tableName)
 
@@ -50,6 +53,7 @@ func Close() {
 	logHandler.DatabaseLogger.Printf("Closed connection to %v", tableName)
 }
 
+// GetDatabaseConnections returns a function that supplies the database connections used by this DAO.
 func GetDatabaseConnections() func() ([]*database.DB, error) {
 	return func() ([]*database.DB, error) {
 		return []*database.DB{activeDB}, nil

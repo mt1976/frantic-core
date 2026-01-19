@@ -14,6 +14,7 @@ import (
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
+// Login logs a user in (creating a record if needed) and updates last login metadata.
 func Login(ctx context.Context, sq string) (TemplateStore, error) {
 	temp := buildUserStub(sq)
 	var usr TemplateStore
@@ -46,6 +47,7 @@ func Login(ctx context.Context, sq string) (TemplateStore, error) {
 	return usr, nil
 }
 
+// SetName validates and sets the record's RealName.
 func (u *TemplateStore) SetName(name string) error {
 	if name == "" {
 		return ce.ErrEmptyName
@@ -57,10 +59,12 @@ func (u *TemplateStore) SetName(name string) error {
 	return nil
 }
 
+// buildUserCode creates a stable user code string used for lookups.
 func (u *TemplateStore) buildUserCode() string {
 	return fmt.Sprintf("%v%v%v", u.UID, cfg.Display.Delimiter, u.UserName)
 }
 
+// Add creates and persists a new user record based on the current OS user.
 func Add(ctx context.Context, sq string) (TemplateStore, error) {
 	testu := buildUserStub(sq)
 
@@ -73,6 +77,7 @@ func Add(ctx context.Context, sq string) (TemplateStore, error) {
 	return u, nil
 }
 
+// buildUserStub builds a record stub for the current OS user.
 func buildUserStub(sq string) TemplateStore {
 	currentUser, _ := user.Current()
 	hostname, _ := os.Hostname()

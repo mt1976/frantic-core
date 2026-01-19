@@ -15,11 +15,13 @@ import (
 	"github.com/mt1976/frantic-core/timing"
 )
 
+// Count returns the total number of records in the table.
 func Count() (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v", tableName)
 	return activeDB.Count(&TemplateStore{})
 }
 
+// CountWhere returns the number of records matching a field/value filter.
 func CountWhere(field entities.Field, value any) (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", tableName, field.String(), value)
 	clock := timing.Start(tableName, "Count", fmt.Sprintf("%v=%v", field.String(), value))
@@ -32,6 +34,7 @@ func CountWhere(field entities.Field, value any) (int, error) {
 	return count, nil
 }
 
+// GetBy returns a single record matching the given field/value.
 func GetBy(field entities.Field, value any) (TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 	clock := timing.Start(tableName, "Get", fmt.Sprintf("%v=%v", field, value))
@@ -58,6 +61,7 @@ func GetBy(field entities.Field, value any) (TemplateStore, error) {
 	return record, nil
 }
 
+// GetAll returns all TemplateStore records.
 func GetAll() ([]TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v ALL", tableName)
 	dao.CheckDAOReadyState(tableName, audit.GET, dbIsReady)
@@ -77,6 +81,7 @@ func GetAll() ([]TemplateStore, error) {
 	return result, nil
 }
 
+// GetAllWhere returns all records matching a field/value filter.
 func GetAllWhere(field entities.Field, value any) ([]TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 	dao.CheckDAOReadyState(tableName, audit.GET, dbIsReady)
@@ -96,10 +101,12 @@ func GetAllWhere(field entities.Field, value any) ([]TemplateStore, error) {
 	return result, nil
 }
 
+// Delete deletes a record by ID.
 func Delete(ctx context.Context, id int, note string) error {
 	return DeleteBy(ctx, Fields.ID, id, note)
 }
 
+// DeleteBy deletes a record by field/value.
 func DeleteBy(ctx context.Context, field entities.Field, value any, note string) error {
 	logHandler.DatabaseLogger.Printf("DELETE %v WHERE %v=%v", tableName, field, value)
 	dao.CheckDAOReadyState(tableName, audit.DELETE, dbIsReady)
@@ -131,31 +138,38 @@ func DeleteBy(ctx context.Context, field entities.Field, value any, note string)
 	return nil
 }
 
+// Validate runs record validation and returns an error if invalid.
 func (record *TemplateStore) Validate() error {
 	return record.validationProcessing()
 }
 
+// Update persists changes to an existing record.
 func (record *TemplateStore) Update(ctx context.Context, note string) error {
 	return record.insertOrUpdate(ctx, note, "Update", audit.UPDATE, "Update")
 }
 
+// UpdateWithAction persists changes using the provided audit action.
 func (record *TemplateStore) UpdateWithAction(ctx context.Context, auditAction audit.Action, note string) error {
 	return record.insertOrUpdate(ctx, note, "Update", auditAction, "Update")
 }
 
+// Create inserts a new record.
 func (record *TemplateStore) Create(ctx context.Context, note string) error {
 	return record.insertOrUpdate(ctx, note, "Create", audit.CREATE, "Create")
 }
 
+// Clone returns a copy of the record using templateClone.
 func (record *TemplateStore) Clone(ctx context.Context) (TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("CLONE %v ID=%v", tableName, record.Key)
 	return templateClone(ctx, *record)
 }
 
+// GetDefaultLookup returns the default lookup for this table.
 func GetDefaultLookup() (lookup.Lookup, error) {
 	return GetLookup(Fields.Key, Fields.Raw)
 }
 
+// GetLookup builds a lookup of key/value pairs from all records.
 func GetLookup(field, value entities.Field) (lookup.Lookup, error) {
 	dao.CheckDAOReadyState(tableName, audit.PROCESS, dbIsReady)
 
@@ -182,11 +196,13 @@ func GetLookup(field, value entities.Field) (lookup.Lookup, error) {
 	return rtnLookup, nil
 }
 
+// Drop drops the underlying database bucket/table for this entity.
 func Drop() error {
 	logHandler.DatabaseLogger.Printf("DROP %v", tableName)
 	return activeDB.Drop(TemplateStore{})
 }
 
+// ClearDown deletes all records from this table.
 func ClearDown(ctx context.Context) error {
 	logHandler.DatabaseLogger.Printf("CLEARFILE %v", tableName)
 

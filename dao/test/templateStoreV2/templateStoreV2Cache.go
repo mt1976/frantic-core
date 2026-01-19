@@ -8,6 +8,7 @@ import (
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
+// PreLoad performs any pre-load work required before the cache is hydrated.
 func PreLoad(ctx context.Context) error {
 	logHandler.CacheLogger.Printf("PreLoad [%+v]", tableName)
 	_ = ctx
@@ -15,12 +16,14 @@ func PreLoad(ctx context.Context) error {
 	return nil
 }
 
+// CacheSpew writes the current cache state for this table to the logs.
 func CacheSpew() {
 	logHandler.CacheLogger.Printf("CacheSpew [%+v]", tableName)
 	cache.SpewFor(TableName)
 	logHandler.CacheLogger.Printf("CacheSpew [%+v] complete", tableName)
 }
 
+// FlushCache synchronises cached records back to the underlying database.
 func FlushCache() error {
 	logHandler.CacheLogger.Printf("FlushCache [%+v]", tableName)
 	err := cache.SynchroniseForType(TemplateStore{})
@@ -28,6 +31,7 @@ func FlushCache() error {
 	return err
 }
 
+// HydrateCache loads all records into cache.
 func HydrateCache() error {
 	logHandler.CacheLogger.Printf("HydrateCache [%+v]", tableName)
 	err := cache.HydrateForType(TemplateStore{})
@@ -35,6 +39,7 @@ func HydrateCache() error {
 	return err
 }
 
+// CacheHydrator returns the cache hydrator function for this table.
 func CacheHydrator(ctx context.Context) func() ([]any, error) {
 	_ = ctx
 	return func() ([]any, error) {
@@ -50,6 +55,7 @@ func CacheHydrator(ctx context.Context) func() ([]any, error) {
 	}
 }
 
+// CacheSynchroniser returns the cache synchroniser function for this table.
 func CacheSynchroniser(ctx context.Context) func(any) error {
 	logHandler.InfoLogger.Printf("Defining Sync function for %v", tableName)
 	return func(data any) error {

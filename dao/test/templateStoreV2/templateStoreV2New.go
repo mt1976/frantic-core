@@ -13,10 +13,12 @@ import (
 	"github.com/mt1976/frantic-core/timing"
 )
 
+// New returns an empty TemplateStore record.
 func New() TemplateStore {
 	return TemplateStore{}
 }
 
+// Create constructs and inserts a new TemplateStore record.
 func Create(ctx context.Context, userName, uid, realName, email, gid string) (TemplateStore, error) {
 	dao.CheckDAOReadyState(tableName, audit.CREATE, dbIsReady)
 

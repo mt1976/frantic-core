@@ -7,11 +7,13 @@ import (
 	"github.com/mt1976/frantic-core/dao/entities"
 )
 
+// TableName is the canonical DAO table identifier for this package.
 var TableName = entities.Table("TemplateStore")
+
 var tableName = TableName.String()
 
 // TemplateStore represents a sample entity for demonstrating reduced DAO boilerplate.
-// Replace this struct and Fields as needed for your real tableName entity.
+// Replace this struct and Fields as needed for your real entity.
 type TemplateStore struct {
 	// The primary key field(s), managed by the framework, DO NOT MODIFY
 	ID  int    `storm:"id,increment=100"`
@@ -63,6 +65,11 @@ type fieldNames struct {
 	LastHost      entities.Field
 }
 
+// Fields provides strongly-typed field names for use with GetBy/GetAllWhere/etc.
+//
+// Example: GetBy(Fields.Key, "abc")
+//
+// Note: the values are the struct field names as stored in Storm.
 var Fields = fieldNames{
 	// The primary key field(s), managed by the framework, DO NOT MODIFY
 	ID:  "ID",
