@@ -8,6 +8,7 @@ import (
 	"github.com/asdine/storm/v3/index"
 	"github.com/asdine/storm/v3/q"
 	"github.com/mt1976/frantic-core/commonErrors"
+	"github.com/mt1976/frantic-core/dao/cache"
 	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/logHandler"
 )
@@ -27,7 +28,17 @@ func GetTyped[T any](db *DB, field entities.Field, value any) (T, error) {
 		return zero, commonErrors.ErrInvalidTypeWrapper("GetTyped", fmt.Sprintf("%T", record), "non-pointer struct")
 	}
 
-	logHandler.DatabaseLogger.Printf("[GET_TYPED]<%v> (%+v=%+v) [%v.db]", entities.GetStructType(record), field.String(), value, db.Name)
+	// Check if a record exists in the cache
+	if cache.IsEnabled(record) {
+		cachedValue, err := cache.GetWhere(record, field, value)
+		if err == nil {
+			logHandler.DatabaseLogger.Printf("[GET] %v WHERE %+v=%+v [...%v.db] - From Cache", entities.GetStructType(record), field.String(), value, db.Name)
+			return cachedValue, nil
+		}
+		logHandler.DatabaseLogger.Printf("[GET] %v WHERE %+v=%+v [...%v.db] - Not Found in Cache", entities.GetStructType(record), field.String(), value, db.Name)
+	}
+
+	logHandler.DatabaseLogger.Printf("[GET] %v WHERE %+v=%+v [...%v.db]", entities.GetStructType(record), field.String(), value, db.Name)
 	if err := db.connection.One(field.String(), value, &record); err != nil {
 		return zero, err
 	}
@@ -43,7 +54,7 @@ func GetAllTyped[T any](db *DB, options ...func(*index.Options)) ([]T, error) {
 		return nil, commonErrors.ErrInvalidTypeWrapper("GetAllTyped", fmt.Sprintf("%T", record), "non-pointer struct")
 	}
 
-	logHandler.DatabaseLogger.Printf("[GETALL_TYPED]<%v> [%v.db]", entities.GetStructType(record), db.Name)
+	logHandler.DatabaseLogger.Printf("[GET] %v ALL [...%v.db]", entities.GetStructType(record), db.Name)
 	result := []T{}
 	if err := db.connection.All(&result, options...); err != nil {
 		return nil, err
@@ -67,7 +78,7 @@ func GetAllWhereTyped[T any](db *DB, field entities.Field, value any) ([]T, erro
 		return nil, err
 	}
 
-	logHandler.DatabaseLogger.Printf("[GETALLWHERE_TYPED]<%v> WHERE (%+v=%+v) [%v.db]", entities.GetStructType(record), field.String(), value, db.Name)
+	logHandler.DatabaseLogger.Printf("[GET] %v WHERE (%+v=%+v) ALL [...%v.db]", entities.GetStructType(record), field.String(), value, db.Name)
 	result := []T{}
 	query := db.connection.Select(q.Eq(field.String(), value))
 	if err := query.Find(&result); err != nil {

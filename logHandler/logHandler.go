@@ -146,10 +146,10 @@ func init() {
 		communicationsWriter = io.MultiWriter(io.Discard)
 	}
 
-	// cacheWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "cache"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
-	// if settings.IsCacheLoggingDisabled() || settings.IsLoggingDisabled() {
-	// 	cacheWriter = io.MultiWriter(io.Discard)
-	// }
+	cacheWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "cache"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	if settings.IsCacheLoggingDisabled() || settings.IsLoggingDisabled() {
+		cacheWriter = io.MultiWriter(io.Discard)
+	}
 
 	msgStructure := log.Lmsgprefix | log.Ldate | log.LstdFlags | log.Lshortfile
 
@@ -170,7 +170,7 @@ func init() {
 	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Export"), msgStructure)
 	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Communications"), msgStructure)
 	LockLogger = log.New(lockWriter, formatNameWithColor(Blue, "Lock"), msgStructure)
-	CacheLogger = log.New(databaseWriter, formatNameWithColor(Green, "Cache"), msgStructure)
+	CacheLogger = log.New(cacheWriter, formatNameWithColor(Green, "Cache"), msgStructure)
 }
 
 func TestIt() {

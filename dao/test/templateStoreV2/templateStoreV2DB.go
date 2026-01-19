@@ -16,7 +16,7 @@ var cfg *commonConfig.Settings
 
 // Initialise opens the database connection for TemplateStoreV2 and optionally enables caching.
 func Initialise(ctx context.Context, cached bool) {
-	logHandler.DatabaseLogger.Printf("Opening connection to %v", tableName)
+	//logHandler.DatabaseLogger.Printf("Opening connection to %v", tableName)
 	logHandler.TraceLogger.Printf("Initialising %v DAO Caching: %t", tableName, cached)
 
 	clock := timing.Start(tableName, "Initialise", "Initialise")
@@ -27,7 +27,7 @@ func Initialise(ctx context.Context, cached bool) {
 	databaseConnectionActive = true
 
 	clock.Stop(1)
-	logHandler.DatabaseLogger.Printf("Opened connection to %v", tableName)
+	//logHandler.DatabaseLogger.Printf("Opened connection to %v", tableName)
 }
 
 // IsInitialised reports whether the DAO has an active database connection.
@@ -37,7 +37,9 @@ func IsInitialised() bool {
 
 // Close flushes the cache (if enabled) and closes the active database connection.
 func Close() {
-	logHandler.DatabaseLogger.Printf("Closing connection to %v", tableName)
+	//logHandler.DatabaseLogger.Printf("Closing connection to %v", tableName)
+	logHandler.TraceLogger.Printf("Closing %v DAO", tableName)
+	clock := timing.Start(tableName, "Close", "Close")
 
 	flusherr2 := cache.SynchroniseForType(TemplateStore{})
 	if flusherr2 != nil {
@@ -50,7 +52,8 @@ func Close() {
 		activeDBConnection.Disconnect()
 	}
 	databaseConnectionActive = false
-	logHandler.DatabaseLogger.Printf("Closed connection to %v", tableName)
+	logHandler.TraceLogger.Printf("Closed connection to %v", tableName)
+	clock.Stop(1)
 }
 
 // GetDatabaseConnections returns a function that supplies the database connections used by this DAO.

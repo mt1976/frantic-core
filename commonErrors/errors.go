@@ -54,6 +54,7 @@ var (
 	ErrCacheRecordNotFound = errors.New("record not found in cache")
 	ErrCacheNilData        = errors.New("cannot operate on nil data")
 	ErrCacheNoHydrator     = errors.New("no hydrator defined")
+	ErrCacheMultipleRecordsFound = errors.New("multiple records found in cache")
 
 	// Message related errors
 	ErrKeyRequired    = errors.New("key is required")
@@ -242,6 +243,10 @@ func ErrCacheDoesNotExistWrapper(table string) error {
 
 func ErrCacheRecordNotFoundWrapper(table string, key any) error {
 	return fmt.Errorf("no record found in cache for table %v with key %v (%w)", table, key, ErrCacheRecordNotFound)
+}
+
+func ErrCacheMultipleRecordsFoundWrapper(table string, field string, value any, count int) error {
+	return fmt.Errorf("multiple records found in cache for table %v where %v=%v (count=%d) (%w)", table, field, value, count, ErrCacheMultipleRecordsFound)
 }
 
 func ErrCacheNilDataWrapper(operation string) error {

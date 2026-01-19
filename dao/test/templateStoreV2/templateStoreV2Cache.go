@@ -60,7 +60,7 @@ func CacheSynchroniser(ctx context.Context) func(any) error {
 	logHandler.InfoLogger.Printf("Defining Sync function for %v", tableName)
 	return func(data any) error {
 		record := data.(TemplateStore)
-		logHandler.InfoLogger.Printf("Sync cache for %v Key: %v", tableName, record.Key)
+		logHandler.CacheLogger.Printf("Sync cache for %v Key: %v", tableName, record.Key)
 		return record.UpdateWithAction(ctx, audit.SYNC, "Cache Sync Update")
 	}
 }

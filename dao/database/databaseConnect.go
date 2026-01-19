@@ -40,13 +40,13 @@ func connect(table any, options ...Option) *DB {
 		config.nameSpace, config.withCaching, config.withCacheKey, config.Verbose, config.timeout, config.poolSize, config.nameSpace, config.withEncryption, config.indices)
 
 	if config.withCaching && config.withCacheKey == "" {
-		logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Caching enabled but no cache key provided for [%v.db]", config.nameSpace)
+		logHandler.DatabaseLogger.Panicf("[CON]{CONNECT} Caching enabled but no cache key provided for [...%v.db]", config.nameSpace)
 		panic(commonErrors.ErrDBConnect)
 	}
 
 	// Ensure the name is lowercase
 	config.nameSpace = strings.ToLower(config.nameSpace)
-	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opening Connection to [%v.db] data (%v)", config.nameSpace, len(connectionPool))
+	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opening Connection to [...%v.db] data (%v)", config.nameSpace, len(connectionPool))
 	// list the connection pool
 	if config.Verbose {
 		for key, value := range connectionPool {
@@ -70,7 +70,7 @@ func connect(table any, options ...Option) *DB {
 		return rtn
 	}
 
-	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} (re)Opening [%v.db] data connection", config.nameSpace)
+	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} (re)Opening [...%v.db] data connection", config.nameSpace)
 	// Open a new connection
 
 	db := DB{}
@@ -85,13 +85,13 @@ func connect(table any, options ...Option) *DB {
 	db.withEncryption = config.withEncryption
 	//db.indices = config.indices
 	// db.cacheInitialised = false
-	// logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Opening [%v.db] data connection *%+v*", db.Name, db)
+	// logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Opening [...%v.db] data connection *%+v*", db.Name, db)
 	connect := timing.Start(db.Name, "Connect", db.databaseName)
 	var err error
 	db.connection, err = storm.Open(db.databaseName, storm.BoltOptions(0666, nil))
 	if err != nil {
 		connect.Stop(0)
-		logHandler.DatabaseLogger.Fatalf("[CON]{CONNECT} Opening [%v.db] connection Error=[%v]", strings.ToLower(db.databaseName), err.Error())
+		logHandler.DatabaseLogger.Fatalf("[CON]{CONNECT} Opening [...%v.db] connection Error=[%v]", strings.ToLower(db.databaseName), err.Error())
 		panic(commonErrors.ErrConnectWrapper(err))
 	}
 	if db.verbose {
@@ -108,7 +108,7 @@ func connect(table any, options ...Option) *DB {
 			logHandler.DatabaseLogger.Printf("[CON]{CONNECT}  Connection Pool [%v] [%v] [codec=%v] %v", key, value.databaseName, value.connection.Node.Codec().Name(), value.initialised)
 		}
 	}
-	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opened [%v.db] data connection [codec=%v] %v", db.databaseName, db.connection.Node.Codec().Name(), db.initialised)
+	logHandler.DatabaseLogger.Printf("[CON]{CONNECT} Opened [...%v.db] data connection [codec=%v] %v", db.databaseName, db.connection.Node.Codec().Name(), db.initialised)
 
 	// // Enable caching for the specified table if caching is enabled
 	// if config.withCaching && table != nil {
@@ -128,10 +128,10 @@ func connect(table any, options ...Option) *DB {
 // If validation fails, it logs the error and returns a wrapped validation error.
 func validate(data any, db *DB) error {
 	timer := timing.Start(db.Name, "Validate", "")
-	logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} Validate [%+v] [%v.db]", entities.GetStructType(data), db.Name)
+	//logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} Validate [%+v] [...%v.db]", entities.GetStructType(data), db.Name)
 	err := commonErrors.HandleGoValidatorError(dataValidator.Struct(data))
 	if err != nil {
-		logHandler.DatabaseLogger.Printf("[CON]{VALIDATE} error validating %v %v [%v.db]", err.Error(), entities.GetStructType(data), db.Name)
+		logHandler.DatabaseLogger.Panicf("[CON]{VALIDATE} error validating %v %v [...%v.db]", err.Error(), entities.GetStructType(data), db.Name)
 		timer.Stop(0)
 		return commonErrors.ErrValidationWrapper(err)
 	}
@@ -159,14 +159,14 @@ func ConnectToNamedDB(name string, options ...Option) *DB {
 // If disconnection fails, it logs the error and panics with a wrapped disconnect error.
 func (db *DB) Disconnect() {
 	timer := timing.Start(db.Name, "Disconnect", db.databaseName)
-	logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Disconnecting [%v.db] connection", db.Name)
+	logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Disconnecting [...%v.db] connection", db.Name)
 	err := db.connection.Close()
 	if err != nil {
-		logHandler.DatabaseLogger.Panicf("[CON]{DISCONNECT} Closing [%v.db] %v ", db.Name, err.Error())
+		logHandler.DatabaseLogger.Panicf("[CON]{DISCONNECT} Closing [...%v.db] %v ", db.Name, err.Error())
 		panic(commonErrors.ErrDisconnectWrapper(err))
 	}
 	releaseFromConnectionPool(db)
-	logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Closed [%v.db] connection", db.Name)
+	logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Closed [...%v.db] connection", db.Name)
 	if db.verbose {
 		for key, value := range connectionPool {
 			logHandler.DatabaseLogger.Printf("[CON]{DISCONNECT} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
@@ -176,11 +176,11 @@ func (db *DB) Disconnect() {
 }
 
 func (db *DB) Reconnect() {
-	logHandler.DatabaseLogger.Printf("[CON]{RECONNECT} Reconnecting [%v.db] data - %+v", db.Name, db)
+	logHandler.DatabaseLogger.Printf("[CON]{RECONNECT} Reconnecting [...%v.db] data - %+v", db.Name, db)
 	logHandler.DatabaseLogger.Printf("[CON]{RECONNECT} Connection Pool [%+v]", connectionPool)
 	for key, value := range connectionPool {
 		logHandler.DatabaseLogger.Printf("[CON]{RECONNECT} Connection Pool [%v] [%v] [codec=%v]", key, value.databaseName, value.connection.Node.Codec().Name())
 	}
 	connect(WithNameSpace(db.Name))
-	logHandler.DatabaseLogger.Printf("[CON]{RECONNECT} Reconnected [%v.db] data", db.Name)
+	logHandler.DatabaseLogger.Printf("[CON]{RECONNECT} Reconnected [...%v.db] data", db.Name)
 }

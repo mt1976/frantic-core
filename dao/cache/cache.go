@@ -191,7 +191,7 @@ func AddEntry(data any) error {
 	Cache.cache[table][key] = record
 	Cache.count[table]++
 	Cache.updated = time.Now()
-	logHandler.InfoLogger.Printf("Cache Entry for Table [%v] added with Key [%v], expiry [%v] %v", table, key, record.cacheTimestamp.Format(time.RFC3339Nano), humanize.Time(record.cacheTimestamp))
+	logHandler.CacheLogger.Printf("Cache Entry for Table [%v] added with Key [%v], expiry [%v] %v", table, key, record.cacheTimestamp.Format(time.RFC3339Nano), humanize.Time(record.cacheTimestamp))
 	return nil
 }
 
@@ -299,6 +299,106 @@ func GetAll[T any](data T) ([]T, error) {
 	targetType := reflect.TypeOf((*T)(nil)).Elem()
 	rtn := make([]T, 0, len(inMemoryCacheEntry))
 	for _, record := range inMemoryCacheEntry {
+		converted, ok := coerceCacheValue[T](record.dataRecord, targetType)
+		if !ok {
+			return nil, fmt.Errorf("cache contains unexpected type for table %v: got %T, want %v", table.String(), record.dataRecord, targetType)
+		}
+		rtn = append(rtn, converted)
+	}
+
+	return rtn, nil
+}
+
+func GetWhere[T any](data T, index entities.Field, value any) (T, error) {
+	// Get records from the cache by index
+	table := entities.GetStructType(data)
+	inMemoryCacheEntry, exists := Cache.cache[table]
+	zero := *new(T)
+
+	if !exists {
+		return zero, ce.ErrCacheDoesNotExistWrapper(table.String())
+	}
+	if !isKeyRegistered(table) {
+		logHandler.WarningLogger.Printf("No Key registered for Table [%v]", table)
+		return zero, ce.ErrCacheNoKeyDefinedWrapper("getwhere", table.String())
+	}
+	targetType := reflect.TypeOf((*T)(nil)).Elem()
+	rtn := *new(T)
+	matchCount := 0
+	for _, record := range inMemoryCacheEntry {
+		rv := reflect.ValueOf(record.dataRecord)
+		if !rv.IsValid() {
+			continue
+		}
+		if rv.Kind() == reflect.Ptr {
+			if rv.IsNil() {
+				continue
+			}
+			rv = rv.Elem()
+		}
+		if rv.Kind() != reflect.Struct {
+			continue
+		}
+		fv := rv.FieldByName(index.String())
+		if !fv.IsValid() {
+			continue
+		}
+		if fv.Interface() != value {
+			continue
+		}
+
+		matchCount++
+		converted, ok := coerceCacheValue[T](record.dataRecord, targetType)
+		if !ok {
+			return zero, fmt.Errorf("cache contains unexpected type for table %v: got %T, want %v", table.String(), record.dataRecord, targetType)
+		}
+		rtn = converted
+		if matchCount > 1 {
+			logHandler.WarningLogger.Printf("GetWhere: multiple cache entries found for table %v where %v=%v (count=%d); refusing ambiguous result", table.String(), index.String(), value, matchCount)
+			return zero, ce.ErrCacheMultipleRecordsFoundWrapper(table.String(), index.String(), value, matchCount)
+		}
+	}
+
+	if matchCount == 0 {
+		return zero, ce.ErrCacheRecordNotFoundWrapper(table.String(), value)
+	}
+	return rtn, nil
+}
+
+func GetAllWhere[T any](data T, index entities.Field, value any) ([]T, error) {
+	// Get records from the cache by index
+	table := entities.GetStructType(data)
+	inMemoryCacheEntry, exists := Cache.cache[table]
+	if !exists {
+		return nil, ce.ErrCacheDoesNotExistWrapper(table.String())
+	}
+	if !isKeyRegistered(table) {
+		logHandler.WarningLogger.Printf("No Key registered for Table [%v]", table)
+		return nil, ce.ErrCacheNoKeyDefinedWrapper("getwhere", table.String())
+	}
+	targetType := reflect.TypeOf((*T)(nil)).Elem()
+	rtn := make([]T, 0)
+	for _, record := range inMemoryCacheEntry {
+		rv := reflect.ValueOf(record.dataRecord)
+		if !rv.IsValid() {
+			continue
+		}
+		if rv.Kind() == reflect.Ptr {
+			if rv.IsNil() {
+				continue
+			}
+			rv = rv.Elem()
+		}
+		if rv.Kind() != reflect.Struct {
+			continue
+		}
+		fv := rv.FieldByName(index.String())
+		if !fv.IsValid() {
+			continue
+		}
+		if fv.Interface() != value {
+			continue
+		}
 		converted, ok := coerceCacheValue[T](record.dataRecord, targetType)
 		if !ok {
 			return nil, fmt.Errorf("cache contains unexpected type for table %v: got %T, want %v", table.String(), record.dataRecord, targetType)

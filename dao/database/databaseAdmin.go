@@ -13,13 +13,13 @@ func (db *DB) Backup(loc string) {
 	timer := timing.Start(db.Name, "Backup", db.databaseName)
 	// Ensure all data is flushed to disk before backup
 	//db.Flush()
-	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] data started... %v", db.Name, loc)
+	logHandler.DatabaseLogger.Printf("[ADM] Backup [...%v.db] data started... %v", db.Name, loc)
 	db.Disconnect()
-	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] disconnected", db.Name)
+	logHandler.DatabaseLogger.Printf("[ADM] Backup [...%v.db] disconnected", db.Name)
 	ioHelpers.Backup(db.Name, loc)
-	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] backup done ends", db.Name)
+	logHandler.DatabaseLogger.Printf("[ADM] Backup [...%v.db] backup done ends", db.Name)
 	db.Reconnect()
-	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] (re)connected", db.Name)
+	logHandler.DatabaseLogger.Printf("[ADM] Backup [...%v.db] (re)connected", db.Name)
 	timer.Stop(1)
-	logHandler.DatabaseLogger.Printf("[ADM] Backup [%v.db] data connection", db.Name)
+	logHandler.DatabaseLogger.Printf("[ADM] Backup [...%v.db] data connection", db.Name)
 }

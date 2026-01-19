@@ -17,13 +17,13 @@ import (
 
 // Count returns the total number of records in the table.
 func Count() (int, error) {
-	logHandler.DatabaseLogger.Printf("COUNT %v", tableName)
+	//logHandler.DatabaseLogger.Printf("COUNT %v", tableName)
 	return activeDBConnection.Count(&TemplateStore{})
 }
 
 // CountWhere returns the number of records matching a field/value filter.
 func CountWhere(field entities.Field, value any) (int, error) {
-	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", tableName, field.String(), value)
+	//logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", tableName, field.String(), value)
 	clock := timing.Start(tableName, "Count", fmt.Sprintf("%v=%v", field.String(), value))
 	count, err := activeDBConnection.CountWhere(field, value, &TemplateStore{})
 	if err != nil {
@@ -36,7 +36,7 @@ func CountWhere(field entities.Field, value any) (int, error) {
 
 // GetBy returns a single record matching the given field/value.
 func GetBy(field entities.Field, value any) (TemplateStore, error) {
-	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
+	//	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 	clock := timing.Start(tableName, "Get", fmt.Sprintf("%v=%v", field, value))
 
 	dao.CheckDAOReadyState(tableName, audit.GET, databaseConnectionActive)
@@ -63,7 +63,7 @@ func GetBy(field entities.Field, value any) (TemplateStore, error) {
 
 // GetAll returns all TemplateStore records.
 func GetAll() ([]TemplateStore, error) {
-	logHandler.DatabaseLogger.Printf("SELECT %v ALL", tableName)
+	//	logHandler.DatabaseLogger.Printf("SELECT %v ALL", tableName)
 	dao.CheckDAOReadyState(tableName, audit.GET, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "GetAll", "ALL")
@@ -83,7 +83,7 @@ func GetAll() ([]TemplateStore, error) {
 
 // GetAllWhere returns all records matching a field/value filter.
 func GetAllWhere(field entities.Field, value any) ([]TemplateStore, error) {
-	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
+	//	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 	dao.CheckDAOReadyState(tableName, audit.GET, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "GetAllWhere", fmt.Sprintf("%v=%v", field, value))
@@ -108,7 +108,7 @@ func Delete(ctx context.Context, id int, note string) error {
 
 // DeleteBy deletes a record by field/value.
 func DeleteBy(ctx context.Context, field entities.Field, value any, note string) error {
-	logHandler.DatabaseLogger.Printf("DELETE %v WHERE %v=%v", tableName, field, value)
+	//	logHandler.DatabaseLogger.Printf("DELETE %v WHERE %v=%v", tableName, field, value)
 	dao.CheckDAOReadyState(tableName, audit.DELETE, databaseConnectionActive)
 
 	clock := timing.Start(tableName, "Delete", fmt.Sprintf("%v=%v", field.String(), value))
@@ -198,13 +198,13 @@ func GetLookup(field, value entities.Field) (lookup.Lookup, error) {
 
 // Drop drops the underlying database bucket/table for this entity.
 func Drop() error {
-	logHandler.DatabaseLogger.Printf("DROP %v", tableName)
+	logHandler.TraceLogger.Printf("DROP %v", tableName)
 	return activeDBConnection.Drop(TemplateStore{})
 }
 
 // ClearDown deletes all records from this table.
 func ClearDown(ctx context.Context) error {
-	logHandler.DatabaseLogger.Printf("CLEARFILE %v", tableName)
+	//	logHandler.DatabaseLogger.Printf("CLEARFILE %v", tableName)
 
 	dao.CheckDAOReadyState(tableName, audit.PROCESS, databaseConnectionActive)
 
@@ -218,10 +218,10 @@ func ClearDown(ctx context.Context) error {
 	}
 
 	count := 0
-	logHandler.DatabaseLogger.Printf("Clearing %v records", len(recordList))
+	logHandler.TraceLogger.Printf("Clearing %v records", len(recordList))
 
 	for i, record := range recordList {
-		logHandler.DatabaseLogger.Printf("(%v/%v) DELETE %v WHERE %v=%v", i+1, len(recordList), tableName, Fields.ID, record.ID)
+		logHandler.TraceLogger.Printf("(%v/%v) DELETE %v WHERE %v=%v", i+1, len(recordList), tableName, Fields.ID, record.ID)
 
 		delErr := Delete(ctx, record.ID, fmt.Sprintf("Clearing %v %v @ initialisation ", tableName, record.ID))
 		if delErr != nil {
@@ -232,6 +232,6 @@ func ClearDown(ctx context.Context) error {
 	}
 
 	clock.Stop(count)
-	logHandler.DatabaseLogger.Printf("Cleared down %v", tableName)
+	//	logHandler.DatabaseLogger.Printf("Cleared down %v", tableName)
 	return nil
 }
