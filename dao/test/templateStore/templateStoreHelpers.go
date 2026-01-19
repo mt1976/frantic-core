@@ -15,7 +15,7 @@ import (
 	"github.com/goforj/godump"
 	ce "github.com/mt1976/frantic-core/commonErrors"
 	"github.com/mt1976/frantic-core/dao/audit"
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -74,7 +74,7 @@ func templateClone(ctx context.Context, source TemplateStore) (TemplateStore, er
 
 // assertTemplateStore asserts that the given result is of type *TemplateStore.
 // It returns the asserted TemplateStore and any error encountered during the assertion.
-func assertTemplateStore(result any, field fields.Field, value any) (*TemplateStore, error) {
+func assertTemplateStore(result any, field entities.Field, value any) (*TemplateStore, error) {
 	x, ok := result.(*TemplateStore)
 	if !ok {
 		return nil, ce.ErrDAOAssertWrapper(Domain, field.String(), value,

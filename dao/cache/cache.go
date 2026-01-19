@@ -8,7 +8,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	ce "github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -32,7 +32,7 @@ func Disable(data any) error {
 	table := GetStructType(data)
 	Cache.tablesActive[table] = false
 	Cache.cache[table] = make(entrys)
-	Cache.indices[table] = []fields.Field{}
+	Cache.indices[table] = []entities.Field{}
 	Cache.key[table] = ""
 	return nil
 }
@@ -51,7 +51,7 @@ func Activate(data any) error {
 	logHandler.InfoLogger.Printf("Activating Cache for Table [%v]", table)
 	Cache.tablesActive[table] = true
 	Cache.cache[table] = make(entrys)
-	Cache.indices[table] = []fields.Field{}
+	Cache.indices[table] = []entities.Field{}
 	Cache.key[table] = ""
 	Cache.count[table] = 0
 	Cache.expiry[table] = defaultCacheExpiry
@@ -98,7 +98,7 @@ func GetExpiry(data any) (time.Duration, error) {
 	return Cache.expiry[GetStructType(data)], nil
 }
 
-func RegisterKey(data any, key fields.Field) error {
+func RegisterKey(data any, key entities.Field) error {
 	logHandler.InfoLogger.Printf("Adding Cache Key [%v] for Table [%v]", key.String(), GetStructType(data))
 	if !IsEnabled(data) {
 		return ce.ErrCacheNotEnabledWrapper("add key", key.String(), string(GetStructType(data)))
@@ -110,7 +110,7 @@ func RegisterKey(data any, key fields.Field) error {
 	return nil
 }
 
-func RegisterIndex(data any, key fields.Field) error {
+func RegisterIndex(data any, key entities.Field) error {
 
 	if !IsEnabled(data) {
 		return ce.ErrCacheNotEnabledWrapper("add index", key.String(), string(GetStructType(data)))
@@ -129,7 +129,7 @@ func RegisterIndex(data any, key fields.Field) error {
 	return nil
 }
 
-func RemoveIndex(data any, key fields.Field) error {
+func RemoveIndex(data any, key entities.Field) error {
 	if !IsEnabled(data) {
 		return ce.ErrCacheNotEnabledWrapper("remove index", key.String(), string(GetStructType(data)))
 	}
@@ -369,13 +369,12 @@ func Count(data any) (int64, error) {
 	return Cache.count[table], nil
 }
 
-
 func FindByKey[T any](data T, key any) (T, error) {
 	// Find and return the record from the cache
 	return Get(data, key)
 }
 
-func FindByIndex[T any](data T, index fields.Field, value any) ([]T, error) {
+func FindByIndex[T any](data T, index entities.Field, value any) ([]T, error) {
 	// Find and return the record(s) from the cache by index
 	table := GetStructType(data)
 	inMemoryCacheEntry, exists := Cache.cache[table]
@@ -423,7 +422,7 @@ func FindByIndex[T any](data T, index fields.Field, value any) ([]T, error) {
 }
 
 func RegisterSynchroniser(data any, synchroniser func(any) error) {
-	Cache.synchroniser = make(map[entity]func(any) error)
+	Cache.synchroniser = make(map[entities.Table]func(any) error)
 	table := GetStructType(data)
 	Cache.synchroniser[table] = synchroniser
 	// Get the name of the function passed in
@@ -434,7 +433,7 @@ func RegisterSynchroniser(data any, synchroniser func(any) error) {
 
 func RegisterHydrator(data any, hydrator func() ([]any, error)) {
 	if Cache.hydrator == nil {
-		Cache.hydrator = make(map[entity]func() ([]any, error))
+		Cache.hydrator = make(map[entities.Table]func() ([]any, error))
 	}
 	if data == nil {
 		logHandler.WarningLogger.Println("Cannot register hydrator for <nil> data")
@@ -447,12 +446,16 @@ func RegisterHydrator(data any, hydrator func() ([]any, error)) {
 	logHandler.WarningLogger.Printf("Registered Function %v as Hydrator for Table [%v]", funcname, table)
 }
 
-func Hydrate(data any) error {
+func HydrateForType(data any) error {
 	if data == nil {
 		return ce.ErrCacheNilDataWrapper("hydrate")
 	}
 	table := GetStructType(data)
 
+	return hydrateCacheByTable(table)
+}
+
+func Hydrate(table entities.Table) error {
 	return hydrateCacheByTable(table)
 }
 
@@ -473,7 +476,7 @@ func HydrateAll() error {
 	return nil
 }
 
-func hydrateCacheByTable(table entity) error {
+func hydrateCacheByTable(table entities.Table) error {
 	inMemoryCacheEntry, exists := Cache.cache[table]
 	if !exists {
 		return ce.ErrCacheDoesNotExistWrapper(table.String())
@@ -507,7 +510,7 @@ func hydrateCacheByTable(table entity) error {
 	return nil
 }
 
-func Synchronise(data any) error {
+func SynchroniseForType(data any) error {
 	table := GetStructType(data)
 	//	logHandler.InfoLogger.Printf("Flushing Cache for Table [%v]", table)
 	inMemoryCacheEntry, exists := Cache.cache[table]
@@ -538,19 +541,23 @@ func Synchronise(data any) error {
 	return nil
 }
 
+func Synchronise(table entities.Table) error {
+	return SynchroniseForType(table)
+}
+
 func SynchroniseAll() error {
 	for table, synchroniserFunc := range Cache.synchroniser {
 		if synchroniserFunc == nil {
 			continue
 		}
-		if err := Synchronise(table); err != nil {
+		if err := SynchroniseForType(table); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func isKeyRegistered(table entity) bool {
+func isKeyRegistered(table entities.Table) bool {
 	keyField, exists := Cache.key[table]
 	if !exists || keyField.String() == "" {
 		return false

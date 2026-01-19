@@ -8,7 +8,7 @@ import (
 	"github.com/asdine/storm/v3/index"
 	"github.com/asdine/storm/v3/q"
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/timing"
 
 	"github.com/mt1976/frantic-core/logHandler"
@@ -26,7 +26,7 @@ import (
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
 //
 // DEPRECATED: Use Get instead.
-func (db *DB) Retrieve(field fields.Field, value, to any) (any, error) {
+func (db *DB) Retrieve(field entities.Field, value, to any) (any, error) {
 	logHandler.WarningLogger.Printf("Retrieve is DEPRECATED, use Get instead")
 	panic("Retrieve is DEPRECATED, use Get instead")
 	//return db.get(field, value, to)
@@ -42,7 +42,7 @@ func (db *DB) Retrieve(field fields.Field, value, to any) (any, error) {
 // Returns:
 //   - any: The retrieved record.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func (db *DB) Get(field fields.Field, value, to any) (any, error) {
+func (db *DB) Get(field entities.Field, value, to any) (any, error) {
 	//logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db]", GetStructType(to), fields.Field, value, GetStructType(to), db.Name)
 	return db.get(field, value, to)
 }
@@ -57,7 +57,7 @@ func (db *DB) Get(field fields.Field, value, to any) (any, error) {
 // Returns:
 //   - any: The retrieved record.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func (db *DB) get(field fields.Field, value, to any) (any, error) {
+func (db *DB) get(field entities.Field, value, to any) (any, error) {
 	logHandler.DatabaseLogger.Printf("[GET]<%v> (%+v=%+v)[%+v] [%v.db] {%+v}", GetStructType(to), field.String(), value, GetStructType(to), db.Name, db)
 
 	// if db.isCaching(to) {
@@ -226,7 +226,7 @@ func (db *DB) GetAll(to any, options ...func(*index.Options)) ([]any, error) {
 // Returns:
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func (db *DB) GetAllWhere(field fields.Field, value, to any) ([]any, error) {
+func (db *DB) GetAllWhere(field entities.Field, value, to any) ([]any, error) {
 	tableName := GetStructType(to)
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", tableName, field.String(), value)
 
@@ -418,7 +418,7 @@ func (db *DB) Count(data any) (int, error) {
 // Returns:
 //   - int: The number of records that match the specified criteria.
 //   - error: An error object if any issues occur during the counting process; otherwise, nil.
-func (db *DB) CountWhere(field fields.Field, value any, to any) (int, error) {
+func (db *DB) CountWhere(field entities.Field, value any, to any) (int, error) {
 	logHandler.DatabaseLogger.Printf("[CNT]<%v>{COUNT} CountWhere (%+v=%+v)[%+v] [%v.db]", GetStructType(to), field.String(), value, GetStructType(to), db.Name)
 	if err := IsValidFieldInStruct(field, to); err != nil {
 		logHandler.DatabaseLogger.Printf("[CNT]<%v>{COUNT} CountWhere (%+v=%+v)[%+v] [%v.db] - Error", GetStructType(to), field.String(), value, GetStructType(to), db.Name)

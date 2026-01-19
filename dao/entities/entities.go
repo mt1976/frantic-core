@@ -1,4 +1,4 @@
-package fields
+package entities
 
 import (
 	"fmt"
@@ -11,6 +11,8 @@ import (
 // Field represents a database field used for queries
 type field string
 type Field field
+type table string
+type Table table
 
 // StormBool is a boolean type that can be marshalled to and from a string, this has been created as Storm does not support boolean types properly
 type StormBool struct {
@@ -198,4 +200,8 @@ func (b *Bool) IsTrue() bool {
 
 func (b *Bool) IsFalse() bool {
 	return !b.Bool()
+}
+
+func (t *Table) String() string {
+	return string(*t)
 }

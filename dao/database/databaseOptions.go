@@ -1,20 +1,20 @@
 package database
 
 import (
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
 // connectionConfig holds the configuration options for database connections
 type connectionConfig struct {
 	withCaching      bool
-	withCacheKey     fields.Field
+	withCacheKey     entities.Field
 	Verbose          bool
 	timeout          int
 	poolSize         int
 	nameSpace        string
 	withEncryption   bool
-	indices          []fields.Field
+	indices          []entities.Field
 	cacheInitialised bool
 }
 
@@ -30,7 +30,7 @@ func WithCaching(enabled bool) Option {
 }
 
 // WithCacheKey sets the cache key fields.Fields.Field for the database connection
-func WithCacheKey(field fields.Field) Option {
+func WithCacheKey(field entities.Field) Option {
 	logHandler.DatabaseLogger.Printf("[CON]{OPTION} WithCacheKey set to %v", field.String())
 	return func(c *connectionConfig) {
 		c.withCacheKey = field

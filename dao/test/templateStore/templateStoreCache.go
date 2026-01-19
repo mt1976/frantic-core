@@ -42,14 +42,14 @@ func CacheSpew() {
 
 func FlushCache() error {
 	logHandler.CacheLogger.Printf("FlushCache [%+v]", Domain)
-	err := cache.Synchronise(TemplateStore{})
+	err := cache.SynchroniseForType(TemplateStore{})
 	logHandler.CacheLogger.Printf("FlushCache [%+v] complete", Domain)
 	return err
 }
 
 func HydrateCache() error {
 	logHandler.CacheLogger.Printf("HydrateCache [%+v]", Domain)
-	err := cache.Hydrate(TemplateStore{})
+	err := cache.HydrateForType(TemplateStore{})
 	logHandler.CacheLogger.Printf("HydrateCache [%+v] complete", Domain)
 	return err
 }

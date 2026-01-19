@@ -12,7 +12,7 @@ import (
 	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/application"
 	"github.com/mt1976/frantic-core/dao/database"
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/idHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/paths"
@@ -21,7 +21,7 @@ import (
 
 var SEP = "-"
 
-func ExportCSV[T any](exportName string, exportList []T, idField fields.Field) error {
+func ExportCSV[T any](exportName string, exportList []T, idField entities.Field) error {
 	clock := timing.Start(exportName, "Export", "")
 
 	logHandler.ExportLogger.Printf("Exporting %v record(s) as CSV '%v'", len(exportList), exportName)
@@ -75,7 +75,7 @@ func ExportCSV[T any](exportName string, exportList []T, idField fields.Field) e
 	return nil
 }
 
-func ExportJSON[T any](exportName string, exportList []T, idField fields.Field) error {
+func ExportJSON[T any](exportName string, exportList []T, idField entities.Field) error {
 	clock := timing.Start(exportName, "Export", "")
 
 	//if exportName == "" {
@@ -94,7 +94,7 @@ func ExportJSON[T any](exportName string, exportList []T, idField fields.Field) 
 	return nil
 }
 
-func buildName[T any](baseName string, exportList []T, idField fields.Field) string {
+func buildName[T any](baseName string, exportList []T, idField entities.Field) string {
 	if baseName == "" {
 		baseName = "Export"
 	}
@@ -116,7 +116,7 @@ func buildName[T any](baseName string, exportList []T, idField fields.Field) str
 	return domainName
 }
 
-func buildNameForRecord[T any](baseName string, record T, idField fields.Field) string {
+func buildNameForRecord[T any](baseName string, record T, idField entities.Field) string {
 	logHandler.TraceLogger.Printf("buildNameForRecord IN: baseName=[%v]", baseName)
 	if baseName == "" {
 		baseName = "Export"

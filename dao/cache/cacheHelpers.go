@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -17,7 +17,7 @@ func GetFunctionName(temp interface{}) string {
 	return strs[len(strs)-1]
 }
 
-func GetStructType(data any) entity {
+func GetStructType(data any) entities.Table {
 	logHandler.TraceLogger.Printf("Resolving Struct Type for data: %v", data)
 	rtnType := reflect.TypeOf(data).String()
 	base := rtnType
@@ -33,10 +33,10 @@ func GetStructType(data any) entity {
 	}
 	logHandler.TraceLogger.Printf("{TYPE} Resolved Struct Type: %v (base: %v)", rtnType, base)
 
-	return entity(rtnType)
+	return entities.Table(rtnType)
 }
 
-func IsValidFieldInStruct(fromField fields.Field, data any) error {
+func IsValidFieldInStruct(fromField entities.Field, data any) error {
 	// Normalise the type: unwrap pointers, and if it's a slice/array, use the element type.
 	if data == nil {
 		logHandler.ErrorLogger.Printf("Cannot validate field '%v' on <nil> data", fromField.String())
@@ -74,7 +74,7 @@ func IsValidFieldInStruct(fromField fields.Field, data any) error {
 	return nil
 }
 
-func IsValidTypeForField(field fields.Field, data, forStruct any) error {
+func IsValidTypeForField(field entities.Field, data, forStruct any) error {
 	if forStruct == nil {
 		logHandler.ErrorLogger.Printf("Cannot validate type for field '%v' on <nil> struct", field.String())
 		return commonErrors.ErrInvalidFieldWrapper(field.String())
@@ -114,8 +114,4 @@ func IsValidTypeForField(field fields.Field, data, forStruct any) error {
 	}
 	logHandler.TraceLogger.Printf("Type for field '%v' is valid: expected '%v', got '%v'", field.String(), structFieldType, dataType)
 	return nil
-}
-
-func (e *entity) String() string {
-	return string(*e)
 }

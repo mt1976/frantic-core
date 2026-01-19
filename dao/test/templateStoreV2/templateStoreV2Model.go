@@ -1,33 +1,29 @@
-package templateStore
-
-// Data Access Object template
-// Version: 0.3.0
-// Updated on: 2025-12-31
-
-//TODO: RENAME "template" TO THE NAME OF THE DOMAIN ENTITY
-//TODO: Update the template_Store struct to match the domain entity
-//TODO: Update the Fields. constants to match the domain entity
+package templateStoreV2
 
 import (
 	"time"
 
-	audit "github.com/mt1976/frantic-core/dao/audit"
+	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/dao/entities"
 )
 
-var Domain = "Template"
-var TableName = Domain + "Store"
+var TableName = entities.Table("TemplateStore")
+var tableName = TableName.String()
 
-// TemplateStore represents a User entity.
+// TemplateStore represents a sample entity for demonstrating reduced DAO boilerplate.
+// Replace this struct and Fields as needed for your real tableName entity.
 type TemplateStore struct {
-	// First three fields are mandatory for all DAO entities
-	ID  int    `storm:"id,increment=100"` // primary key with auto increment
-	Key string `storm:"unique"`           // key
-	Raw string `storm:"unique"`           // raw ID before encoding
-	// Add your domain entity fields below
+	// The primary key field(s), managed by the framework, DO NOT MODIFY
+	ID  int    `storm:"id,increment=100"`
+	Key string `storm:"index,unique"`
+	Raw string `storm:"index,unique"`
+	// Audit information, managed by the framework, DO NOT MODIFY
+	Audit audit.Audit `csv:"-"`
+
+	// Domain specific fields
 	UID           string `validate:"required"`
 	GID           string `storm:"index" validate:"required"`
-	RealName      string `validate:"required,min=5"` // this field will not be indexed
+	RealName      string `validate:"required,min=5"`
 	UserName      string `validate:"required,min=5"`
 	UserCode      string `storm:"index" validate:"required,min=5"`
 	Email         string
@@ -40,18 +36,16 @@ type TemplateStore struct {
 	ExampleString string
 	LastLogin     time.Time
 	LastHost      string `storm:"index"`
-	// Last field is mandatory for all DAO entities
-	Audit audit.Audit `csv:"-"` // audit data
 }
 
-// Fields provides a structured way to reference model field names.
 type fieldNames struct {
-	// First four fields are mandatory for all DAO entities
-	ID    entities.Field
-	Key   entities.Field
-	Raw   entities.Field
+	// The primary key field(s), managed by the framework, DO NOT MODIFY
+	ID  entities.Field
+	Key entities.Field
+	Raw entities.Field
+	// The audit information, managed by the framework, DO NOT MODIFY
 	Audit entities.Field
-	// Add your domain entity fields below
+	// Domain specific fields, please modify as required
 	UID           entities.Field
 	GID           entities.Field
 	RealName      entities.Field
@@ -69,14 +63,14 @@ type fieldNames struct {
 	LastHost      entities.Field
 }
 
-// Fields provides a structured way to reference model field names.
 var Fields = fieldNames{
-	// First four fields are mandatory for all DAO entities
-	ID:    "ID",
-	Key:   "Key",
-	Raw:   "Raw",
+	// The primary key field(s), managed by the framework, DO NOT MODIFY
+	ID:  "ID",
+	Key: "Key",
+	Raw: "Raw",
+	// The audit information, managed by the framework, DO NOT MODIFY
 	Audit: "Audit",
-	// Add your domain entity fields below
+	// tableName-specific fields, please modify as required
 	UID:           "UID",
 	GID:           "GID",
 	RealName:      "RealName",

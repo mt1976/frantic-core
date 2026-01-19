@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 )
 
 const defaultCacheExpiry = 100 * 365 * 24 * time.Hour // 100 years
@@ -15,12 +15,12 @@ func Initialise() {
 	// Note: do not use ':=' here, that would shadow the package-level Cache.
 	Cache.created = time.Now()
 	Cache.updated = time.Time{}
-	Cache.cache = make(map[entity]entrys)
-	Cache.indices = make(map[entity][]fields.Field)
-	Cache.key = make(map[entity]fields.Field)
-	Cache.tablesActive = make(map[entity]bool)
-	Cache.count = make(map[entity]int64)
-	Cache.expiry = make(map[entity]time.Duration)
-	Cache.synchroniser = make(map[entity]func(any) error)
-	Cache.hydrator = make(map[entity]func() ([]any, error))
+	Cache.cache = make(map[entities.Table]entrys)
+	Cache.indices = make(map[entities.Table][]entities.Field)
+	Cache.key = make(map[entities.Table]entities.Field)
+	Cache.tablesActive = make(map[entities.Table]bool)
+	Cache.count = make(map[entities.Table]int64)
+	Cache.expiry = make(map[entities.Table]time.Duration)
+	Cache.synchroniser = make(map[entities.Table]func(any) error)
+	Cache.hydrator = make(map[entities.Table]func() ([]any, error))
 }

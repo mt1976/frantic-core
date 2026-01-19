@@ -18,7 +18,7 @@ import (
 	"github.com/mt1976/frantic-core/dao"
 	"github.com/mt1976/frantic-core/dao/audit"
 	"github.com/mt1976/frantic-core/dao/database"
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 	"github.com/mt1976/frantic-core/dao/lookup"
 	"github.com/mt1976/frantic-core/logHandler"
 	"github.com/mt1976/frantic-core/timing"
@@ -43,7 +43,7 @@ func Count() (int, error) {
 // Returns:
 //   - int: The count of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the counting process; otherwise, nil.
-func CountWhere(field fields.Field, value any) (int, error) {
+func CountWhere(field entities.Field, value any) (int, error) {
 	logHandler.DatabaseLogger.Printf("COUNT %v WHERE (%v=%v)", Domain, field.String(), value)
 	clock := timing.Start(Domain, "Count", fmt.Sprintf("%v=%v", field.String(), value))
 	count, err := activeDB.CountWhere(field, value, &TemplateStore{})
@@ -98,7 +98,7 @@ func GetByKey(key any) (TemplateStore, error) {
 // Returns:
 //   - TemplateStore: The TemplateStore record that matches the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func GetBy(field fields.Field, value any) (TemplateStore, error) {
+func GetBy(field entities.Field, value any) (TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 
 	clock := timing.Start(Domain, "Get", fmt.Sprintf("%v=%v", field, value))
@@ -198,7 +198,7 @@ func GetAll() ([]TemplateStore, error) {
 // Returns:
 //   - []TemplateStore: A slice of TemplateStore records that match the specified criteria.
 //   - error: An error object if any issues occur during the retrieval process; otherwise, nil.
-func GetAllWhere(field fields.Field, value any) ([]TemplateStore, error) {
+func GetAllWhere(field entities.Field, value any) ([]TemplateStore, error) {
 	logHandler.DatabaseLogger.Printf("SELECT %v WHERE (%v=%v)", Domain, field.String(), value)
 	dao.CheckDAOReadyState(Domain, audit.GET, initialised) // Check the DAO has been initialised, Mandatory.
 
@@ -298,7 +298,7 @@ func DeleteByKey(ctx context.Context, key string, note string) error {
 //
 // Returns:
 //   - error: An error object if any issues occur during the deletion process; otherwise, nil.
-func DeleteBy(ctx context.Context, field fields.Field, value any, note string) error {
+func DeleteBy(ctx context.Context, field entities.Field, value any, note string) error {
 	logHandler.DatabaseLogger.Printf("DELETE %v WHERE %v=%v", Domain, field, value)
 
 	dao.CheckDAOReadyState(Domain, audit.DELETE, initialised) // Check the DAO has been initialised, Mandatory.
@@ -436,7 +436,7 @@ func GetDefaultLookup() (lookup.Lookup, error) {
 // Returns:
 //   - lookup.Lookup: A Lookup structure containing key-value pairs based on the specified fields.
 //   - error: An error object if any issues occur during the lookup process; otherwise, nil.
-func GetLookup(field, value fields.Field) (lookup.Lookup, error) {
+func GetLookup(field, value entities.Field) (lookup.Lookup, error) {
 
 	dao.CheckDAOReadyState(Domain, audit.PROCESS, initialised) // Check the DAO has been initialised, Mandatory.
 

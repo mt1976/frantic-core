@@ -5,7 +5,7 @@ import (
 
 	"github.com/asdine/storm/v3"
 	"github.com/mt1976/frantic-core/commonErrors"
-	"github.com/mt1976/frantic-core/dao/fields"
+	"github.com/mt1976/frantic-core/dao/entities"
 
 	"github.com/mt1976/frantic-core/ioHelpers"
 	"github.com/mt1976/frantic-core/logHandler"
@@ -24,7 +24,7 @@ func connect(table any, options ...Option) *DB {
 		poolSize:         connectionPoolMaxSize,
 		nameSpace:        "main",
 		withEncryption:   false,
-		indices:          []fields.Field{},
+		indices:          []entities.Field{},
 		withCacheKey:     "ID",
 		cacheInitialised: false,
 	}
