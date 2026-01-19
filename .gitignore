@@ -24,16 +24,8 @@ go.work.sum
 # env file
 .env
 main.go
-dao/test/userStore/.DS_Store
-dao/test/userStore/README.md
-dao/test/userStore/userStore_cache.go
-dao/test/userStore/userStore_helpers.go
-dao/test/userStore/userStore_impex.go
-dao/test/userStore/userStore_init.go
-dao/test/userStore/userStore_internals.go
-dao/test/userStore/userStore_model.go
-dao/test/userStore/userStore_new.go
-dao/test/userStore/userStore.go
+dao/test/*
+dao/test
 data/database/*.db
 data/dumps/*.json
 data/defaults/*.csv
