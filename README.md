@@ -1,6 +1,21 @@
 # frantic-core
 
-frantic-core is a comprehensive Go utility library providing a wide range of helpers and utilities for application development. It includes modules for banking, colors, configuration, error handling, date and time helpers, logging, math, messaging, networking, notifications, string manipulation, and more.  
+frantic-core is a Go utility library and application toolkit.
+
+It includes a large set of helper packages (banking, dates, logging, etc.) as well as a Storm-backed DAO layer (`dao/`) with caching and a code generator (`cmd/dao-gen`) for generating new DAO packages.
+
+Docs:
+
+- [CODE-GEN.md](CODE-GEN.md) (DAO generator)
+- [logHandler/README.md](logHandler/README.md) (logging)
+- [commonConfig/README.md](commonConfig/README.md) (configuration)
+- [commonErrors/README.md](commonErrors/README.md) (shared errors)
+- [contextHandler/README.md](contextHandler/README.md) (context/session)
+- [idHelpers/README.md](idHelpers/README.md) (IDs)
+- [importExportHelper/README.md](importExportHelper/README.md) (import/export)
+- [jobs/README.md](jobs/README.md) (scheduler)
+- [timing/README.md](timing/README.md) (timing)
+- [chiMiddleware/README.md](chiMiddleware/README.md) (chi middleware)
 
 ## Features
 
@@ -11,6 +26,9 @@ frantic-core is a comprehensive Go utility library providing a wide range of hel
 - Context and session helpers
 - Data import/export helpers
 - Date and time utilities
+- DAO / database layer (Storm-backed) with optional caching
+- Typed (generic) helpers to reduce DAO boilerplate
+- `go generate`-friendly DAO code generator (`cmd/dao-gen`)
 - Docker helpers
 - Email handling
 - Financial calculations
@@ -23,9 +41,10 @@ frantic-core is a comprehensive Go utility library providing a wide range of hel
 
 ## Directory Structure
 
-```
+```text
 application/         # Application entry points
 banking/             # Banking utilities (IBAN, ISIN, LEI, UTI, etc.)
+cmd/                 # Tools (includes dao-gen)
 colours/             # Color utilities
 commonConfig/        # Configuration management
 commonErrors/        # Error handling
@@ -114,6 +133,21 @@ func main() {
     today := dateHelpers.Today()
     fmt.Println("Today's date is:", today)
 }
+```
+
+## DAO layer & code generation
+
+If you’re using the DAO stack in `dao/`, these docs are the best entry points:
+
+- DAO generator (`dao-gen`): see [CODE-GEN.md](CODE-GEN.md)
+- Typed DB helpers (generics): see [dao/database/README.md](dao/database/README.md)
+- Example generated/templated DAO: see [dao/test/templateStoreV2/README.md](dao/test/templateStoreV2/README.md)
+
+Quick example (from this repo root):
+
+```bash
+mkdir -p dao/test/fred
+go run ./cmd/dao-gen -out dao/test/fred -pkg fred -type Fred -table Fred -namespace main -force
 ```
 
 ## License

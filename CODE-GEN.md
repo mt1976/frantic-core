@@ -2,6 +2,8 @@
 
 This repo includes a small code generator at `cmd/dao-gen` that produces a new DAO package using the TemplateStoreV2 template set.
 
+See also: [README.md](README.md)
+
 ## Quick start
 
 From the repo root:
@@ -109,6 +111,7 @@ From your other project:
 go get github.com/mt1976/frantic-core@latest
 go run github.com/mt1976/frantic-core/cmd/dao-gen@latest -out .app/dao/fred -pkg fred -type Fred -table Fred -namespace main -force
 ```
+
 In the example above replace fred/Fred with the name of the DAO, for example userStore/UserStore and the namespace used by the db instance, normally this will be "main"
 
 For repeatable builds, pin a specific version instead of `@latest`.
