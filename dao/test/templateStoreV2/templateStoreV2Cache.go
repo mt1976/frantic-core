@@ -59,8 +59,19 @@ func CacheHydrator(ctx context.Context) func() ([]any, error) {
 func CacheSynchroniser(ctx context.Context) func(any) error {
 	logHandler.InfoLogger.Printf("Defining Sync function for %v", tableName)
 	return func(data any) error {
-		record := data.(TemplateStore)
-		logHandler.CacheLogger.Printf("Sync cache for %v Key: %v", tableName, record.Key)
-		return record.UpdateWithAction(ctx, audit.SYNC, "Cache Sync Update")
+		switch rec := data.(type) {
+		case TemplateStore:
+			logHandler.CacheLogger.Printf("Sync cache for %v Key: %v", tableName, rec.Key)
+			return rec.UpdateWithAction(ctx, audit.SYNC, "Cache Sync Update")
+		case *TemplateStore:
+			if rec == nil {
+				return nil
+			}
+			logHandler.CacheLogger.Printf("Sync cache for %v Key: %v", tableName, rec.Key)
+			return rec.UpdateWithAction(ctx, audit.SYNC, "Cache Sync Update")
+		default:
+			logHandler.WarningLogger.Printf("Sync cache for %v received unexpected type %T", tableName, data)
+			return nil
+		}
 	}
 }

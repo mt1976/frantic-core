@@ -166,10 +166,26 @@ func AddEntry(data any) error {
 		return ce.ErrCacheNoKeyDefinedWrapper("add", table.String())
 	}
 
+	logHandler.InfoLogger.Printf("Adding Cache Entry for Table [%v] with Key Field [%v]", table, keyField.String())
 	// Lets get the key value and build the cache entry
 	// Get the key value, by using reflection to get the field value
-	key := reflect.ValueOf(data).FieldByName(keyField.String()).Interface()
-
+	rv := reflect.ValueOf(data)
+	if rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			logHandler.WarningLogger.Println("Cannot add <nil> pointer data to cache")
+			return ce.ErrCacheNilDataWrapper("add")
+		}
+		rv = rv.Elem()
+	}
+	if rv.Kind() != reflect.Struct {
+		return fmt.Errorf("cannot add non-struct cache entry for table %v: got %T", table.String(), data)
+	}
+	fv := rv.FieldByName(keyField.String())
+	if !fv.IsValid() {
+		return fmt.Errorf("cannot add cache entry for table %v: key field %q not found on %T", table.String(), keyField.String(), data)
+	}
+	key := fv.Interface()
+	logHandler.InfoLogger.Printf("Adding Cache Entry for Table [%v] with Key [%+v]", table, key)
 	// Get Cache Expiry
 	expiryDuration, err := GetExpiry(data)
 	if err != nil {
@@ -222,7 +238,21 @@ func RemoveEntry(data any) error {
 	}
 
 	// Get the key value, by using reflection to get the field value
-	key := reflect.ValueOf(data).FieldByName(keyField.String()).Interface()
+	rv := reflect.ValueOf(data)
+	if rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			return ce.ErrCacheNilDataWrapper("remove")
+		}
+		rv = rv.Elem()
+	}
+	if rv.Kind() != reflect.Struct {
+		return fmt.Errorf("cannot remove non-struct cache entry for table %v: got %T", table.String(), data)
+	}
+	fv := rv.FieldByName(keyField.String())
+	if !fv.IsValid() {
+		return fmt.Errorf("cannot remove cache entry for table %v: key field %q not found on %T", table.String(), keyField.String(), data)
+	}
+	key := fv.Interface()
 
 	delete(Cache.cache[table], key)
 	Cache.count[table]--
@@ -296,7 +326,7 @@ func GetAll[T any](data T) ([]T, error) {
 	}
 
 	// Range through the cache and build a strongly-typed return slice.
-	targetType := reflect.TypeOf((*T)(nil)).Elem()
+	targetType := reflect.TypeFor[T]()
 	rtn := make([]T, 0, len(inMemoryCacheEntry))
 	for _, record := range inMemoryCacheEntry {
 		converted, ok := coerceCacheValue[T](record.dataRecord, targetType)
@@ -647,6 +677,46 @@ func Synchronise(table entities.Table) error {
 	return SynchroniseForType(table)
 }
 
+func SynchroniseEntry(data any) error {
+	table := entities.GetStructType(data)
+	//	logHandler.InfoLogger.Printf("Flushing Cache Entry for Table [%v]", table)
+	inMemoryCacheEntry, exists := Cache.cache[table]
+	if !exists {
+		return ce.ErrCacheDoesNotExistWrapper(table.String())
+	}
+
+	if !isKeyRegistered(table) {
+		logHandler.WarningLogger.Printf("No Key registered for Table [%v]", table)
+		return ce.ErrCacheNoKeyDefinedWrapper("synchronise", table.String())
+	}
+
+	synchroniserFunc, exists := Cache.synchroniser[table]
+	if !exists {
+		return ce.ErrCacheNoSynchroniserDefinedWrapper(table.String())
+	}
+
+	keyField, exists := Cache.key[table]
+	if !exists || keyField.String() == "" {
+		return ce.ErrCacheNoKeyDefinedWrapper("synchronise", table.String())
+	}
+
+	// Get the key value, by using reflection to get the field value
+	key := reflect.ValueOf(data).FieldByName(keyField.String()).Interface()
+
+	record, exists := inMemoryCacheEntry[key]
+	if !exists {
+		return ce.ErrCacheRecordNotFoundWrapper(table.String(), key)
+	}
+
+	err := synchroniserFunc(record.dataRecord)
+	if err != nil {
+		return err
+	}
+
+	logHandler.InfoLogger.Printf("Cache Entry for Table [%v] with Key [%v] synchronised", table, key)
+	return nil
+}
+
 func SynchroniseAll() error {
 	for table, synchroniserFunc := range Cache.synchroniser {
 		if synchroniserFunc == nil {
@@ -665,4 +735,41 @@ func isKeyRegistered(table entities.Table) bool {
 		return false
 	}
 	return true
+}
+
+func ClearCacheForType(data any) error {
+	table := entities.GetStructType(data)
+	_, exists := Cache.cache[table]
+	if !exists {
+		return ce.ErrCacheDoesNotExistWrapper(table.String())
+	}
+
+	Cache.cache[table] = make(entrys)
+	Cache.count[table] = 0
+	Cache.updated = time.Now()
+	logHandler.InfoLogger.Printf("Cache for Table [%v] cleared", table)
+	return nil
+}
+
+func ClearAllCaches() error {
+	for table := range Cache.cache {
+		Cache.cache[table] = make(entrys)
+		Cache.count[table] = 0
+	}
+	Cache.updated = time.Now()
+	logHandler.InfoLogger.Printf("All Caches cleared")
+	return nil
+}
+
+func Clear(table entities.Table) error {
+	_, exists := Cache.cache[table]
+	if !exists {
+		return ce.ErrCacheDoesNotExistWrapper(table.String())
+	}
+
+	Cache.cache[table] = make(entrys)
+	Cache.count[table] = 0
+	Cache.updated = time.Now()
+	logHandler.InfoLogger.Printf("Cache for Table [%v] cleared", table)
+	return nil
 }
