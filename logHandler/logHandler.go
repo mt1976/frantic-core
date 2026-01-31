@@ -60,8 +60,8 @@ func init() {
 
 	setColoursNormal()
 	if runtime.GOOS == "windows" {
-		setColoursWindows()    
-	} 
+		setColoursWindows()
+	}
 
 	generalWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "general"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsGeneralLoggingDisabled() || settings.IsLoggingDisabled() {
@@ -157,10 +157,10 @@ func init() {
 
 	InfoLogger = log.New(generalWriter, formatNameWithColor(Green, "Info"), msgStructure)
 	WarningLogger = log.New(warningWriter, formatNameWithColor(Yellow, "Warn"), msgStructure)
-	ErrorLogger = log.New(errorWriter, formatNameWithColor(Red, "Erro"), msgStructure)
-	PanicLogger = log.New(panicWriter, formatNameWithColor(Red, "Pani"), msgStructure)
-	TimingLogger = log.New(timingWriter, formatNameWithColor(Gray, "Timi"), msgStructure)
-	EventLogger = log.New(eventWriter, formatNameWithColor(Magenta, "Even"), msgStructure)
+	ErrorLogger = log.New(errorWriter, formatNameWithColor(Red, "Errr"), msgStructure)
+	PanicLogger = log.New(panicWriter, formatNameWithColor(Red, "Pnic"), msgStructure)
+	TimingLogger = log.New(timingWriter, formatNameWithColor(Gray, "Time"), msgStructure)
+	EventLogger = log.New(eventWriter, formatNameWithColor(Magenta, "Evnt"), msgStructure)
 	ServiceLogger = log.New(serviceWriter, formatNameWithColor(Magenta, "Srvc"), msgStructure)
 	TraceLogger = log.New(traceWriter, formatNameWithColor(Gray, "Trac"), msgStructure)
 	AuditLogger = log.New(auditWriter, formatNameWithColor(White, "Audt"), msgStructure)
@@ -172,7 +172,7 @@ func init() {
 	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Expo"), msgStructure)
 	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Comm"), msgStructure)
 	LockLogger = log.New(lockWriter, formatNameWithColor(Blue, "Lock"), msgStructure)
-	CacheLogger = log.New(cacheWriter, formatNameWithColor(Cyan, "Cach"), msgStructure)
+	CacheLogger = log.New(cacheWriter, formatNameWithColor(Cyan, "Cche"), msgStructure)
 }
 
 func TestIt() {
