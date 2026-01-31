@@ -33,19 +33,21 @@ var (
 	CacheLogger          *log.Logger
 )
 
-var Reset string
-var Red string
-var Green string
-var Yellow string
-var Blue string
-var Magenta string
-var Cyan string
-var Gray string
-var White string
+var (
+	Reset   string
+	Red     string
+	Green   string
+	Yellow  string
+	Blue    string
+	Magenta string
+	Cyan    string
+	Gray    string
+	White   string
+)
 
 func init() {
 	settings := commonConfig.Get()
-	//applicationPath := "data/logs/"
+	// applicationPath := "data/logs/"
 	applicationPath := paths.Application().String()
 	applicationPath += paths.Logs().String()
 	applicationPath += string(os.PathSeparator)
@@ -81,12 +83,12 @@ func init() {
 		auditWriter = io.MultiWriter(io.Discard)
 	}
 
-	errorWriter := io.MultiWriter(os.Stdout, os.Stderr, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "error"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	errorWriter := io.MultiWriter(os.Stderr, os.Stdout, os.Stdout, os.Stdout, os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "error"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsLoggingDisabled() {
 		errorWriter = io.MultiWriter(io.Discard)
 	}
 
-	panicWriter := io.MultiWriter(os.Stdout, os.Stderr, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "panic"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	panicWriter := io.MultiWriter(os.Stderr, os.Stdout, os.Stdout, os.Stdout, os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "panic"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsLoggingDisabled() {
 		panicWriter = io.MultiWriter(io.Discard)
 	}
@@ -153,24 +155,24 @@ func init() {
 
 	msgStructure := log.Lmsgprefix | log.Ldate | log.LstdFlags | log.Lshortfile
 
-	InfoLogger = log.New(generalWriter, formatNameWithColor(White, "Info"), msgStructure)
-	WarningLogger = log.New(warningWriter, formatNameWithColor(Yellow, "Warning"), msgStructure)
-	ErrorLogger = log.New(errorWriter, formatNameWithColor(Red, "Error"), msgStructure)
-	PanicLogger = log.New(panicWriter, formatNameWithColor(Red, "Panic"), msgStructure)
-	TimingLogger = log.New(timingWriter, formatNameWithColor(Gray, "Timing"), msgStructure)
-	EventLogger = log.New(eventWriter, formatNameWithColor(Magenta, "Event"), msgStructure)
-	ServiceLogger = log.New(serviceWriter, formatNameWithColor(Green, "Service"), msgStructure)
-	TraceLogger = log.New(traceWriter, formatNameWithColor(White, "Trace"), msgStructure)
-	AuditLogger = log.New(auditWriter, formatNameWithColor(Yellow, "Audit"), msgStructure)
-	TranslationLogger = log.New(translationWriter, formatNameWithColor(Cyan, "Translation"), msgStructure)
-	SecurityLogger = log.New(securityWriter, formatNameWithColor(Magenta, "Security"), msgStructure)
-	DatabaseLogger = log.New(databaseWriter, formatNameWithColor(Green, "Database"), msgStructure)
-	ApiLogger = log.New(apiWriter, formatNameWithColor(Green, "API"), msgStructure)
-	ImportLogger = log.New(importWriter, formatNameWithColor(Blue, "Import"), msgStructure)
-	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Export"), msgStructure)
-	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Communications"), msgStructure)
+	InfoLogger = log.New(generalWriter, formatNameWithColor(Green, "Info"), msgStructure)
+	WarningLogger = log.New(warningWriter, formatNameWithColor(Yellow, "Warn"), msgStructure)
+	ErrorLogger = log.New(errorWriter, formatNameWithColor(Red, "Erro"), msgStructure)
+	PanicLogger = log.New(panicWriter, formatNameWithColor(Red, "Pani"), msgStructure)
+	TimingLogger = log.New(timingWriter, formatNameWithColor(Gray, "Timi"), msgStructure)
+	EventLogger = log.New(eventWriter, formatNameWithColor(Magenta, "Even"), msgStructure)
+	ServiceLogger = log.New(serviceWriter, formatNameWithColor(Magenta, "Srvc"), msgStructure)
+	TraceLogger = log.New(traceWriter, formatNameWithColor(Gray, "Trac"), msgStructure)
+	AuditLogger = log.New(auditWriter, formatNameWithColor(White, "Audt"), msgStructure)
+	TranslationLogger = log.New(translationWriter, formatNameWithColor(Cyan, "Trl8"), msgStructure)
+	SecurityLogger = log.New(securityWriter, formatNameWithColor(Magenta, "SECR"), msgStructure)
+	DatabaseLogger = log.New(databaseWriter, formatNameWithColor(Blue, "DBas"), msgStructure)
+	ApiLogger = log.New(apiWriter, formatNameWithColor(Cyan, "API_"), msgStructure)
+	ImportLogger = log.New(importWriter, formatNameWithColor(Blue, "Impo"), msgStructure)
+	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Expo"), msgStructure)
+	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Comm"), msgStructure)
 	LockLogger = log.New(lockWriter, formatNameWithColor(Blue, "Lock"), msgStructure)
-	CacheLogger = log.New(cacheWriter, formatNameWithColor(Green, "Cache"), msgStructure)
+	CacheLogger = log.New(cacheWriter, formatNameWithColor(Cyan, "Cach"), msgStructure)
 }
 
 func TestIt() {
