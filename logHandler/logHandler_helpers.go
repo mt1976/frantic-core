@@ -16,7 +16,7 @@ func formatNameWithColor(colour, name string) string {
 	if len(name) > 4 {
 		name = name[:4]
 	}
-	return colour + name + Reset + " "
+	return colour + "[" + name + "]" + Reset + " "
 }
 
 func setColoursNormal() {

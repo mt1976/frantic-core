@@ -60,8 +60,8 @@ func init() {
 
 	setColoursNormal()
 	if runtime.GOOS == "windows" {
-		setColoursWindows()
-	}
+		setColoursWindows()    
+	} 
 
 	generalWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "general"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsGeneralLoggingDisabled() || settings.IsLoggingDisabled() {
