@@ -13,10 +13,10 @@ func assembleLogFileName(in, name string) string {
 func formatNameWithColor(colour, name string) string {
 	name = strings.ToUpper(name)
 	// take the first 4 characters only
-	if len(name) > 4 {
-		name = name[:4]
+	if len(name) > 3 {
+		name = name[:3]
 	}
-	return colour + "[" + name + "]" + Reset + " "
+	return colour + name + Reset + " "
 }
 
 func setColoursNormal() {
