@@ -29,3 +29,10 @@ func (s *Settings) SEP() string {
 func (s *Settings) Delimiter() string {
 	return s.GetDefault_Delimiter()
 }
+
+func (s *Settings) GetWorkerPoolSize() int {
+	if s.WorkerPool.Size <= 0 {
+		return 10
+	}
+	return s.WorkerPool.Size
+}

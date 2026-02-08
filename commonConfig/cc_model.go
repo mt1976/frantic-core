@@ -169,5 +169,9 @@ type Settings struct {
 
 	Backups struct {
 		RetainDays int `toml:"retainDays"`
-	}
+	} `toml:"Backups"`
+
+	WorkerPool struct {
+		Size int `toml:"size"`
+	} `toml:"WorkerPool"`
 }

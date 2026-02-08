@@ -49,3 +49,15 @@ func InjectUserContext(next http.Handler, uid string, username string) http.Hand
 			next.ServeHTTP(w, r)
 		})
 }
+
+func InjectWorkerPoolIntoContext(next http.Handler, workerPool interface{}) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			logHandler.InfoLogger.Println("Adding worker pool to context")
+			ctx := r.Context()
+			ctx = contextHandler.SetWorkerPool(ctx, workerPool)
+			logHandler.TraceLogger.Printf("Worker Pool added to context")
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
+		})
+}

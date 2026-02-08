@@ -25,6 +25,8 @@ var (
 	userRoleKey     contextKey
 )
 
+var WorkerPoolKey = contextKey{name: "workerPool", pointlessIdentifier: "workerPool"}
+
 // NewFartFarmer is a constructor for the fartFarmer struct
 func new(in string) contextKey {
 	var out contextKey

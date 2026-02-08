@@ -13,6 +13,20 @@ import (
 // tokenKey        = new(cfg.GetSecuritySessionKey_Token())
 // expiryPeriodKey = new(cfg.GetSecuritySessionKey_ExpiryPeriod())
 
+func SetWorkerPool(ctx context.Context, pool any) context.Context {
+	logHandler.TraceLogger.Printf("Setting Worker Pool in Context: %v=%v", WorkerPoolKey.name, pool)
+	return context.WithValue(ctx, WorkerPoolKey, pool)
+}
+
+func GetWorkerPool(ctx context.Context) any {
+	value := ctx.Value(WorkerPoolKey)
+	if value == nil {
+		logHandler.WarningLogger.Printf("Worker pool (%v) requested but not found in context, returning nil", WorkerPoolKey.name)
+		return nil
+	}
+	return value
+}
+
 func GetSession_UserCode(ctx context.Context) string {
 	value := ctx.Value(userCodeKey)
 	if value == nil {
