@@ -22,6 +22,7 @@ require (
 )
 
 require (
+	github.com/alitto/pond/v2 v2.6.0 // indirect
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
