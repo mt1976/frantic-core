@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/alitto/pond/v2"
-	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -21,7 +20,7 @@ func SetWorkerPool(ctx context.Context, pool pond.Pool) context.Context {
 }
 
 func GetWorkerPool(ctx context.Context) pond.Pool {
-	godump.Dump(ctx)
+	// godump.Dump(ctx)
 	value := ctx.Value(WorkerPoolKey)
 	if value == nil {
 		logHandler.WarningLogger.Printf("Worker pool (%v) requested but not found in context, returning nil", WorkerPoolKey.name)
