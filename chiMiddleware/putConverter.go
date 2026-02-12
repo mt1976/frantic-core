@@ -56,7 +56,7 @@ func InjectWorkerPoolIntoContext(next http.Handler, workerPool pond.Pool) http.H
 		func(w http.ResponseWriter, r *http.Request) {
 			logHandler.InfoLogger.Println("Adding worker pool to context")
 			ctx := r.Context()
-			ctx = contextHandler.SetWorkerPool(ctx, workerPool)
+			ctx = contextHandler.AddWorkerPoolToContext(ctx, workerPool)
 			logHandler.TraceLogger.Printf("Worker Pool added to context")
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)

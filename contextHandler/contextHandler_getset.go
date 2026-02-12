@@ -2,9 +2,11 @@ package contextHandler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/alitto/pond/v2"
+	"github.com/goforj/godump"
 	"github.com/mt1976/frantic-core/logHandler"
 )
 
@@ -14,20 +16,21 @@ import (
 // tokenKey        = new(cfg.GetSecuritySessionKey_Token())
 // expiryPeriodKey = new(cfg.GetSecuritySessionKey_ExpiryPeriod())
 
-func SetWorkerPool(ctx context.Context, pool pond.Pool) context.Context {
+func AddWorkerPoolToContext(ctx context.Context, pool pond.Pool) context.Context {
 	logHandler.TraceLogger.Printf("Setting Worker Pool in Context: %v=%v", WorkerPoolKey.name, pool)
 	return context.WithValue(ctx, WorkerPoolKey, pool)
 }
 
-func GetWorkerPool(ctx context.Context) pond.Pool {
-	// godump.Dump(ctx)
+func GetWorkerPool(ctx context.Context) (pond.Pool, error) {
+	logHandler.TraceLogger.Printf("Retrieving Worker Pool from Context: %v", godump.DumpStr(ctx))
 	value := ctx.Value(WorkerPoolKey)
 	if value == nil {
-		logHandler.WarningLogger.Printf("Worker pool (%v) requested but not found in context, returning nil", WorkerPoolKey.name)
-		panic("Worker pool requested but not found in context")
+		logHandler.ErrorLogger.Fatalf("Worker pool (%v) requested but not found in context, returning nil", WorkerPoolKey.name)
+		return nil, fmt.Errorf("Worker pool requested but not found in context")
+		// panic("Worker pool requested but not found in context")
 	}
 	// Coearce the value to the expected type (e.g., *pond.WorkerPool)
-	return value.(pond.Pool)
+	return value.(pond.Pool), nil
 }
 
 func GetSession_UserCode(ctx context.Context) string {
