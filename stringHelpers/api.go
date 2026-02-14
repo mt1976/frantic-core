@@ -57,7 +57,7 @@ func Encode(rawStr string) string {
 	out = strings.Trim(out, " ")
 	out, err := htmlHelpers.ToPathSafe(out)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("error encoding string: %v", err.Error())
+		logHandler.Error.Printf("error encoding string: %v", err.Error())
 		return ""
 	}
 

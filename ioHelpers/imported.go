@@ -22,7 +22,7 @@ func base64Decode(str string) (string, bool) {
 }
 
 func MkdirAll(path string) error {
-	logHandler.InfoLogger.Printf("[%v] Creating folder Path=[%v]", strings.ToUpper(name), path)
+	logHandler.Info.Printf("[%v] Creating folder Path=[%v]", strings.ToUpper(name), path)
 	return os.MkdirAll(path, os.ModeSticky|os.ModePerm)
 }
 

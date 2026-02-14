@@ -298,11 +298,11 @@ func StartOfDay(t time.Time) time.Time {
 	w := t.Format(Format.DMY)
 	r, err := time.Parse(Format.DMY, w)
 	if err != nil {
-		logHandler.WarningLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
+		logHandler.Warning.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
 		return t
 	}
 	if cfg.IsApplicationMode(commonConfig.MODE_DEVELOPMENT) {
-		logHandler.TraceLogger.Printf("[%v] [DateStartOfDay] Date=[%v] Result=[%v]", strings.ToUpper(name), t, r)
+		logHandler.Trace.Printf("[%v] [DateStartOfDay] Date=[%v] Result=[%v]", strings.ToUpper(name), t, r)
 	}
 	return r
 }
@@ -312,13 +312,13 @@ func EndOfDay(t time.Time) time.Time {
 	w := t.Format(Format.DMY)
 	r, err := time.Parse(Format.DMY, w)
 	if err != nil {
-		logHandler.WarningLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
+		logHandler.Warning.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
 		return t
 	}
 	r = r.AddDate(0, 0, 1)
 	r = r.Add(-time.Second)
 	if cfg.IsApplicationMode(commonConfig.MODE_DEVELOPMENT) {
-		logHandler.TraceLogger.Printf("[%v] [DateEndOfDay] Date=[%v] Result=[%v]", strings.ToUpper(name), t, r)
+		logHandler.Trace.Printf("[%v] [DateEndOfDay] Date=[%v] Result=[%v]", strings.ToUpper(name), t, r)
 	}
 	return r
 }
@@ -327,14 +327,14 @@ func EndOfDay(t time.Time) time.Time {
 // when both are compared at their respective start-of-day values.
 func IsBeforeOrEqualTo(t1, t2 time.Time) bool {
 	if cfg.IsApplicationMode(commonConfig.MODE_DEVELOPMENT) {
-		//	logger.InfoLogger.Printf("HLP: [HELPER] Date=[%v] Check=[%v]", DateStartOfDay(t1), DateStartOfDay(t2))
+		//	logger.Info.Printf("HLP: [HELPER] Date=[%v] Check=[%v]", DateStartOfDay(t1), DateStartOfDay(t2))
 	}
 	check := StartOfDay(t1)
 	if check.Before(StartOfDay(t2)) || check.Equal(StartOfDay(t2)) {
-		//	logger.InfoLogger.Printf("HLP: [HELPER] Date=[%v] Check=[%v] Result=[%v]", DateStartOfDay(t1), DateStartOfDay(t2), true)
+		//	logger.Info.Printf("HLP: [HELPER] Date=[%v] Check=[%v] Result=[%v]", DateStartOfDay(t1), DateStartOfDay(t2), true)
 		return true
 	}
-	//logger.InfoLogger.Printf("HLP: [HELPER] Date=[%v] Check=[%v] Result=[%v]", DateStartOfDay(t1), DateStartOfDay(t2), false)
+	//logger.Info.Printf("HLP: [HELPER] Date=[%v] Check=[%v] Result=[%v]", DateStartOfDay(t1), DateStartOfDay(t2), false)
 	return false
 }
 

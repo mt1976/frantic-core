@@ -170,7 +170,7 @@ func Lookup_LEI(inISIN string) (string, error) {
 			resp, err := http.Get(uri)
 			if err != nil {
 				//fmt.Println("No response from request")
-				logHandler.ErrorLogger.Printf("No response from request: %v", err)
+				logHandler.Error.Printf("No response from request: %v", err)
 			}
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body) // response body is []byte
@@ -178,7 +178,7 @@ func Lookup_LEI(inISIN string) (string, error) {
 			var result GLIEF
 			if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to go struct pointer
 				//				fmt.Println("Can not unmarshal JSON")
-				logHandler.ErrorLogger.Printf("Can not unmarshal JSON: %v", err)
+				logHandler.Error.Printf("Can not unmarshal JSON: %v", err)
 			}
 			//fmt.Printf("result: %v\n", result)
 			//spew.Dump(result)

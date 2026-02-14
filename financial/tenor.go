@@ -32,7 +32,7 @@ func (t *Tenor) String() string {
 func (t *Tenor) Set(term string) (*Tenor, error) {
 	newTenor, err := validateAndFormatTenor(term)
 	if err != nil {
-		logHandler.EventLogger.Printf("invalid tenor [%s] [%v]", term, err.Error())
+		logHandler.Event.Printf("invalid tenor [%s] [%v]", term, err.Error())
 		return nil, err
 	}
 	t.term = newTenor
@@ -44,7 +44,7 @@ func validateAndFormatTenor(tenor string) (string, error) {
 	// Validation is that the string is at least 2 characters long, and the last character is a valid unit
 	// i.e. D, W, M, Y
 	if len(tenor) < 2 {
-		logHandler.ErrorLogger.Printf("invalid tenor [%s] must be at least 2 characters long", tenor)
+		logHandler.Error.Printf("invalid tenor [%s] must be at least 2 characters long", tenor)
 		return "", fmt.Errorf("invalid tenor [%s] must be at least 2 characters long", tenor)
 	}
 	unit := tenor[len(tenor)-1]
@@ -60,7 +60,7 @@ func validateAndFormatTenor(tenor string) (string, error) {
 
 	_, err := strconv.Atoi(factor)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("supplied value [%s] is not a number %v", factor, err.Error())
+		logHandler.Error.Printf("supplied value [%s] is not a number %v", factor, err.Error())
 		return "", fmt.Errorf("supplied value [%s] is not a number", factor)
 	}
 
@@ -76,7 +76,7 @@ func validateAndFormatTenor(tenor string) (string, error) {
 	case 'Y':
 		return clean, nil
 	default:
-		logHandler.ErrorLogger.Printf("invalid tenor mnemonic [%c]", unit)
+		logHandler.Error.Printf("invalid tenor mnemonic [%c]", unit)
 		return "", fmt.Errorf("invalid tenor mnemonic")
 	}
 }

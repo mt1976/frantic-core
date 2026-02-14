@@ -152,7 +152,7 @@ func strArrayToStringWithSep(inArray []string, inSep string) string {
 func removeSpecialChars(in string) string {
 	reg, err := regexp.Compile(specialChars)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("Error=[%v]", err.Error())
+		logHandler.Error.Printf("Error=[%v]", err.Error())
 	}
 	newStr := reg.ReplaceAllString(in, "-")
 	return newStr
@@ -179,7 +179,7 @@ func encode(rawStr string) string {
 func decode(encodedStr string) string {
 	decodedStr, err := base64.URLEncoding.DecodeString(encodedStr)
 	if err != nil {
-		logHandler.WarningLogger.Printf("Error=[%v]", err.Error())
+		logHandler.Warning.Printf("Error=[%v]", err.Error())
 	}
 
 	return string(decodedStr)
@@ -249,13 +249,13 @@ func CompareStrings(a, b string) {
 		// If one line is missing
 		switch {
 		case lineA == "" && lineB != "":
-			logHandler.WarningLogger.Printf("[Line %d] Added:    %q", i+1, lineB)
+			logHandler.Warning.Printf("[Line %d] Added:    %q", i+1, lineB)
 		case lineA != "" && lineB == "":
-			logHandler.WarningLogger.Printf("[Line %d] Removed:  %q", i+1, lineA)
+			logHandler.Warning.Printf("[Line %d] Removed:  %q", i+1, lineA)
 		default:
-			logHandler.WarningLogger.Printf("[Line %d] Changed:", i+1)
-			logHandler.WarningLogger.Printf("   - %q", lineA)
-			logHandler.WarningLogger.Printf("   + %q", lineB)
+			logHandler.Warning.Printf("[Line %d] Changed:", i+1)
+			logHandler.Warning.Printf("   - %q", lineA)
+			logHandler.Warning.Printf("   + %q", lineB)
 		}
 	}
 }

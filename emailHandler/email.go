@@ -31,7 +31,7 @@ const (
 func Email_init() *gomail.Dialer {
 	//fmt.Println("Email Init")
 	clock := timing.Start("Email", "Message", "Initialise")
-	logHandler.CommunicationsLogger.Printf("[%v] Email - Initialising...", domain)
+	logHandler.Communications.Printf("[%v] Email - Initialising...", domain)
 	set := commonConfig.Get()
 
 	emailService := set.GetCommunicationsEmail_Host()
@@ -48,7 +48,7 @@ func Email_init() *gomail.Dialer {
 
 	Emailer = gomail.NewDialer(emailService, emailPort, emailUser, emailPassword)
 	Emailer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
-	logHandler.CommunicationsLogger.Printf("[%v] Email - Initialised", domain)
+	logHandler.Communications.Printf("[%v] Email - Initialised", domain)
 	clock.Stop(1)
 	return Emailer
 }
@@ -57,7 +57,7 @@ func Email_init() *gomail.Dialer {
 // `gomail` package in Go.
 func SendEmail(to string, name string, subject string, body string) {
 	clock := timing.Start("Email", "Message", "Send")
-	logHandler.CommunicationsLogger.Printf("[%v] Email - Sending...", domain)
+	logHandler.Communications.Printf("[%v] Email - Sending...", domain)
 	set := commonConfig.Get()
 
 	// The code block is creating a new email message using the `gomail` package.
@@ -75,6 +75,6 @@ func SendEmail(to string, name string, subject string, body string) {
 	if err := Emailer.DialAndSend(m); err != nil {
 		panic(ce.ErrEmailWrapper(err))
 	}
-	logHandler.CommunicationsLogger.Printf("[%v] Email - Sent to [%v] Subject [%v]", domain, to, subject)
+	logHandler.Communications.Printf("[%v] Email - Sent to [%v] Subject [%v]", domain, to, subject)
 	clock.Stop(1)
 }

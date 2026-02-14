@@ -5,5 +5,5 @@ import (
 )
 
 func report(in string) {
-	logHandler.InfoLogger.Printf("Mocking - %s\n", in)
+	logHandler.Info.Printf("Mocking - %s\n", in)
 }

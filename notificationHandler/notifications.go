@@ -16,7 +16,7 @@ var domain = "Notification"
 
 func Send(inMessage, inTitle string, key int) error {
 	clock := timing.Start(domain, "Message", "Pushover Notification")
-	logHandler.CommunicationsLogger.Printf("[%v] Pushover - Sending...", domain)
+	logHandler.Communications.Printf("[%v] Pushover - Sending...", domain)
 
 	cfg := commonConfig.Get()
 
@@ -30,10 +30,10 @@ func Send(inMessage, inTitle string, key int) error {
 		}
 	}
 
-	logHandler.CommunicationsLogger.Printf("[%v] Api Token=[%v] User Key=[%v]", strings.ToUpper(domain), poAPIKey, poUserKey)
+	logHandler.Communications.Printf("[%v] Api Token=[%v] User Key=[%v]", strings.ToUpper(domain), poAPIKey, poUserKey)
 
 	if poUserKey == "" || poAPIKey == "" {
-		logHandler.WarningLogger.Printf("[%v] Error=[%v]", strings.ToUpper(domain), "Pushover User Key or API Token not set, message not sent")
+		logHandler.Warning.Printf("[%v] Error=[%v]", strings.ToUpper(domain), "Pushover User Key or API Token not set, message not sent")
 		return nil
 	}
 
@@ -64,11 +64,11 @@ func Send(inMessage, inTitle string, key int) error {
 	}
 	//Spew(*message)
 
-	logHandler.CommunicationsLogger.Printf("[%v] Pusover - Message [Title=%v] [Message=%v]", domain, message.Title, message.Message)
+	logHandler.Communications.Printf("[%v] Pusover - Message [Title=%v] [Message=%v]", domain, message.Title, message.Message)
 
 	_, err := app.SendMessage(message, recipient)
 	if err != nil {
-		logHandler.WarningLogger.Printf("[%v] Error=[%v]", strings.ToUpper(domain), err.Error())
+		logHandler.Warning.Printf("[%v] Error=[%v]", strings.ToUpper(domain), err.Error())
 		return ce.ErrNotificationWrapper(err)
 	}
 

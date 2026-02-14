@@ -35,7 +35,7 @@ func NewISO23897UTI(generatingEntity string) (UTI, error) {
 
 	nu := UTI{uti: uti}
 	//fmt.Printf("UTI: %s\n", nu.Formatted())
-	logHandler.InfoLogger.Printf("UTI: %s\n", nu.Formatted())
+	logHandler.Info.Printf("UTI: %s\n", nu.Formatted())
 
 	return nu, nil
 }
@@ -71,7 +71,7 @@ func (U *UTI) IsValid() (bool, error) {
 	}
 
 	//fmt.Printf("UTI: %s\n", U.Formatted())
-	logHandler.InfoLogger.Printf("UTI: %s\n", U.Formatted())
+	logHandler.Info.Printf("UTI: %s\n", U.Formatted())
 
 	return true, nil
 }

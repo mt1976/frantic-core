@@ -13,20 +13,20 @@ import (
 // successful.
 func Copy(fileName string, fromPath string, toPath string) bool {
 
-	logHandler.WarningLogger.Println("Copying " + fileName + " from " + fromPath + " to " + toPath)
+	logHandler.Warning.Println("Copying " + fileName + " from " + fromPath + " to " + toPath)
 
 	content, err := Read(fileName, fromPath)
 	if err != nil {
-		logHandler.ErrorLogger.Fatalf("File Read Error %v", err)
+		logHandler.Error.Fatalf("File Read Error %v", err)
 	}
 
 	ok, err2 := Write(fileName, toPath, content)
 	if err2 != nil {
-		logHandler.ErrorLogger.Fatalf("File Write Error %v", err2)
+		logHandler.Error.Fatalf("File Write Error %v", err2)
 	}
 
 	if !ok {
-		logHandler.ErrorLogger.Fatalf("Unable to Copy "+fileName+" from "+fromPath+" to "+toPath, nil)
+		logHandler.Error.Fatalf("Unable to Copy "+fileName+" from "+fromPath+" to "+toPath, nil)
 	}
 
 	return true
@@ -51,7 +51,7 @@ func Read(fileName string, path string) (string, error) {
 	// making it very simple. No need to close the file.
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		logHandler.ErrorLogger.Fatal("Read Error : [", err, "]")
+		logHandler.Error.Fatal("Read Error : [", err, "]")
 	}
 	// Convert []byte to string and print to screen
 	return string(content), ce.ErrReadWrapper(err)
@@ -70,7 +70,7 @@ func Write(fileName string, path string, content string) (bool, error) {
 	message := []byte(content)
 	err := ioutil.WriteFile(filePath, message, 0644)
 	if err != nil {
-		logHandler.ErrorLogger.Fatalf("Write Error : [%v]", err)
+		logHandler.Error.Fatalf("Write Error : [%v]", err)
 		return false, ce.ErrWriteWrapper(err)
 	}
 	return false, nil
@@ -88,12 +88,12 @@ func WriteData(fileName string, path string, content string) int {
 	message := []byte(content)
 	err := os.WriteFile(filePath, message, 0644)
 	if err != nil {
-		logHandler.ErrorLogger.Fatalf("Write Error %v", err)
+		logHandler.Error.Fatalf("Write Error %v", err)
 		return -1
 	}
 
 	//	log.Println("File Write : " + fileName + " in " + path + "[" + filePath + "]")
-	logHandler.InfoLogger.Panicln(fileName, filePath)
+	logHandler.Info.Panicln(fileName, filePath)
 	return 1
 }
 
@@ -107,17 +107,17 @@ func Touch(filename string) bool {
 // Empty clears the contents of a specified directory
 // The function "Empty" deletes all files in a given directory.
 func Empty(dir string) error {
-	logHandler.InfoLogger.Println("TRASH", dir)
+	logHandler.Info.Println("TRASH", dir)
 	files, err := filepath.Glob(filepath.Join(dir, "*"))
 	if err != nil {
-		logHandler.InfoLogger.Println(err)
+		logHandler.Info.Println(err)
 		return ce.ErrEmptyWrapper(err)
 	}
 	//	fmt.Println("do Clear", files)
 	for _, file := range files {
 		err = os.RemoveAll(file)
 		if err != nil {
-			logHandler.InfoLogger.Println(err)
+			logHandler.Info.Println(err)
 			return ce.ErrEmptyWrapper(err)
 		}
 	}

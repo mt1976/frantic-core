@@ -117,14 +117,14 @@ func HandleGoValidatorError(err error) error {
 	// if err != nil {
 
 	// 	if _, ok := err.(*validator.InvalidValidationError); ok {
-	// 		logger.InfoLogger.Println(err)
+	// 		logger.Info.Println(err)
 	// 		return err
 	// 	}
 
 	// 	for _, err := range err.(validator.ValidationErrors) {
 
 	// 		op := fmt.Sprintf("VALIDATION: Field[%s] Tag[%s] Kind[%s] Param[%s] Value[%s]", err.Field(), err.Tag(), err.Kind(), err.Param(), err.Value())
-	// 		logger.InfoLogger.Println(op)
+	// 		logger.Info.Println(op)
 
 	// 	}
 
@@ -156,7 +156,7 @@ func ErrFunctionalWrapper(err error, f string) error {
 }
 
 func ErrWrapper(err error) error {
-	logHandler.WarningLogger.Println("It is not advised to wrap errors without a specific error message")
+	logHandler.Warning.Println("It is not advised to wrap errors without a specific error message")
 	return fmt.Errorf("error (%w)", err)
 }
 

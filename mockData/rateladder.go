@@ -98,7 +98,7 @@ func test() bool {
 	noitems := len(Ladder)
 	for i := 1; i <= noitems; i++ {
 		rli := GetRateLadderByIndex(i)
-		logHandler.InfoLogger.Printf("rate ladder info: rli=[%v] i=[%v]\n", rli, i)
+		logHandler.Info.Printf("rate ladder info: rli=[%v] i=[%v]\n", rli, i)
 	}
 	return true
 }

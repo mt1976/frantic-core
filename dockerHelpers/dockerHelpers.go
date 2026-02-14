@@ -31,13 +31,13 @@ func DeployDefaultsPayload() error {
 			continue
 		}
 
-		//logger.InfoLogger.Printf("Copying %v", entry.Name())
+		//logger.Info.Printf("Copying %v", entry.Name())
 		from := "./" + defaultsFolder + string(os.PathSeparator) + entry.Name()
 		to := destinationFolder + string(os.PathSeparator) + entry.Name()
-		//logHandler.EventLogger.Printf("Copying [%v] to [%v]", from, to)
+		//logHandler.Event.Printf("Copying [%v] to [%v]", from, to)
 		err = startupCopyFile(from, to)
 		if err != nil {
-			logHandler.ErrorLogger.Println(err.Error())
+			logHandler.Error.Println(err.Error())
 		}
 		//err = CopyFile("defaults/defaults.toml", "data/defaults/defaults.toml")
 

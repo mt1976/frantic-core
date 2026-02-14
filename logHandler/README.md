@@ -36,9 +36,9 @@ import (
 )
 
 func main() {
-    logHandler.InfoLogger.Println("hello")
-    logHandler.WarningLogger.Println("something to look at")
-    logHandler.ErrorLogger.Println("something failed")
+    logHandler.Info.Println("hello")
+    logHandler.Warning.Println("something to look at")
+    logHandler.Error.Println("something failed")
 
     logHandler.InfoBanner("startup", "init", "application starting")
     logHandler.Break()

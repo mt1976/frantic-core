@@ -24,7 +24,7 @@ func Start(domain, activity, notes string) Stopwatch {
 func (w *Stopwatch) Stop(count int) {
 	w.end = time.Now()
 	w.duration = w.end.Sub(w.start)
-	logHandler.TimingLogger.Printf("Domain=[%v] Activity=[%v] Notes=[%v] Count=[%v] Duration=[%v]", w.domain, strings.ToUpper(w.activity), w.notes, count, w.duration)
+	logHandler.Timing.Printf("Domain=[%v] Activity=[%v] Notes=[%v] Count=[%v] Duration=[%v]", w.domain, strings.ToUpper(w.activity), w.notes, count, w.duration)
 }
 
 // SnoozeFor snoozes the application for a given amount of time
@@ -41,6 +41,6 @@ func Snooze() {
 
 func snooze(noSeconds int) {
 	//pollingInterval, _ := strconv.Atoi(inPollingInterval)
-	logHandler.InfoLogger.Printf("Snooze... Zzzzzz.... snoozing for %d seconds...", noSeconds)
+	logHandler.Info.Printf("Snooze... Zzzzzz.... snoozing for %d seconds...", noSeconds)
 	time.Sleep(time.Duration(noSeconds) * time.Second)
 }

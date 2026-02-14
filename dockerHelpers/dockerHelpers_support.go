@@ -46,7 +46,7 @@ func startupCopyFile(src, dst string) (err error) {
 // destination file exists, all it's contents will be replaced by the contents
 // of the source file.
 func startupCopyFileContents(src, dst string) (err error) {
-	logHandler.EventLogger.Printf("Copying [%v] to [%v]", src, dst)
+	logHandler.Event.Printf("Copying [%v] to [%v]", src, dst)
 	in, err := os.Open(src)
 	if err != nil {
 		return

@@ -35,7 +35,7 @@ func Encode(in string) string {
 	out = strings.Trim(out, " ")
 	out, err := htmlHelpers.ToPathSafe(out)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("error encoding string: %v", err.Error())
+		logHandler.Error.Printf("error encoding string: %v", err.Error())
 		return ""
 	}
 
@@ -50,7 +50,7 @@ func Encode(in string) string {
 func Decode(in string) string {
 	in, err := htmlHelpers.FromPathSafe(in)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("error decoding string: %v", err.Error())
+		logHandler.Error.Printf("error decoding string: %v", err.Error())
 		return ""
 	}
 	return in
@@ -80,7 +80,7 @@ func GetUUID() string {
 	// yy = strings.Replace(yy, "-", "", -1)
 	//yy = base64Encode(yy)
 
-	//	logger.InfoLogger.Printf("[UUID] %v %v", yy, UUID2String(yy))
+	//	logger.Info.Printf("[UUID] %v %v", yy, UUID2String(yy))
 
 	// return yy
 }
@@ -93,14 +93,14 @@ func GetUUID() string {
 // 	// 2407032122304271385011014720229731 convert to 240703\212230\427138\501\1014720229\731
 // 	// 2407032122304271385011014720229731 convert to 240703.212230.427138.501.1014720229.731
 // 	// 2407032122304271385011014720229731 convert to 240703-212230-427138-501-1014720229-731
-// 	//logger.InfoLogger.Println("UID: UUID: ", uuid, len(uuid))
+// 	//logger.Info.Println("UID: UUID: ", uuid, len(uuid))
 
 // 	fmtr := "%s" + SEP + "%s" + SEP + "%s" + SEP + "%s" + SEP + "%s"
 // 	op := fmt.Sprintf(fmtr, uuid[0:6], uuid[6:12], uuid[12:18], uuid[18:24], uuid[24:])
 // 	day, _ := time.Parse("060102150405", uuid[0:12])
 // 	fmtr2 := "(Date=[%s]" + " " + "Time=[%s]" + " " + "ms=[%sms]" + " " + "uid=[%s]" + " " + "rnd=[%s])"
 // 	op2 := fmt.Sprintf(fmtr2, dateHelpers.FormatHuman(day), day.Format("15:04:05"), uuid[12:18], strings.TrimLeft(uuid[18:24], "0"), uuid[24:])
-// 	//logger.InfoLogger.Println("UID: String:", op, len(op))
+// 	//logger.Info.Println("UID: String:", op, len(op))
 // 	return op + ", " + op2
 // }
 
@@ -124,7 +124,7 @@ func GetUUIDv2WithPayload(payload string) (string, error) {
 	}
 	ksuid, err := ksuid.FromParts(time.Now(), []byte(payload))
 	if err != nil {
-		logHandler.ErrorLogger.Printf("Error generating KSUID: [%v]", err.Error())
+		logHandler.Error.Printf("Error generating KSUID: [%v]", err.Error())
 		return "", ce.ErrIDGenerationWrapper(err)
 	}
 	return ksuid.String(), nil
@@ -135,7 +135,7 @@ func GetUUIDv2WithPayload(payload string) (string, error) {
 func GetUUIDv2Payload(uuid string) string {
 	ksuid, err := ksuid.Parse(uuid)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("Error generating KSUID: [%v]", err.Error())
+		logHandler.Error.Printf("Error generating KSUID: [%v]", err.Error())
 		return ""
 	}
 	val := string(ksuid.Payload())
@@ -148,7 +148,7 @@ func GetUUIDv2Payload(uuid string) string {
 func InspectUUIDv2(uuid string) string {
 	ksuid, err := ksuid.Parse(uuid)
 	if err != nil {
-		logHandler.ErrorLogger.Println("Error parsing KSUID:", err, " got:", len(uuid), " uuid", uuid)
+		logHandler.Error.Println("Error parsing KSUID:", err, " got:", len(uuid), " uuid", uuid)
 		return ""
 	}
 	payload := ksuid.Payload()
@@ -160,7 +160,7 @@ func InspectUUIDv2(uuid string) string {
 // (hashed) form of the composite ID.
 func BuildCompositeID(part ...interface{}) (compositeID string, encodedCompositeID string, err error) {
 
-	logHandler.TraceLogger.Printf("BuildCompositeID called with parts: %v", part)
+	logHandler.Trace.Printf("BuildCompositeID called with parts: %v", part)
 
 	// Based on parts, build a composite ID, e.g., "part1::part2::part3"
 	// parts must be convertible to string
@@ -173,7 +173,7 @@ func BuildCompositeID(part ...interface{}) (compositeID string, encodedComposite
 	}
 
 	encodedCompositeID = Encode(compositeID)
-	logHandler.TraceLogger.Printf("Built CompositeID: %v, Encoded: %v", compositeID, encodedCompositeID)
+	logHandler.Trace.Printf("Built CompositeID: %v, Encoded: %v", compositeID, encodedCompositeID)
 	return compositeID, encodedCompositeID, nil
 }
 
@@ -193,41 +193,41 @@ const exampleID = "5907763e7e4043e610d88bf2feae302a0ceb2578f923c4eed94004dbfdfba
 // If the input appears to be a hash (example length), it is lowercased.
 func SanitizeID(id string) string {
 	orig := id
-	logHandler.TraceLogger.Printf("Sanitizing ID: '%v'", id)
+	logHandler.Trace.Printf("Sanitizing ID: '%v'", id)
 	sanitizedID := stringHelpers.CamelCase(id)
-	logHandler.TraceLogger.Printf("CamelCased ID: '%v'", sanitizedID)
+	logHandler.Trace.Printf("CamelCased ID: '%v'", sanitizedID)
 	sanitizedID = stringHelpers.RemoveSpecialChars(sanitizedID)
-	logHandler.TraceLogger.Printf("Removed Special Chars ID: '%v'", sanitizedID)
+	logHandler.Trace.Printf("Removed Special Chars ID: '%v'", sanitizedID)
 	sanitizedID = strings.TrimSpace(sanitizedID)
-	logHandler.TraceLogger.Printf("Trimmed ID: '%v'", sanitizedID)
+	logHandler.Trace.Printf("Trimmed ID: '%v'", sanitizedID)
 	// cleanID = strings.ToLower(cleanID)
-	// logHandler.TraceLogger.Printf("Lowercased ID: %v", cleanID)
+	// logHandler.Trace.Printf("Lowercased ID: %v", cleanID)
 	sanitizedID = strings.ReplaceAll(sanitizedID, "_", "")
-	logHandler.TraceLogger.Printf("Final Sanitized ID: '%v'", sanitizedID)
+	logHandler.Trace.Printf("Final Sanitized ID: '%v'", sanitizedID)
 	sanitizedID = strings.ReplaceAll(sanitizedID, "-", "")
 
 	sanitizedID = strings.ReplaceAll(sanitizedID, ".local", "")
-	logHandler.TraceLogger.Printf("Removed .local ID: '%v'", sanitizedID)
+	logHandler.Trace.Printf("Removed .local ID: '%v'", sanitizedID)
 	r := strings.NewReplacer("\n", "", "\r", "", "\t", "")
 	sanitizedID = r.Replace(sanitizedID)
-	logHandler.TraceLogger.Println("Removed \n \r \t")
+	logHandler.Trace.Println("Removed \n \r \t")
 
 	sanitizedID = stringHelpers.RemoveSpecialCharacters(sanitizedID)
-	logHandler.TraceLogger.Printf("Stripped Special ID: '%v'", sanitizedID)
+	logHandler.Trace.Printf("Stripped Special ID: '%v'", sanitizedID)
 
 	if len(orig) == len(exampleID) {
 		// Looks like a hash - make lowercase
 		sanitizedID = strings.ToLower(sanitizedID)
-		logHandler.TraceLogger.Printf("Sanitized ID looks like a hash, lowercased to: '%v'", sanitizedID)
+		logHandler.Trace.Printf("Sanitized ID looks like a hash, lowercased to: '%v'", sanitizedID)
 	}
-	logHandler.TraceLogger.Printf("Final Sanitized ID after removing hyphens: '%v'", sanitizedID)
+	logHandler.Trace.Printf("Final Sanitized ID after removing hyphens: '%v'", sanitizedID)
 	if sanitizedID == "" {
-		logHandler.TraceLogger.Printf("Sanitized ID is empty for original ID: '%v'", orig)
+		logHandler.Trace.Printf("Sanitized ID is empty for original ID: '%v'", orig)
 	}
 	if orig == sanitizedID {
-		logHandler.TraceLogger.Printf("Sanitized ID is unchanged: '%v'", sanitizedID)
+		logHandler.Trace.Printf("Sanitized ID is unchanged: '%v'", sanitizedID)
 	} else {
-		logHandler.TraceLogger.Printf("Sanitized ID changed from '%v' to '%v'", orig, sanitizedID)
+		logHandler.Trace.Printf("Sanitized ID changed from '%v' to '%v'", orig, sanitizedID)
 		if len(orig) == len(exampleID) {
 			stringHelpers.CompareStrings(orig, sanitizedID)
 		}

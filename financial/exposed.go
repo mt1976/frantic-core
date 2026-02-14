@@ -26,7 +26,7 @@ func AbbrToInt(str string) int {
 
 	intNum, err := strconv.Atoi(number)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("error converting string to int [%s]", number)
+		logHandler.Error.Printf("error converting string to int [%s]", number)
 	}
 
 	var retNum int
@@ -102,7 +102,7 @@ func FormatAmountToDPS(inAmount string, inCCY string, inPrec string) string {
 func FormatAmount(inAmount float64, inCCY string) string {
 	ccyInfo, err := mockData.GetCurrency(inCCY)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("Accounting Currenty Error=[%v]", err.Error())
+		logHandler.Error.Printf("Accounting Currenty Error=[%v]", err.Error())
 	}
 	ac := accounting.Accounting{Symbol: ccyInfo.Character, Precision: ccyInfo.DPS, Format: "%v", FormatNegative: "-%v", FormatZero: "\u2013 \u2013"}
 	return ac.FormatMoney(inAmount)

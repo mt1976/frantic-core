@@ -47,7 +47,7 @@ func HostName() string {
 	}
 	hn, err := os.Hostname()
 	if err != nil {
-		logHandler.ErrorLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
+		logHandler.Error.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
 		panic(commonErrors.ErrOSWrapper(err))
 	}
 	return strings.ToLower(hn)
@@ -60,7 +60,7 @@ func hostname_windows() string {
 	hostname, err := cmd.Output()
 
 	if err != nil {
-		logHandler.ErrorLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
+		logHandler.Error.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
 		panic(commonErrors.ErrOSWrapper(err))
 	}
 	rtn := string(hostname)
@@ -99,7 +99,7 @@ func get_IP() (string, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		os.Stderr.WriteString("Oops: " + err.Error() + "\n")
-		logHandler.ErrorLogger.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
+		logHandler.Error.Printf("[%v] Error=[%v]", strings.ToUpper(name), err.Error())
 		os.Exit(1)
 	}
 

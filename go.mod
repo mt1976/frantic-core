@@ -1,6 +1,6 @@
 module github.com/mt1976/frantic-core
 
-go 1.25
+go 1.26
 
 require (
 	github.com/BurntSushi/toml v1.6.0
@@ -11,7 +11,7 @@ require (
 	github.com/robfordww/finident v0.2.1
 	github.com/segmentio/ksuid v1.0.4
 	github.com/trisacrypto/lei v1.0.0
-	golang.org/x/term v0.39.0
+	golang.org/x/term v0.40.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
@@ -22,8 +22,9 @@ require (
 )
 
 require (
-	github.com/alitto/pond/v2 v2.6.0 // indirect
+	github.com/alitto/pond/v2 v2.6.0
 	github.com/cockroachdb/apd v1.1.0 // indirect
+	github.com/goforj/godump v1.9.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/smarty/assertions v1.16.0 // indirect
@@ -33,12 +34,12 @@ require (
 
 require (
 	github.com/gregdel/pushover v1.4.0
-	golang.org/x/text v0.33.0
+	golang.org/x/text v0.34.0
 )
 
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/tdewolff/minify/v2 v2.24.8
-	golang.org/x/crypto v0.47.0
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/crypto v0.48.0
+	golang.org/x/sys v0.41.0 // indirect
 )

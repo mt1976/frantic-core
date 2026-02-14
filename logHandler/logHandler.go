@@ -13,24 +13,26 @@ import (
 )
 
 var (
-	WarningLogger        *log.Logger
-	InfoLogger           *log.Logger
-	ErrorLogger          *log.Logger
-	PanicLogger          *log.Logger
-	TimingLogger         *log.Logger
-	EventLogger          *log.Logger
-	ServiceLogger        *log.Logger
-	TraceLogger          *log.Logger
-	AuditLogger          *log.Logger
-	TranslationLogger    *log.Logger
-	SecurityLogger       *log.Logger
-	DatabaseLogger       *log.Logger
-	ApiLogger            *log.Logger
-	ImportLogger         *log.Logger
-	ExportLogger         *log.Logger
-	CommunicationsLogger *log.Logger
-	LockLogger           *log.Logger
-	CacheLogger          *log.Logger
+	Warning        *log.Logger
+	Info           *log.Logger
+	Error          *log.Logger
+	Panic          *log.Logger
+	Timing         *log.Logger
+	Event          *log.Logger
+	Service        *log.Logger
+	Trace          *log.Logger
+	Audit          *log.Logger
+	Translation    *log.Logger
+	Security       *log.Logger
+	Database       *log.Logger
+	Api            *log.Logger
+	Import         *log.Logger
+	Export         *log.Logger
+	Communications *log.Logger
+	Lock           *log.Logger
+	Unlock         *log.Logger
+	SkipLock       *log.Logger
+	Cache          *log.Logger
 )
 
 var (
@@ -73,7 +75,7 @@ func init() {
 		timingWriter = io.MultiWriter(io.Discard)
 	}
 
-	serviceWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "service"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	serviceWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "worker"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
 	if settings.IsServiceLoggingDisabled() || settings.IsLoggingDisabled() {
 		serviceWriter = io.MultiWriter(io.Discard)
 	}
@@ -155,57 +157,63 @@ func init() {
 
 	msgStructure := log.Lmsgprefix | log.Ldate | log.LstdFlags | log.Lshortfile
 
-	InfoLogger = log.New(generalWriter, formatNameWithColor(Green, "Info"), msgStructure)
-	WarningLogger = log.New(warningWriter, formatNameWithColor(Yellow, "Warn"), msgStructure)
-	ErrorLogger = log.New(errorWriter, formatNameWithColor(Red, "Errr"), msgStructure)
-	PanicLogger = log.New(panicWriter, formatNameWithColor(Red, "Pnic"), msgStructure)
-	TimingLogger = log.New(timingWriter, formatNameWithColor(Gray, "Time"), msgStructure)
-	EventLogger = log.New(eventWriter, formatNameWithColor(Magenta, "Evnt"), msgStructure)
-	ServiceLogger = log.New(serviceWriter, formatNameWithColor(Magenta, "Srvc"), msgStructure)
-	TraceLogger = log.New(traceWriter, formatNameWithColor(Gray, "Trac"), msgStructure)
-	AuditLogger = log.New(auditWriter, formatNameWithColor(White, "Audt"), msgStructure)
-	TranslationLogger = log.New(translationWriter, formatNameWithColor(Cyan, "Trl8"), msgStructure)
-	SecurityLogger = log.New(securityWriter, formatNameWithColor(Magenta, "SECR"), msgStructure)
-	DatabaseLogger = log.New(databaseWriter, formatNameWithColor(Blue, "DBas"), msgStructure)
-	ApiLogger = log.New(apiWriter, formatNameWithColor(Cyan, "API_"), msgStructure)
-	ImportLogger = log.New(importWriter, formatNameWithColor(Blue, "Impo"), msgStructure)
-	ExportLogger = log.New(exportWriter, formatNameWithColor(Cyan, "Expo"), msgStructure)
-	CommunicationsLogger = log.New(communicationsWriter, formatNameWithColor(White, "Comm"), msgStructure)
-	LockLogger = log.New(lockWriter, formatNameWithColor(Blue, "Lock"), msgStructure)
-	CacheLogger = log.New(cacheWriter, formatNameWithColor(Cyan, "Cche"), msgStructure)
+	Info = log.New(generalWriter, formatNameWithColor(Green, "Info"), msgStructure)
+	Warning = log.New(warningWriter, formatNameWithColor(Yellow, "Warn"), msgStructure)
+	Error = log.New(errorWriter, formatNameWithColor(Red, "Errr"), msgStructure)
+	Panic = log.New(panicWriter, formatNameWithColor(Red, "Pnic"), msgStructure)
+	Timing = log.New(timingWriter, formatNameWithColor(Gray, "Time"), msgStructure)
+	Event = log.New(eventWriter, formatNameWithColor(Magenta, "Evnt"), msgStructure)
+	Service = log.New(serviceWriter, formatNameWithColor(Cyan, "Work"), msgStructure)
+	Trace = log.New(traceWriter, formatNameWithColor(Gray, "Trac"), msgStructure)
+	Audit = log.New(auditWriter, formatNameWithColor(White, "Audt"), msgStructure)
+	Translation = log.New(translationWriter, formatNameWithColor(Cyan, "Trl8"), msgStructure)
+	Security = log.New(securityWriter, formatNameWithColor(Magenta, "SECR"), msgStructure)
+	Database = log.New(databaseWriter, formatNameWithColor(Blue, "DBas"), msgStructure)
+	Api = log.New(apiWriter, formatNameWithColor(Cyan, "API_"), msgStructure)
+	Import = log.New(importWriter, formatNameWithColor(Gray, "Impo"), msgStructure)
+	Export = log.New(exportWriter, formatNameWithColor(White, "Expo"), msgStructure)
+	Communications = log.New(communicationsWriter, formatNameWithColor(Cyan, "Comm"), msgStructure)
+	Lock = log.New(lockWriter, formatNameWithColor(Blue, "Lock"), msgStructure)
+	Unlock = log.New(lockWriter, formatNameWithColor(Blue, "Unlk"), msgStructure)
+	SkipLock = log.New(lockWriter, formatNameWithColor(Blue, "Skip"), msgStructure)
+
+	Cache = log.New(cacheWriter, formatNameWithColor(Cyan, "Cche"), msgStructure)
 }
 
 func TestIt() {
-	InfoLogger.Println("Starting the application...")
-	InfoLogger.Println("Something noteworthy happened")
-	WarningLogger.Println("There is something you should know about")
-	PanicLogger.Println("Something went wrong")
-	ErrorLogger.Println("Something went wrong")
-	TimingLogger.Println("Timing")
-	EventLogger.Println("Events")
-	ServiceLogger.Println("Service")
-	TraceLogger.Println("Trace")
-	AuditLogger.Println("Audit")
-	TranslationLogger.Println("Translation")
-	SecurityLogger.Println("Security")
-	DatabaseLogger.Println("Database")
-	ApiLogger.Println("API")
-	ImportLogger.Println("Import")
-	ExportLogger.Println("Export")
-	CommunicationsLogger.Println("Communications")
-	LockLogger.Println("Lock")
+	Info.Println("Starting the application...")
+	Info.Println("Something noteworthy happened")
+	Warning.Println("There is something you should know about")
+	Panic.Println("Something went wrong")
+	Error.Println("Something went wrong")
+	Timing.Println("Timing")
+	Event.Println("Events")
+	Service.Println("Service")
+	Trace.Println("Trace")
+	Audit.Println("Audit")
+	Translation.Println("Translation")
+	Security.Println("Security")
+	Database.Println("Database")
+	Api.Println("API")
+	Import.Println("Import")
+	Export.Println("Export")
+	Communications.Println("Communications")
+	Lock.Println("Lock")
+	Unlock.Println("Unlock")
+	SkipLock.Println("Skip Lock")
+	Cache.Println("Cache")
 }
 
 var hdr = "*------------------------------------------------------------------------*"
 
 func banner(logCategory, logActivity, logMessage string, logger *log.Logger) {
-	logger.Println(hdr)
-	logger.Printf("[%v] Activity=[%v] - %v", strings.ToUpper(logCategory), logActivity, logMessage)
-	logger.Println(hdr)
+	Info.Println(hdr)
+	Info.Printf("[%v] Activity=[%v] - %v", strings.ToUpper(logCategory), logActivity, logMessage)
+	Info.Println(hdr)
 }
 
-func InfoBanner(logCategory, logActivity, logMessage string) {
-	banner(logCategory, logActivity, logMessage, InfoLogger)
+func Banner(logCategory, logActivity, logMessage string) {
+	banner(logCategory, logActivity, logMessage, Info)
 }
 
 // ServiceBanner - log a banner message to the service log
@@ -215,5 +223,5 @@ func ServiceBanner(logCategory, logActivity, logMessage string) {
 }
 
 func Break() {
-	InfoLogger.Println(formatNameWithColor(Cyan, hdr))
+	Info.Println(formatNameWithColor(Cyan, hdr))
 }

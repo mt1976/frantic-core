@@ -18,7 +18,7 @@ func ValueToInt(s string) int {
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		// ... handle error
-		logHandler.WarningLogger.Printf("[%v] [Math] Error=[%v]", strings.ToUpper(name), err.Error())
+		logHandler.Warning.Printf("[%v] [Math] Error=[%v]", strings.ToUpper(name), err.Error())
 		return 999999999
 	}
 	return i

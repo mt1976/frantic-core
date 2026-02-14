@@ -42,13 +42,13 @@ func GetDateFromTenor(tenor Tenor, tradeDate time.Time, ccy ...string) (time.Tim
 
 	if len(ccy) == 0 {
 		//xlogs.Warn("no currency provided")
-		logHandler.ErrorLogger.Printf("no currency provided")
+		logHandler.Error.Printf("no currency provided")
 		return time.Now(), ce.ErrNoCurrencyProvided
 	}
 
 	if tenor.term == "" {
 		//xlogs.Warn("no tenor provided")
-		logHandler.ErrorLogger.Printf("no tenor provided")
+		logHandler.Error.Printf("no tenor provided")
 		return time.Now(), ce.ErrNoTenorProvided
 	}
 
@@ -58,7 +58,7 @@ func GetDateFromTenor(tenor Tenor, tradeDate time.Time, ccy ...string) (time.Tim
 	// loop thgouth currencies
 
 	if !mockData.IsValidPeriod(tenor.String()) {
-		logHandler.ErrorLogger.Printf("invalid tenor [%s]", tenor.String())
+		logHandler.Error.Printf("invalid tenor [%s]", tenor.String())
 		return time.Now(), ce.ErrInvalidTenorWrapper(tenor.String())
 	}
 
@@ -68,7 +68,7 @@ func GetDateFromTenor(tenor Tenor, tradeDate time.Time, ccy ...string) (time.Tim
 		//fmt.Printf("c: %v\n", c)
 		ccySpot, spotError := getSettlementDaysCCY(c)
 		if spotError != nil {
-			logHandler.ErrorLogger.Printf("error getting settlement days for currency [%s]", c)
+			logHandler.Error.Printf("error getting settlement days for currency [%s]", c)
 			return time.Now(), spotError
 		}
 		if ccySpot > spotDays {
@@ -91,7 +91,7 @@ func GetDateFromTenor(tenor Tenor, tradeDate time.Time, ccy ...string) (time.Tim
 
 	tenorPeriod, err := tenorToDuration(tenor)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("error converting tenor to duration [%s] [%v]", tenor.String(), err.Error())
+		logHandler.Error.Printf("error converting tenor to duration [%s] [%v]", tenor.String(), err.Error())
 		return time.Now(), err
 	}
 	//fmt.Printf("tenorPeriod: %v\n", tenorPeriod)
@@ -106,7 +106,7 @@ func GetDateFromTenor(tenor Tenor, tradeDate time.Time, ccy ...string) (time.Tim
 func tenorToDuration(tenor Tenor) (time.Duration, error) {
 	term := tenor.String()
 	if len(term) < 2 {
-		logHandler.ErrorLogger.Printf("invalid term length [%s] must be 2 characters", term)
+		logHandler.Error.Printf("invalid term length [%s] must be 2 characters", term)
 		return 0, fmt.Errorf("invalid term length [%s] must be 2 characters", term)
 	}
 
@@ -115,7 +115,7 @@ func tenorToDuration(tenor Tenor) (time.Duration, error) {
 
 	value, err := strconv.Atoi(valueStr)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("invalid term prefix [%s]", term)
+		logHandler.Error.Printf("invalid term prefix [%s]", term)
 		return 0, fmt.Errorf("invalid term prefix [%s]", term)
 	}
 
@@ -129,7 +129,7 @@ func tenorToDuration(tenor Tenor) (time.Duration, error) {
 	case 'Y':
 		return time.Duration(value) * 365 * 24 * time.Hour, nil // Assuming 365 days per year
 	default:
-		logHandler.ErrorLogger.Printf("invalid term unit: %c", unit)
+		logHandler.Error.Printf("invalid term unit: %c", unit)
 		return 0, fmt.Errorf("invalid term unit: %c", unit)
 	}
 }
@@ -139,7 +139,7 @@ func tenorToDuration(tenor Tenor) (time.Duration, error) {
 func GetLadder(pivotDate time.Time, ccy ...string) ([]FinDate, int, error) {
 	//fmt.Printf("GetLadder pivotDate: [%v] [%v]\n", pivotDate, ccy)
 	if len(ccy) == 0 {
-		logHandler.ErrorLogger.Printf("no currency provided")
+		logHandler.Error.Printf("no currency provided")
 		return []FinDate{}, 0, ce.ErrNoCurrencyProvided
 	}
 	var DateList []FinDate
@@ -155,12 +155,12 @@ func GetLadder(pivotDate time.Time, ccy ...string) ([]FinDate, int, error) {
 		//fmt.Printf("ladder[%v]: %v\n", i, ladder)
 		thisTenor, err := NewTenor(ladder.Code)
 		if err != nil {
-			logHandler.ErrorLogger.Printf("error [%v]\n", err.Error())
+			logHandler.Error.Printf("error [%v]\n", err.Error())
 			return DateList, 0, ce.ErrFunctionalWrapper(err, "tenor validation")
 		}
 		date, err := GetDateFromTenor(thisTenor, pivotDate, ccy...)
 		if err != nil {
-			logHandler.ErrorLogger.Printf("error [%v]\n", err.Error())
+			logHandler.Error.Printf("error [%v]\n", err.Error())
 			return DateList, 0, ce.ErrFunctionalWrapper(err, "tenor -> date calculation")
 		}
 		//fmt.Printf("thisTenor: [%v] [%v] -> [%v]\n", ladder.Code, thisTenor.String(), date.Format("2006-01-02"))
@@ -190,18 +190,18 @@ func GetTenorFromDate(inDate, baseDate time.Time, ccy ...string) (Tenor, error) 
 	//fmt.Printf("GetTenorFromDate inDate: [%v] base: [%v] ccy [%v]\n", dFormat(inDate), dFormat(baseDate), ccy)
 
 	if len(ccy) == 0 {
-		logHandler.ErrorLogger.Printf("no currency provided")
+		logHandler.Error.Printf("no currency provided")
 		return Tenor{}, ce.ErrNoCurrencyProvided
 	}
 
 	if inDate.Before(baseDate) {
-		logHandler.WarningLogger.Printf("date before base date [%v] [%v]", inDate, baseDate)
+		logHandler.Warning.Printf("date before base date [%v] [%v]", inDate, baseDate)
 		return Tenor{}, fmt.Errorf("date before base date")
 	}
 
 	tenorList, ladderSize, err := GetLadder(baseDate, ccy...)
 	if err != nil {
-		logHandler.ErrorLogger.Printf("Error [%v]\n", err.Error())
+		logHandler.Error.Printf("Error [%v]\n", err.Error())
 		return Tenor{}, err
 	}
 
@@ -215,7 +215,7 @@ func GetTenorFromDate(inDate, baseDate time.Time, ccy ...string) (Tenor, error) 
 			//fmt.Printf("loop tenor.Date.Equal(inDate) %v %v", tenor.Date, inDate)
 			rtn, err := NewTenor(tenor.Code)
 			if err != nil {
-				logHandler.ErrorLogger.Printf("Error [%v]\n", err.Error())
+				logHandler.Error.Printf("Error [%v]\n", err.Error())
 				return Tenor{}, err
 			}
 			return rtn, nil
@@ -245,7 +245,7 @@ func GetTenorFromDate(inDate, baseDate time.Time, ccy ...string) (Tenor, error) 
 		// 	return approximatedTenor, nil
 		// }
 	}
-	logHandler.ErrorLogger.Printf("no tenor found [%v] [%v]", inDate, baseDate)
+	logHandler.Error.Printf("no tenor found [%v] [%v]", inDate, baseDate)
 	return Tenor{}, ce.ErrFunctionalWrapper(fmt.Errorf("no tenor found"), fmt.Sprintf("no tenor found for [%v][%v]", inDate, baseDate))
 }
 
@@ -255,18 +255,18 @@ func dFormat(d time.Time) string {
 
 func getTenorFromDateCCY(inDate, pivotDate time.Time, ccy string) (Tenor, error) {
 	// TODO - this is a stub, please write logic
-	logHandler.TraceLogger.Printf("getTenorFromDateCCY [%v] [%v] [%v]", inDate, pivotDate, ccy)
+	logHandler.Trace.Printf("getTenorFromDateCCY [%v] [%v] [%v]", inDate, pivotDate, ccy)
 	return Tenor{}, nil
 }
 
 func getTenorFromDateCCYPAIR(inDate, pivotDate time.Time, ccy1 string, ccy2 string) (Tenor, error) {
 	// TODO - this is a stub, please write logic
-	logHandler.TraceLogger.Printf("getTenorFromDateCCYPAIR [%v] [%v] [%v] [%v]", inDate, pivotDate, ccy1, ccy2)
+	logHandler.Trace.Printf("getTenorFromDateCCYPAIR [%v] [%v] [%v] [%v]", inDate, pivotDate, ccy1, ccy2)
 	return Tenor{}, nil
 }
 
 func getTenorFromDateCCYCROSS(inDate, pivotDate time.Time, ccy1 string, via string, ccy2 string) (Tenor, error) {
 	// TODO - this is a stub, please write logic
-	logHandler.TraceLogger.Printf("getTenorFromDateCCYCROSS [%v] [%v] [%v] [%v] [%v]", inDate, pivotDate, ccy1, via, ccy2)
+	logHandler.Trace.Printf("getTenorFromDateCCYCROSS [%v] [%v] [%v] [%v] [%v]", inDate, pivotDate, ccy1, via, ccy2)
 	return Tenor{}, nil
 }
