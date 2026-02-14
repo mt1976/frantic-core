@@ -32,6 +32,13 @@ Keys are derived from `commonConfig` session key names, and an internal identifi
 
 - `Debug(ctx context.Context, name string)`
 
+## Worker Pool
+
+- `AddWorkerPoolToContext(ctx context.Context, pool pond.Pool) context.Context` — stores a worker pool in context
+- `GetWorkerPool(ctx context.Context) (pond.Pool, error)` — retrieves the worker pool from context
+- `WorkerPoolKey` — context key for the worker pool
+- `ErrWorkerPoolNotFound` — error returned when no pool is in context
+
 ## Example
 
 ```go

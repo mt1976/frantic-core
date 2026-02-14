@@ -1,7 +1,6 @@
 package ioHelpers
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -12,7 +11,6 @@ import (
 // The Copy function copies a file from one path to another and returns true if the copy was
 // successful.
 func Copy(fileName string, fromPath string, toPath string) bool {
-
 	logHandler.Warning.Println("Copying " + fileName + " from " + fromPath + " to " + toPath)
 
 	content, err := Read(fileName, fromPath)
@@ -46,7 +44,7 @@ func Read(fileName string, path string) (string, error) {
 		WriteData(fileName, path, "")
 	}
 
-	//log.Println("Read          :", filePath)
+	// log.Println("Read          :", filePath)
 	// Read entire file content, giving us little control but
 	// making it very simple. No need to close the file.
 	content, err := os.ReadFile(filePath)
@@ -65,10 +63,10 @@ func Write(fileName string, path string, content string) (bool, error) {
 	if len(path) != 0 {
 		filePath = pwd + path + "/" + fileName
 	}
-	//log.Println("Write         :", filePath)
+	// log.Println("Write         :", filePath)
 
 	message := []byte(content)
-	err := ioutil.WriteFile(filePath, message, 0644)
+	err := os.WriteFile(filePath, message, 0o644)
 	if err != nil {
 		logHandler.Error.Fatalf("Write Error : [%v]", err)
 		return false, ce.ErrWriteWrapper(err)
@@ -83,10 +81,10 @@ func WriteData(fileName string, path string, content string) int {
 	if len(path) != 0 {
 		filePath = pwd + path + "/" + fileName
 	}
-	//log.Println("Write         :", filePath)
+	// log.Println("Write         :", filePath)
 
 	message := []byte(content)
-	err := os.WriteFile(filePath, message, 0644)
+	err := os.WriteFile(filePath, message, 0o644)
 	if err != nil {
 		logHandler.Error.Fatalf("Write Error %v", err)
 		return -1

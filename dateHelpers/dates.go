@@ -482,7 +482,7 @@ func AddMonths(startDate time.Time, monthsToAdd int) time.Time {
 func AddWorkingMonths(startDate time.Time, monthsToAdd int) time.Time {
 	currentDate := startDate
 
-	for i := 0; i < monthsToAdd; i++ {
+	for range monthsToAdd {
 		currentDate = currentDate.AddDate(0, 1, 0) // Add one month
 		currentDate = AdjustToNextWorkingday(currentDate)
 	}
@@ -496,7 +496,7 @@ func AddYears(startDate time.Time, yearsToAdd int) time.Time {
 func AddWorkingYears(startDate time.Time, yearsToAdd int) time.Time {
 	currentDate := startDate
 
-	for i := 0; i < yearsToAdd; i++ {
+	for range yearsToAdd {
 		currentDate = currentDate.AddDate(1, 0, 0) // Add one year
 		currentDate = AdjustToNextWorkingday(currentDate)
 	}
@@ -537,7 +537,7 @@ func SubtractMonths(startDate time.Time, monthsToSubtract int) time.Time {
 func SubtractWorkingMonths(startDate time.Time, monthsToSubtract int) time.Time {
 	currentDate := startDate
 
-	for i := 0; i < monthsToSubtract; i++ {
+	for range monthsToSubtract {
 		currentDate = currentDate.AddDate(0, -1, 0) // Subtract one month
 		currentDate = AdjustToPreviousWorkingday(currentDate)
 	}
@@ -553,7 +553,7 @@ func SubtractYears(startDate time.Time, yearsToSubtract int) time.Time {
 func SubtractWorkingYears(startDate time.Time, yearsToSubtract int) time.Time {
 	currentDate := startDate
 
-	for i := 0; i < yearsToSubtract; i++ {
+	for range yearsToSubtract {
 		currentDate = currentDate.AddDate(-1, 0, 0) // Subtract one year
 		currentDate = AdjustToPreviousWorkingday(currentDate)
 	}

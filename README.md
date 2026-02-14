@@ -2,75 +2,97 @@
 
 frantic-core is a Go utility library and application toolkit.
 
-It includes a large set of helper packages (banking, dates, logging, etc.) as well as a Storm-backed DAO layer (`dao/`) with caching and a code generator (`cmd/dao-gen`) for generating new DAO packages.
+It includes a large set of helper packages for banking, dates, logging, configuration, financial calculations, and more.
 
-Docs:
+## Package Documentation
 
-- [CODE-GEN.md](CODE-GEN.md) (DAO generator)
-- [logHandler/README.md](logHandler/README.md) (logging)
-- [commonConfig/README.md](commonConfig/README.md) (configuration)
-- [commonErrors/README.md](commonErrors/README.md) (shared errors)
-- [contextHandler/README.md](contextHandler/README.md) (context/session)
-- [idHelpers/README.md](idHelpers/README.md) (IDs)
-- [importExportHelper/README.md](importExportHelper/README.md) (import/export)
-- [jobs/README.md](jobs/README.md) (scheduler)
-- [timing/README.md](timing/README.md) (timing)
-- [chiMiddleware/README.md](chiMiddleware/README.md) (chi middleware)
+| Package | Description |
+|---|---|
+| [application](application/README.md) | OS/platform detection and system identity |
+| [banking](banking/README.md) | IBAN, ISIN, LEI, UTI validation and GLEIF API lookup |
+| [chiMiddleware](chiMiddleware/README.md) | Chi router middleware (Brotli, minify, method conversion, context injection) |
+| [colours](colours/README.md) | ANSI colour escape sequences for terminal styling |
+| [commonConfig](commonConfig/README.md) | TOML-based application configuration |
+| [commonErrors](commonErrors/README.md) | Shared sentinel errors and wrapping helpers |
+| [contextHandler](contextHandler/README.md) | Request-scoped context and session management |
+| [dateHelpers](dateHelpers/README.md) | Date formatting, parsing, arithmetic, and business-day logic |
+| [dockerHelpers](dockerHelpers/README.md) | Docker environment detection and payload deployment |
+| [emailHandler](emailHandler/README.md) | Email composition and SMTP sending |
+| [financial](financial/README.md) | Tenor calculations, settlement dates, and amount formatting |
+| [frantic](frantic/README.md) | Project identity utilities and validation |
+| [htmlHelpers](htmlHelpers/README.md) | HTML value conversion and URL-safe encoding |
+| [idHelpers](idHelpers/README.md) | ID generation (KSUID), hashing, and composite IDs |
+| [ioHelpers](ioHelpers/README.md) | File I/O, copy, backup, and directory management |
+| [logHandler](logHandler/README.md) | Multi-channel logging with file rotation |
+| [mathHelpers](mathHelpers/README.md) | Random numbers, min/max, coin toss |
+| [messageHelpers](messageHelpers/README.md) | Inter-service message types (user, session, authority, translation) |
+| [mockData](mockData/README.md) | Mock reference datasets for testing (countries, currencies, etc.) |
+| [netHandler](netHandler/README.md) | Network host reachability checking |
+| [notificationHandler](notificationHandler/README.md) | Push notifications via Pushover |
+| [paths](paths/README.md) | Filesystem path helpers and directory structure |
+| [stringHelpers](stringHelpers/README.md) | String formatting, quoting, encoding, and manipulation |
+| [timeHelpers](timeHelpers/README.md) | Timezone inference from locale |
+| [timing](timing/README.md) | Stopwatch timing and snooze utilities |
+| [tuiInputHelper](tuiInputHelper/README.md) | Terminal UI input prompts |
 
 ## Features
 
-- Banking utilities (IBAN, ISIN, LEI, UTI, etc.)
-- Color manipulation
-- Centralized configuration management
-- Common error handling
-- Context and session helpers
-- Data import/export helpers
-- Date and time utilities
-- DAO / database layer (Storm-backed) with optional caching
-- Typed (generic) helpers to reduce DAO boilerplate
-- `go generate`-friendly DAO code generator (`cmd/dao-gen`)
-- Docker helpers
-- Email handling
-- Financial calculations
-- Logging and audit
-- Math helpers
-- Messaging and notification
-- Path and file I/O helpers
-- String manipulation
-- TUI input helpers
+- Banking utilities (IBAN, ISIN, LEI, UTI validation and formatting)
+- GLEIF API integration for LEI lookups
+- Color terminal output
+- Centralized TOML-based configuration management
+- Common error handling with sentinel errors and wrappers
+- Context and session helpers with worker pool support
+- Date and time utilities with business-day awareness
+- Docker environment detection
+- Email sending via SMTP
+- Financial calculations (tenors, settlement dates, rate ladders, amount formatting)
+- Project identity validation
+- HTML value helpers and URL-safe encoding
+- ID generation (KSUID), hashing (SHA3-256), and composite IDs
+- File I/O, backup, and directory management
+- Multi-channel logging with file rotation (lumberjack)
+- Math helpers (random, min/max)
+- Inter-service messaging types
+- Mock reference data (countries, currencies, genders, titles, rate ladders)
+- Network host reachability checks
+- Push notifications (Pushover)
+- Filesystem path management
+- String manipulation and formatting
+- Timezone inference
+- Stopwatch timing and sleep utilities
+- Terminal UI input helpers
+- Chi router middleware (Brotli, HTML minification, HTTP method conversion)
 
 ## Directory Structure
 
 ```text
-application/         # Application entry points
-banking/             # Banking utilities (IBAN, ISIN, LEI, UTI, etc.)
-cmd/                 # Tools (includes dao-gen)
-colours/             # Color utilities
-commonConfig/        # Configuration management
-commonErrors/        # Error handling
-contextHandler/      # Context and session helpers
-dao/                 # Data access objects
-dateHelpers/         # Date utilities
-dockerHelpers/       # Docker support
-emailHandler/        # Email utilities
-financial/           # Financial calculations
-frantic/             # Core frantic logic
-htmlHelpers/         # HTML helpers
-idHelpers/           # ID generation and validation
-importExportHelper/  # Import/export helpers
-ioHelpers/           # File and I/O helpers
-jobs/                # Job scheduling and helpers
-logHandler/          # Logging and audit
-mathHelpers/         # Math utilities
-messageHelpers/      # Messaging helpers
-mockData/            # Mock/test data
-netHandler/          # Networking helpers
-notificationHandler/ # Notification utilities
-paths/               # Path helpers
+application/         # OS/platform detection and system identity
+banking/             # Financial identifier validation (IBAN, ISIN, LEI, UTI)
+chiMiddleware/       # Chi router middleware
+colours/             # ANSI colour escape sequences
+commonConfig/        # TOML-based configuration management
+commonErrors/        # Shared sentinel errors and wrappers
+contextHandler/      # Context and session management
+dateHelpers/         # Date utilities and business-day logic
+dockerHelpers/       # Docker environment support
+emailHandler/        # Email sending via SMTP
+financial/           # Financial calculations and tenor logic
+frantic/             # Project identity utilities
+htmlHelpers/         # HTML value helpers and URL encoding
+idHelpers/           # ID generation and hashing
+ioHelpers/           # File I/O and directory management
+logHandler/          # Multi-channel logging with rotation
+mathHelpers/         # Numeric helpers
+messageHelpers/      # Inter-service message types
+mockData/            # Mock reference datasets
+netHandler/          # Network reachability checking
+notificationHandler/ # Push notifications (Pushover)
+paths/               # Filesystem path helpers
 stringHelpers/       # String manipulation
-timeHelpers/         # Time utilities
-timing/              # Timing helpers
-tuiInputHelper/      # TUI input helpers
+timeHelpers/         # Timezone inference
+timing/              # Stopwatch and snooze utilities
+tuiInputHelper/      # Terminal UI input helpers
 ```
 
 ## Installation
@@ -105,9 +127,12 @@ import (
 )
 
 func main() {
-    iban := "GB82WEST12345698765432"
-    valid := banking.ValidateIBAN(iban)
-    fmt.Printf("IBAN %s valid: %v\n", iban, valid)
+    iban, err := banking.NewIBAN("GB82WEST12345698765432")
+    if err != nil {
+        fmt.Println("Invalid IBAN:", err)
+        return
+    }
+    fmt.Println("IBAN:", iban.String())
 }
 ```
 
@@ -117,7 +142,7 @@ func main() {
 import "github.com/mt1976/frantic-core/logHandler"
 
 func main() {
-    logHandler.Info("Application started")
+    logHandler.Info.Println("Application started")
 }
 ```
 
@@ -131,23 +156,9 @@ import (
 
 func main() {
     today := dateHelpers.Today()
-    fmt.Println("Today's date is:", today)
+    fmt.Println("Today:", dateHelpers.FormatHuman(today))
+    fmt.Println("Is working day:", dateHelpers.IsWorkingDay(today))
 }
-```
-
-## DAO layer & code generation
-
-If you’re using the DAO stack in `dao/`, these docs are the best entry points:
-
-- DAO generator (`dao-gen`): see [CODE-GEN.md](CODE-GEN.md)
-- Typed DB helpers (generics): see [dao/database/README.md](dao/database/README.md)
-- Example generated/templated DAO: see [dao/test/templateStoreV2/README.md](dao/test/templateStoreV2/README.md)
-
-Quick example (from this repo root):
-
-```bash
-mkdir -p dao/test/fred
-go run ./cmd/dao-gen -out dao/test/fred -pkg fred -type Fred -table Fred -namespace main -force
 ```
 
 ## License

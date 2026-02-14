@@ -2,6 +2,7 @@ package mockData
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mt1976/frantic-core/logHandler"
 )
@@ -104,16 +105,16 @@ func test() bool {
 }
 
 func LadderToString(R map[string]Rung) string {
-	output := ""
+	var output strings.Builder
 	//	noItems := len(R)
 	noitems := len(Ladder)
 	for i := 1; i <= noitems; i++ {
 		rli := GetRateLadderByIndex(i)
 		// add to output
-		output += fmt.Sprintf("%v:%v,", rli.Code, rli.Index)
+		output.WriteString(fmt.Sprintf("%v:%v,", rli.Code, rli.Index))
 	}
 
-	return output
+	return output.String()
 }
 
 func GetTenorInfo(tenor string) (Rung, error) {

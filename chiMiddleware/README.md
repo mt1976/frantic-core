@@ -10,7 +10,11 @@
 - `HandleHTTPMethodConversion(next http.Handler) http.Handler`
   - Converts incoming `POST`/`GET` requests to `PUT` or `DELETE` if the form contains `_method=PUT` or `_method=DELETE`.
 - `HandleBrotli(next http.Handler) http.Handler`
-  - Brotli support. (Currently incomplete: it sets up an encoder but does not call `next`.)
+  - Adds Brotli compression support to responses.
+- `InjectUserContext(next http.Handler, uid, username string) http.Handler`
+  - Injects user ID and username into the request context.
+- `InjectWorkerPoolIntoContext(next http.Handler, workerPool pond.Pool) http.Handler`
+  - Injects a worker pool into the request context.
 
 ## Example (chi)
 

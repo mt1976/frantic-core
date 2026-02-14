@@ -1,11 +1,10 @@
 package idHelpers
 
 import (
+	"crypto/sha3"
 	"fmt"
 	"strings"
 	"time"
-
-	"golang.org/x/crypto/sha3"
 
 	"github.com/mt1976/frantic-core/commonConfig"
 	ce "github.com/mt1976/frantic-core/commonErrors"
@@ -158,7 +157,7 @@ func InspectUUIDv2(uuid string) string {
 // BuildCompositeID builds a composite identifier by sanitizing each part and
 // joining them with the configured delimiter. It also returns the encoded
 // (hashed) form of the composite ID.
-func BuildCompositeID(part ...interface{}) (compositeID string, encodedCompositeID string, err error) {
+func BuildCompositeID(part ...any) (compositeID string, encodedCompositeID string, err error) {
 
 	logHandler.Trace.Printf("BuildCompositeID called with parts: %v", part)
 

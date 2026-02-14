@@ -140,12 +140,12 @@ func sParentheses(s string) string {
 // strArrayToStringWithSep converts a string array to a string using a given separator
 func strArrayToStringWithSep(inArray []string, inSep string) string {
 
-	outString := ""
+	var outString strings.Builder
 	noRows := len(inArray)
-	for ii := 0; ii < noRows; ii++ {
-		outString += inArray[ii] + inSep
+	for ii := range noRows {
+		outString.WriteString(inArray[ii] + inSep)
 	}
-	return outString
+	return outString.String()
 }
 
 // removeSpecialChars removes special characters from a string and replaces them with a dash
