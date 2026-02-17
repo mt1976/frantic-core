@@ -22,7 +22,7 @@ require (
 )
 
 require (
-	github.com/alitto/pond/v2 v2.6.0
+	github.com/alitto/pond/v2 v2.6.2
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/goforj/godump v1.9.0
 	github.com/pkg/errors v0.9.1 // indirect
@@ -41,6 +41,5 @@ require (
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/tdewolff/minify/v2 v2.24.8
-	golang.org/x/crypto v0.48.0
 	golang.org/x/sys v0.41.0 // indirect
 )
