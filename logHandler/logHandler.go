@@ -33,6 +33,7 @@ var (
 	Unlock         *log.Logger
 	SkipLock       *log.Logger
 	Cache          *log.Logger
+	Web            *log.Logger
 )
 
 var (
@@ -155,6 +156,11 @@ func init() {
 		cacheWriter = io.MultiWriter(io.Discard)
 	}
 
+	webWriter := io.MultiWriter(os.Stdout, &lumberjack.Logger{Filename: assembleLogFileName(applicationPath, "web"), MaxSize: maxSize, MaxBackups: maxBackups, MaxAge: maxAge, Compress: compress})
+	if settings.IsWebLoggingDisabled() || settings.IsLoggingDisabled() {
+		webWriter = io.MultiWriter(io.Discard)
+	}
+
 	msgStructure := log.Lmsgprefix | log.Ldate | log.LstdFlags | log.Lshortfile
 
 	Info = log.New(generalWriter, formatNameWithColor(Green, "Info"), msgStructure)
@@ -178,6 +184,7 @@ func init() {
 	SkipLock = log.New(lockWriter, formatNameWithColor(Blue, "Skip"), msgStructure)
 
 	Cache = log.New(cacheWriter, formatNameWithColor(Cyan, "Cche"), msgStructure)
+	Web = log.New(webWriter, formatNameWithColor(Cyan, "Web "), msgStructure)
 }
 
 func TestIt() {

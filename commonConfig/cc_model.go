@@ -157,6 +157,7 @@ type Settings struct {
 			Communications string `toml:"comms"`
 			Lock           string `toml:"lock"`
 			Cache          string `toml:"cache"`
+			Web            string `toml:"web"`
 			All            string `toml:"all"`
 		} `toml:"disable"`
 		Defaults struct {

@@ -39,6 +39,7 @@ require (
 
 require (
 	github.com/go-chi/chi v1.5.5
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/tdewolff/minify/v2 v2.24.8
 	golang.org/x/crypto v0.48.0
 	golang.org/x/sys v0.41.0 // indirect

@@ -4,7 +4,10 @@ import "strconv"
 
 func (s *Settings) IsGeneralLoggingDisabled() bool {
 	return isTrueFalse(s.Logging.Disable.General)
+}
 
+func (s *Settings) IsWebLoggingDisabled() bool {
+	return isTrueFalse(s.Logging.Disable.Web)
 }
 
 func (s *Settings) IsTimingLoggingDisabled() bool {
