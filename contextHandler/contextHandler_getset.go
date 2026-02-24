@@ -16,10 +16,10 @@ import (
 // tokenKey        = new(cfg.GetSecuritySessionKey_Token())
 // expiryPeriodKey = new(cfg.GetSecuritySessionKey_ExpiryPeriod())
 
-func AddWorkerPoolToContext(ctx context.Context, pool pond.Pool) context.Context {
-	logHandler.Trace.Printf("Setting Worker Pool in Context: %v=%v", WorkerPoolKey.name, pool)
-	return context.WithValue(ctx, WorkerPoolKey, pool)
-}
+// func AddWorkerPoolToContext(ctx context.Context, pool pond.Pool) context.Context {
+// 	logHandler.Trace.Printf("Setting Worker Pool in Context: %v=%v", WorkerPoolKey.name, pool)
+// 	return context.WithValue(ctx, WorkerPoolKey, pool)
+// }
 
 func GetWorkerPool(ctx context.Context) (pond.Pool, error) {
 	logHandler.Trace.Printf("Retrieving Worker Pool from Context: %v", godump.DumpStr(ctx))
