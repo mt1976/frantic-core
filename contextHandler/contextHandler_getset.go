@@ -164,3 +164,8 @@ func SetSession_UserRole(ctx context.Context, role string) context.Context {
 	logHandler.Trace.Printf("Setting User Role in Context: %v=%v", userRoleKey.name, role)
 	return context.WithValue(ctx, userRoleKey, role)
 }
+
+func AddWorkerPoolToContext(ctx context.Context, pool pond.Pool) context.Context {
+	logHandler.Trace.Printf("Setting Worker Pool in Context: %v=%v", WorkerPoolKey.name, pool)
+	return context.WithValue(ctx, WorkerPoolKey, pool)
+}
