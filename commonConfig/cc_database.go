@@ -2,8 +2,8 @@ package commonConfig
 
 import "strconv"
 
-func (s *Settings) GetDatabase_Version() int {
-	return s.Database.Version
+func (s *Settings) GetDatabase_Version() string {
+	return importedVersionInfo
 }
 
 func (s *Settings) GetDatabase_Type() string {

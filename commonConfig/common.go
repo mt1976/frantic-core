@@ -10,15 +10,18 @@ import (
 )
 
 // var Data ConfigurationModel
-var name = "common"
-var filename = ""
-var commonSettingsFile = "common"
+var (
+	name               = "common"
+	filename           = ""
+	commonSettingsFile = "common"
+)
 
-var TRUE = "true"
-var FALSE = "false"
+var (
+	TRUE  = "true"
+	FALSE = "false"
+)
 
 func Get() *Settings {
-
 	var thisConfig Settings
 	filename = paths.Application().String() + paths.Config().String() + string(os.PathSeparator) + commonSettingsFile + ".toml"
 	content, err := os.ReadFile(filename)
@@ -62,4 +65,24 @@ func isTrueFalse(s string) bool {
 	}
 
 	return false
+}
+
+var importedVersionInfo string
+
+func init() {
+	importedVersionInfo = ""
+	// Import the db version from the version.no file stored in the root of the project
+	// This is used to ensure that the database version is always in sync with the application version, and to prevent accidental changes to the database version in the common.toml file
+	versionFile := paths.Application().String() + "version.no"
+	content, err := os.ReadFile(versionFile)
+	if err != nil {
+		fmt.Printf("[%v] Error reading database version from file: %v\n", strings.ToUpper(name), err.Error())
+	} else {
+		importedVersionInfo = strings.TrimSpace(string(content))
+		fmt.Printf("[%v] Imported database version from file: %v\n", strings.ToUpper(name), importedVersionInfo)
+	}
+	if importedVersionInfo == "" {
+		fmt.Printf("[%v] No database version imported from file, using default from common.toml: %v\n", strings.ToUpper(name), importedVersionInfo)
+		importedVersionInfo = Get().Application.Version
+	}
 }

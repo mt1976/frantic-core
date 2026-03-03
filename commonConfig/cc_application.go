@@ -23,7 +23,7 @@ func (s *Settings) GetApplication_Description() string {
 }
 
 func (s *Settings) GetApplication_Version() string {
-	return s.Application.Version
+	return importedVersionInfo
 }
 
 func (s *Settings) GetApplication_Environment() string {
