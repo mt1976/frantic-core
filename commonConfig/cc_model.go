@@ -143,6 +143,7 @@ type Settings struct {
 			Port     int    `toml:"port"`
 			User     string `toml:"user"`
 			Password string `toml:"password"`
+			Folder   string `toml:"folder"`
 			Target   []struct {
 				From string `toml:"from"`
 			} `toml:"target"`

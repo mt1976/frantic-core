@@ -73,3 +73,7 @@ func (s *Settings) GetCommunicationsMonitorEmail_Targets() []string {
 	}
 	return targets
 }
+
+func (s *Settings) GetCommunicationsMonitorEmail_Folder() string {
+	return s.Communications.MonitorEmail.Folder
+}
