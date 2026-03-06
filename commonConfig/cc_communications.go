@@ -41,3 +41,35 @@ func (s *Settings) GetCommunicationsEmail_PortString() string {
 func (s *Settings) GetCommunicationsEmail_AdminEmail() string {
 	return s.Communications.Email.Admin
 }
+
+func (s *Settings) GetCommunicationsMonitorEmail_Host() string {
+	return s.Communications.MonitorEmail.Host
+}
+
+func (s *Settings) GetCommunicationsMonitorEmail_Port() int {
+	return s.Communications.MonitorEmail.Port
+}
+
+func (s *Settings) GetCommunicationsMonitorEmail_User() string {
+	return s.Communications.MonitorEmail.User
+}
+
+func (s *Settings) GetCommunicationsMonitorEmail_Password() string {
+	return s.Communications.MonitorEmail.Password
+}
+
+func (s *Settings) IsCommunicationsEventLoggingDisabled() bool {
+	return isTrueFalse(s.Logging.Disable.Event)
+}
+
+func (s *Settings) IsCommunicationsServiceLoggingDisabled() bool {
+	return isTrueFalse(s.Logging.Disable.Service)
+}
+
+func (s *Settings) GetCommunicationsMonitorEmail_Targets() []string {
+	var targets []string
+	for _, target := range s.Communications.MonitorEmail.Target {
+		targets = append(targets, target.From)
+	}
+	return targets
+}

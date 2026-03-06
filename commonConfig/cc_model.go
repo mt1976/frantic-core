@@ -18,7 +18,7 @@ type Settings struct {
 	} `toml:"Application"`
 
 	Database struct {
-		Version  int    `toml:"version"`
+		Version  string `toml:"version"`
 		Type     string `toml:"type"`
 		Host     string `toml:"host"`
 		Port     int    `toml:"port"`
@@ -138,6 +138,15 @@ type Settings struct {
 			Footer   string `toml:"footer"`
 			Admin    string `toml:"admin"`
 		} `toml:"Email"`
+		MonitorEmail struct {
+			Host     string `toml:"host"`
+			Port     int    `toml:"port"`
+			User     string `toml:"user"`
+			Password string `toml:"password"`
+			Target   []struct {
+				From string `toml:"from"`
+			} `toml:"target"`
+		} `toml:"MonitorEmail"`
 	} `toml:"Communications"`
 	Logging struct {
 		Disable struct {
