@@ -77,3 +77,19 @@ func (s *Settings) GetCommunicationsMonitorEmail_Targets() []string {
 func (s *Settings) GetCommunicationsMonitorEmail_Folder() string {
 	return s.Communications.MonitorEmail.Folder
 }
+
+type EmailIdentifier struct {
+	Key             string
+	SubjectContains []string
+}
+
+func (s *Settings) GetCommunicationsMonitorEmail_Identifiers() []EmailIdentifier {
+	var identifiers []EmailIdentifier
+	for _, identifier := range s.Communications.MonitorEmail.Identifiers.Types {
+		identifiers = append(identifiers, EmailIdentifier{
+			Key:             identifier.Key,
+			SubjectContains: identifier.SubjectContains,
+		})
+	}
+	return identifiers
+}

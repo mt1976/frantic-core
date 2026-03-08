@@ -147,6 +147,12 @@ type Settings struct {
 			Target   []struct {
 				From string `toml:"from"`
 			} `toml:"target"`
+			Identifiers struct {
+				Types []struct {
+					Key             string   `toml:"key"`
+					SubjectContains []string `toml:"subjectContains"`
+				} `toml:"Types"`
+			} `toml:"Identifiers"`
 		} `toml:"MonitorEmail"`
 	} `toml:"Communications"`
 	Logging struct {
