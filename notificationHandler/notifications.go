@@ -12,11 +12,11 @@ import (
 	"github.com/mt1976/frantic-core/timing"
 )
 
-var domain = "Notification"
+var domain = "Pushover"
 
 func Send(inMessage, inTitle string, key int) error {
-	clock := timing.Start(domain, "Message", "Pushover Notification")
-	logHandler.Communications.Printf("[%v] Pushover - Sending...", domain)
+	clock := timing.Start(domain, "Message", "Notification")
+	logHandler.Communications.Printf("[%v] Sending...", domain)
 
 	cfg := commonConfig.Get()
 
@@ -30,7 +30,7 @@ func Send(inMessage, inTitle string, key int) error {
 		}
 	}
 
-	logHandler.Communications.Printf("[%v] Api Token=[%v] User Key=[%v]", strings.ToUpper(domain), poAPIKey, poUserKey)
+	logHandler.Communications.Printf("[%v] Api Token=[%v] User Key=[%v]", domain, poAPIKey, poUserKey)
 
 	if poUserKey == "" || poAPIKey == "" {
 		logHandler.Warning.Printf("[%v] Error=[%v]", strings.ToUpper(domain), "Pushover User Key or API Token not set, message not sent")
@@ -42,7 +42,7 @@ func Send(inMessage, inTitle string, key int) error {
 	var inCallbackUrl string
 
 	if key != 0 {
-		//inCallbackUrl = support.Application.BaseURL() + "view/" + key
+		// inCallbackUrl = support.Application.BaseURL() + "view/" + key
 		inCallbackUrl = fmt.Sprintf("http://%v:%v/view/%v", cfg.GetServer_Host(), cfg.GetServer_Port(), key)
 	} else {
 		inCallbackUrl = fmt.Sprintf("http://%v:%v/dashboard/", cfg.GetServer_Host(), cfg.GetServer_Port())
@@ -58,13 +58,13 @@ func Send(inMessage, inTitle string, key int) error {
 		Retry:      60 * time.Second,
 		Expire:     time.Hour,
 		DeviceName: "",
-		//CallbackURL: "http://yourapp.com/callback",
+		// CallbackURL: "http://yourapp.com/callback",
 		CallbackURL: inCallbackUrl,
 		Sound:       pushover.SoundCosmic,
 	}
-	//Spew(*message)
+	// Spew(*message)
 
-	logHandler.Communications.Printf("[%v] Pusover - Message [Title=%v] [Message=%v]", domain, message.Title, message.Message)
+	logHandler.Communications.Printf("[%v] Message [Title=%v] [Message=%v]", domain, message.Title, message.Message)
 
 	_, err := app.SendMessage(message, recipient)
 	if err != nil {
