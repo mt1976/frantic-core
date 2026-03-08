@@ -111,7 +111,6 @@ func tenorToDuration(tenor Tenor) (time.Duration, error) {
 	}
 
 	valueStr := term[:len(term)-1]
-	unit := term[len(term)-1]
 
 	value, err := strconv.Atoi(valueStr)
 	if err != nil {
@@ -119,7 +118,7 @@ func tenorToDuration(tenor Tenor) (time.Duration, error) {
 		return 0, fmt.Errorf("invalid term prefix [%s]", term)
 	}
 
-	switch unit {
+	switch unit := term[len(term)-1]; unit {
 	case 'D':
 		return time.Duration(value) * 24 * time.Hour, nil
 	case 'W':

@@ -18,7 +18,7 @@ func AbbrToInt(str string) int {
 	number := strings.ReplaceAll(str, "$", "")
 	number = strings.ReplaceAll(number, "€", "")
 	number = strings.ReplaceAll(number, "£", "")
-	fact := strings.ToUpper(number[len(number)-1:])
+
 	number = strings.ReplaceAll(number, "M", "")
 	number = strings.ReplaceAll(number, "K", "")
 	number = strings.ReplaceAll(number, "T", "")
@@ -30,7 +30,7 @@ func AbbrToInt(str string) int {
 	}
 
 	var retNum int
-	switch fact {
+	switch fact := strings.ToUpper(number[len(number)-1:]); fact {
 	case "T":
 		retNum = intNum * 1000
 	case "K":

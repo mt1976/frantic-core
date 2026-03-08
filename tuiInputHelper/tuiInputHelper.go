@@ -23,13 +23,11 @@ func GetUserInput(question string, inputWidth int, inputMandatory bool, isPasswo
 			defer term.Restore(int(os.Stdin.Fd()), oldState)
 
 			input := make([]rune, 0, inputWidth)
-			buf := make([]byte, 1)
 
-			for {
+			for buf := make([]byte, 1); ; {
 				os.Stdin.Read(buf)
-				char := buf[0]
 
-				if char == '\r' || char == '\n' {
+				if char := buf[0]; char == '\r' || char == '\n' {
 					// Enter key
 					break
 				} else if char == 127 || char == 8 {

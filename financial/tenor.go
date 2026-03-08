@@ -16,8 +16,8 @@ type Tenor struct {
 // The function NewTenor takes a string as input and returns a Tenor object.
 func NewTenor(term string) (Tenor, error) {
 	newTenor := Tenor{}
-	_, err := newTenor.Set(term)
-	if err != nil {
+
+	if _, err := newTenor.Set(term); err != nil {
 		return Tenor{}, err
 	}
 	return newTenor, nil
@@ -52,21 +52,18 @@ func validateAndFormatTenor(tenor string) (string, error) {
 	factor := tenor[:len(tenor)-1]
 
 	// Deal with special cases of SP and TD
-	uTerm := strings.ToUpper(tenor)
+
 	// Special cases SP, TD, ON, TN
-	if uTerm == "SP" || uTerm == "TD" || uTerm == "ON" || uTerm == "TN" || uTerm == "SN" {
+	if uTerm := strings.ToUpper(tenor); uTerm == "SP" || uTerm == "TD" || uTerm == "ON" || uTerm == "TN" || uTerm == "SN" {
 		return uTerm, nil
 	}
 
-	_, err := strconv.Atoi(factor)
-	if err != nil {
+	if _, err := strconv.Atoi(factor); err != nil {
 		logHandler.Error.Printf("supplied value [%s] is not a number %v", factor, err.Error())
 		return "", fmt.Errorf("supplied value [%s] is not a number", factor)
 	}
 
-	clean := fmt.Sprintf("%s%c", factor, unit)
-
-	switch unit {
+	switch clean := fmt.Sprintf("%s%c", factor, unit); unit {
 	case 'D':
 		return clean, nil
 	case 'W':

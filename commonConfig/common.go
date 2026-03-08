@@ -74,8 +74,8 @@ func init() {
 	// Import the db version from the version.no file stored in the root of the project
 	// This is used to ensure that the database version is always in sync with the application version, and to prevent accidental changes to the database version in the common.toml file
 	versionFile := paths.Application().String() + string(os.PathSeparator) + "version.no"
-	content, err := os.ReadFile(versionFile)
-	if err != nil {
+
+	if content, err := os.ReadFile(versionFile); err != nil {
 		fmt.Printf("[%v] Error reading database version from file: %v\n", strings.ToUpper(name), err.Error())
 	} else {
 		importedVersionInfo = strings.TrimSpace(string(content))

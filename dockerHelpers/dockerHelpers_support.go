@@ -57,8 +57,9 @@ func startupCopyFileContents(src, dst string) (err error) {
 		return
 	}
 	defer func() {
-		cerr := out.Close()
+
 		if err == nil {
+			cerr := out.Close()
 			err = cerr
 		}
 	}()

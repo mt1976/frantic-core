@@ -17,16 +17,15 @@ func New(name string) (Identity, error) {
 	// the first part is the name, the second part is the suffix
 	// if there is no - or _ character, return an error
 
-	err := validateName(name)
-	if err != nil {
+	if err := validateName(name); err != nil {
 		return Identity{}, err
 	}
 
 	name = sanitizeName(name)
 
 	verified := false
-	validErr := ValidateIdentityOrigin(name)
-	if validErr != nil {
+
+	if validErr := ValidateIdentityOrigin(name); validErr != nil {
 		verified = true
 	}
 
@@ -78,8 +77,7 @@ func ValidateIdentityOrigin(name string) error {
 		"frantic-template",
 	}
 
-	err := validateName(name)
-	if err != nil {
+	if err := validateName(name); err != nil {
 		return err
 	}
 

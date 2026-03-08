@@ -39,12 +39,13 @@ func GetDBFileName(name string) string {
 }
 
 func Dump(tableName string, where paths.FileSystemPath, action string, recordID string, yy any) {
-	cfg := commonConfig.Get()
+
 	sep := "-"
 
 	logHandler.Database.Printf("[SUPPORT] [%v] Dump to '%v'", strings.ToUpper(tableName), where.String())
 	id := idHelpers.GetUUID()
 	if action != "" {
+		cfg := commonConfig.Get()
 		id = id + sep + cfg.GetApplication_Name() + sep + tableName + sep + strings.ToTitle(action) + sep + recordID
 	}
 	id = id + ".json"
@@ -96,8 +97,7 @@ func Backup(table, location string) {
 	logHandler.Info.Printf("BackupPaths=[%v] [%v] to [%v]", strings.ToLower(table), fromPath, toPath)
 	logHandler.Info.Printf("BackupFiles=[%v] [%v] to [%v]", strings.ToLower(table), fromFile, toFile)
 
-	err := CopyFile(fromFile, toFile)
-	if err != nil {
+	if err := CopyFile(fromFile, toFile); err != nil {
 		logHandler.Error.Printf("Backup=[%v] [%v] to [%v] Error=[%v]", strings.ToLower(name), fromPath, toPath, err.Error())
 		panic(err)
 	}

@@ -66,8 +66,7 @@ func Send(inMessage, inTitle string, key int) error {
 
 	logHandler.Communications.Printf("[%v] Message [Title=%v] [Message=%v]", domain, message.Title, message.Message)
 
-	_, err := app.SendMessage(message, recipient)
-	if err != nil {
+	if _, err := app.SendMessage(message, recipient); err != nil {
 		logHandler.Warning.Printf("[%v] Error=[%v]", strings.ToUpper(domain), err.Error())
 		return ce.ErrNotificationWrapper(err)
 	}

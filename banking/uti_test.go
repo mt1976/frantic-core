@@ -20,8 +20,8 @@ func TestNewISO23897UTI(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewISO23897UTI(tt.args.generatingEntity)
-			if (err != nil) != tt.wantErr {
+
+			if _, err := NewISO23897UTI(tt.args.generatingEntity); (err != nil) != tt.wantErr {
 				t.Errorf("NewISO23897UTI() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}

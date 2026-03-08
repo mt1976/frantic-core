@@ -20,8 +20,8 @@ func HandleHTTPMethodConversion(next http.Handler) http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			logHandler.Info.Println("Checking for HTTP method conversion")
 			in := r.Method
-			testMethod := strings.ToUpper(r.Method)
-			if testMethod == "POST" || testMethod == "GET" {
+
+			if testMethod := strings.ToUpper(r.Method); testMethod == "POST" || testMethod == "GET" {
 				r.ParseForm()
 				if r.Form["_method"] != nil && r.FormValue("_method") == "PUT" {
 					r.Method = "PUT"

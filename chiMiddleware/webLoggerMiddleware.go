@@ -121,8 +121,8 @@ func RequestLogger(logger *log.Logger, o *Options) func(http.Handler) http.Handl
 
 				if logReqBody || o.LogExtraAttrs != nil {
 					// Ensure the request body is fully read if the underlying HTTP handler didn't do so.
-					n, _ := io.Copy(io.Discard, r.Body)
-					if n > 0 {
+
+					if n, _ := io.Copy(io.Discard, r.Body); n > 0 {
 						extra = append(extra, fmt.Sprintf("bytes_unread=%d", n))
 					}
 				}

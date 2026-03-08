@@ -80,9 +80,7 @@ func HostIP() string {
 
 	for _, netInterfaceAddress := range netInterfaceAddresses {
 
-		networkIp, ok := netInterfaceAddress.(*net.IPNet)
-
-		if ok && !networkIp.IP.IsLoopback() && networkIp.IP.To4() != nil {
+		if networkIp, ok := netInterfaceAddress.(*net.IPNet); ok && !networkIp.IP.IsLoopback() && networkIp.IP.To4() != nil {
 
 			ip := networkIp.IP.String()
 
@@ -129,10 +127,10 @@ func cleanID(id string) string {
 
 func stripSpecial(s string) string {
 	var b strings.Builder
-	gr := uniseg.NewGraphemes(s)
-	for gr.Next() {
-		r := gr.Runes()[0]
-		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+
+	for gr := uniseg.NewGraphemes(s); gr.Next(); {
+
+		if r := gr.Runes()[0]; unicode.IsLetter(r) || unicode.IsDigit(r) {
 			b.WriteString(gr.Str())
 		}
 	}

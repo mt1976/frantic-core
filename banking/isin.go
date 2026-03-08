@@ -30,8 +30,8 @@ func (I *ISIN) IsValid() bool {
 
 	//Validate the ISIN prefix, first two characters are a valud countrycode
 	countryCode := val[:2]
-	countryInfo, err := mockData.GetCountryInfo(countryCode)
-	if err != nil || countryCode != countryInfo.ISOCode {
+
+	if countryInfo, err := mockData.GetCountryInfo(countryCode); err != nil || countryCode != countryInfo.ISOCode {
 		//log.Printf("[WARN] ISIN prefix not a valid country code (%v)\n", countryCode)
 		logHandler.Warning.Printf("ISIN prefix not a valid country code (%v)\n", countryCode)
 		return false

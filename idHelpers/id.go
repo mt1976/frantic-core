@@ -114,8 +114,8 @@ func GetUUIDv2() string {
 // Returns the KSUID string or an error if generation fails.
 func GetUUIDv2WithPayload(payload string) (string, error) {
 	// Ensure payload is 16 bytes
-	length := 16
-	if len(payload) > length {
+
+	if length := 16; len(payload) > length {
 		return "", ce.ErrIDGenerationWrapper(fmt.Errorf("payload must be %d bytes or less", length))
 	}
 	if len(payload) < 16 {

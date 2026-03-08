@@ -262,10 +262,10 @@ func CompareStrings(a, b string) {
 
 func RemoveSpecialCharacters(s string) string {
 	var b strings.Builder
-	gr := uniseg.NewGraphemes(s)
-	for gr.Next() {
-		r := gr.Runes()[0]
-		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+
+	for gr := uniseg.NewGraphemes(s); gr.Next(); {
+
+		if r := gr.Runes()[0]; unicode.IsLetter(r) || unicode.IsDigit(r) {
 			b.WriteString(gr.Str())
 		}
 	}

@@ -329,8 +329,8 @@ func IsBeforeOrEqualTo(t1, t2 time.Time) bool {
 	if cfg.IsApplicationMode(commonConfig.MODE_DEVELOPMENT) {
 		//	logger.Info.Printf("HLP: [HELPER] Date=[%v] Check=[%v]", DateStartOfDay(t1), DateStartOfDay(t2))
 	}
-	check := StartOfDay(t1)
-	if check.Before(StartOfDay(t2)) || check.Equal(StartOfDay(t2)) {
+
+	if check := StartOfDay(t1); check.Before(StartOfDay(t2)) || check.Equal(StartOfDay(t2)) {
 		//	logger.Info.Printf("HLP: [HELPER] Date=[%v] Check=[%v] Result=[%v]", DateStartOfDay(t1), DateStartOfDay(t2), true)
 		return true
 	}
@@ -452,9 +452,8 @@ func AddDays(startDate time.Time, daysToAdd int) time.Time {
 // AddWorkingDays adds n working days (excluding weekends) to a given date.
 func AddWorkingDays(startDate time.Time, daysToAdd int) time.Time {
 	currentDate := startDate
-	addedDays := 0
 
-	for addedDays < daysToAdd {
+	for addedDays := 0; addedDays < daysToAdd; {
 		currentDate = currentDate.AddDate(0, 0, 1) // Add one day
 
 		// Skip weekends
@@ -509,9 +508,8 @@ func SubtractDays(startDate time.Time, daysToSubtract int) time.Time {
 
 func SubtractWorkingDays(startDate time.Time, daysToSubtract int) time.Time {
 	currentDate := startDate
-	subtractedDays := 0
 
-	for subtractedDays < daysToSubtract {
+	for subtractedDays := 0; subtractedDays < daysToSubtract; {
 		currentDate = currentDate.AddDate(0, 0, -1) // Subtract one day
 
 		// Skip weekends

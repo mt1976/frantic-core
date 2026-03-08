@@ -66,8 +66,8 @@ func Write(fileName string, path string, content string) (bool, error) {
 	// log.Println("Write         :", filePath)
 
 	message := []byte(content)
-	err := os.WriteFile(filePath, message, 0o644)
-	if err != nil {
+
+	if err := os.WriteFile(filePath, message, 0o644); err != nil {
 		logHandler.Error.Fatalf("Write Error : [%v]", err)
 		return false, ce.ErrWriteWrapper(err)
 	}
@@ -84,8 +84,8 @@ func WriteData(fileName string, path string, content string) int {
 	// log.Println("Write         :", filePath)
 
 	message := []byte(content)
-	err := os.WriteFile(filePath, message, 0o644)
-	if err != nil {
+
+	if err := os.WriteFile(filePath, message, 0o644); err != nil {
 		logHandler.Error.Fatalf("Write Error %v", err)
 		return -1
 	}

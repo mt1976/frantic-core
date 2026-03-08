@@ -45,8 +45,7 @@ func HandleHTMLMinification() func(http.Handler) http.Handler {
 
 			next.ServeHTTP(rw, r)
 
-			contentType := w.Header().Get("Content-Type")
-			if strings.Contains(contentType, "text/html") {
+			if contentType := w.Header().Get("Content-Type"); strings.Contains(contentType, "text/html") {
 				// Minify HTML content
 				minified, err := m.String("text/html", buf.String())
 				if err != nil {

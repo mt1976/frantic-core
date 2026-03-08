@@ -22,8 +22,8 @@ func (I *IBAN) isValid(iban string) bool {
 
 	// Check if the IBAN length is valid for the country code
 	countryCode := iban[:2]
-	countryInfo, err := mockData.GetCountryInfo(countryCode)
-	if err != nil || len(iban) != countryInfo.IBANLength {
+
+	if countryInfo, err := mockData.GetCountryInfo(countryCode); err != nil || len(iban) != countryInfo.IBANLength {
 		return false
 	}
 

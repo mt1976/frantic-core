@@ -161,8 +161,7 @@ var gliefAPIURI = "https://api.gleif.org/api/v1/lei-records?filter[isin]=%v"
 
 func Lookup_LEI(inISIN string) (string, error) {
 
-	isinOK, err := validations.ValidateISIN(inISIN)
-	if err == nil {
+	if isinOK, err := validations.ValidateISIN(inISIN); err == nil {
 		//log.Printf("%q is Valid %v", inISIN, isinOK)
 		if isinOK {
 			uri := fmt.Sprintf(gliefAPIURI, inISIN)

@@ -16,8 +16,8 @@ type LEI struct {
 // spaces and converting it to uppercase.
 func isValidLEI(inLei string) bool {
 	// Remove spaces and convert to uppercase
-	err := zlei.LEI(inLei).Check()
-	if err != nil {
+
+	if err := zlei.LEI(inLei).Check(); err != nil {
 		return false
 	}
 	return true
