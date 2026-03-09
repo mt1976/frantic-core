@@ -1,6 +1,8 @@
 package commonConfig
 
-import "strconv"
+import (
+	"strconv"
+)
 
 func (s *Settings) GetCommunicationsPushover_UserKey() string {
 	return s.Communications.Pushover.UserKey
@@ -80,6 +82,7 @@ func (s *Settings) GetCommunicationsMonitorEmail_Folder() string {
 
 type EmailIdentifier struct {
 	Key             string
+	Value           string
 	SubjectContains []string
 }
 
@@ -88,8 +91,26 @@ func (s *Settings) GetCommunicationsMonitorEmail_Identifiers() []EmailIdentifier
 	for _, identifier := range s.Communications.MonitorEmail.Identifiers.Types {
 		identifiers = append(identifiers, EmailIdentifier{
 			Key:             identifier.Key,
+			Value:           identifier.Value, // Assuming the value is the same as the key, adjust if needed
 			SubjectContains: identifier.SubjectContains,
 		})
 	}
 	return identifiers
+}
+
+func (s *Settings) GetCommunicationsMonitorEmail_IdentifierByKey(key string) *EmailIdentifier {
+	for _, identifier := range s.GetCommunicationsMonitorEmail_Identifiers() {
+		if identifier.Key == key {
+			return &identifier
+		}
+	}
+	return nil
+}
+
+func (s *Settings) GetCommunicationsMonitorEmail_Lookup() map[string]string {
+	lookup := make(map[string]string)
+	for _, identifier := range s.GetCommunicationsMonitorEmail_Identifiers() {
+		lookup[identifier.Key] = identifier.Value
+	}
+	return lookup
 }

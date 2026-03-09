@@ -150,6 +150,7 @@ type Settings struct {
 			Identifiers struct {
 				Types []struct {
 					Key             string   `toml:"key"`
+					Value           string   `toml:"value"`
 					SubjectContains []string `toml:"subjectContains"`
 				} `toml:"Types"`
 			} `toml:"Identifiers"`
