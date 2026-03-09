@@ -152,6 +152,7 @@ type Settings struct {
 					Key             string   `toml:"key"`
 					Value           string   `toml:"value"`
 					SubjectContains []string `toml:"subjectContains"`
+					BodyContains    []string `toml:"bodyContains"`
 				} `toml:"Types"`
 			} `toml:"Identifiers"`
 		} `toml:"MonitorEmail"`

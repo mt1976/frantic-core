@@ -84,6 +84,7 @@ type EmailIdentifier struct {
 	Key             string
 	Value           string
 	SubjectContains []string
+	BodyContains    []string
 }
 
 func (s *Settings) GetCommunicationsMonitorEmail_Identifiers() []EmailIdentifier {
@@ -93,6 +94,7 @@ func (s *Settings) GetCommunicationsMonitorEmail_Identifiers() []EmailIdentifier
 			Key:             identifier.Key,
 			Value:           identifier.Value, // Assuming the value is the same as the key, adjust if needed
 			SubjectContains: identifier.SubjectContains,
+			BodyContains:    identifier.BodyContains,
 		})
 	}
 	return identifiers
