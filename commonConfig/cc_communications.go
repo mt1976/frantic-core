@@ -83,8 +83,8 @@ func (s *Settings) GetCommunicationsMonitorEmail_Folder() string {
 type EmailIdentifier struct {
 	Key             string
 	Value           string
-	SubjectContains []string
-	BodyContains    []string
+	SubjectContains [][]string
+	BodyContains    [][]string
 }
 
 func (s *Settings) GetCommunicationsMonitorEmail_Identifiers() []EmailIdentifier {

@@ -149,10 +149,10 @@ type Settings struct {
 			} `toml:"target"`
 			Identifiers struct {
 				Types []struct {
-					Key             string   `toml:"key"`
-					Value           string   `toml:"value"`
-					SubjectContains []string `toml:"subjectContains"`
-					BodyContains    []string `toml:"bodyContains"`
+					Key             string     `toml:"key"`
+					Value           string     `toml:"value"`
+					SubjectContains [][]string `toml:"subjectContains"`
+					BodyContains    [][]string `toml:"bodyContains"`
 				} `toml:"Types"`
 			} `toml:"Identifiers"`
 		} `toml:"MonitorEmail"`
