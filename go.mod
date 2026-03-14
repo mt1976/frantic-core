@@ -18,11 +18,11 @@ require (
 
 require (
 	github.com/stretchr/testify v1.11.1 // indirect
-	github.com/tdewolff/parse/v2 v2.8.5 // indirect
+	github.com/tdewolff/parse/v2 v2.8.10 // indirect
 )
 
 require (
-	github.com/alitto/pond/v2 v2.6.2
+	github.com/alitto/pond/v2 v2.7.0
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/goforj/godump v1.9.0
 	github.com/pkg/errors v0.9.1 // indirect
@@ -34,12 +34,12 @@ require (
 
 require (
 	github.com/gregdel/pushover v1.4.0
-	golang.org/x/text v0.34.0
+	golang.org/x/text v0.35.0
 )
 
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.2.5
-	github.com/tdewolff/minify/v2 v2.24.8
-	golang.org/x/sys v0.41.0 // indirect
+	github.com/tdewolff/minify/v2 v2.24.10
+	golang.org/x/sys v0.42.0 // indirect
 )
