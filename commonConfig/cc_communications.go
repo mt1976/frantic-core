@@ -80,6 +80,10 @@ func (s *Settings) GetCommunicationsMonitorEmail_Folder() string {
 	return s.Communications.MonitorEmail.Folder
 }
 
+func (s *Settings) GetCommunicationsMonitorEmail_ProcessedFolder() string {
+	return s.Communications.MonitorEmail.ProcessedFolder
+}
+
 type EmailIdentifier struct {
 	Key             string
 	Value           string

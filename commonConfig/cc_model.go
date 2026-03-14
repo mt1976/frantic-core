@@ -139,12 +139,13 @@ type Settings struct {
 			Admin    string `toml:"admin"`
 		} `toml:"Email"`
 		MonitorEmail struct {
-			Host     string `toml:"host"`
-			Port     int    `toml:"port"`
-			User     string `toml:"user"`
-			Password string `toml:"password"`
-			Folder   string `toml:"folder"`
-			Target   []struct {
+			Host            string `toml:"host"`
+			Port            int    `toml:"port"`
+			User            string `toml:"user"`
+			Password        string `toml:"password"`
+			Folder          string `toml:"folder"`
+			ProcessedFolder string `toml:"processedFolder"`
+			Target          []struct {
 				From string `toml:"from"`
 			} `toml:"target"`
 			Identifiers struct {
