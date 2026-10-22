@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	brotli_enc "github.com/andybalholm/brotli"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func HandleBrotli(next http.Handler) http.Handler {
