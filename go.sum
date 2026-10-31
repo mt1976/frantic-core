@@ -10,8 +10,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/galsondor/go-ascii v0.0.0-20151210013816-e2eb5175fb10 h1:wg8EZEM/8jNk5KZhMVVEPq16M4CrrjMAYNsH3ZPjiac=
 github.com/galsondor/go-ascii v0.0.0-20151210013816-e2eb5175fb10/go.mod h1:TQf0oGo0I2KYcJfUbnOgrnHZrxhfVu6TW9z6q+k1I/M=
-github.com/go-chi/chi/v5 v5.3.0 h1:halUjDxhshgXHMrao5bB8eNBXo/rnzwr8m5m36glehM=
-github.com/go-chi/chi/v5 v5.3.0/go.mod h1:R+tYY2hNuVUUjxoPtqUdgBqevM9s9njzkTLutVsOCto=
+github.com/go-chi/chi/v5 v5.4.0 h1:+ufzvFTGKyin26Or5DLrlIDq4ygIDBVcj7oVNeeaYFE=
+github.com/go-chi/chi/v5 v5.4.0/go.mod h1:d1IG7GtKPSjPyBP365PH8sAGVHk3qfB/IhjFNRH1wWM=
 github.com/goforj/godump v1.9.0 h1:Y/APfWKQKnJetXgVJxDqD7vEpTGSgAwbKJGmj0UAteI=
 github.com/goforj/godump v1.9.0/go.mod h1:/Vy+p50JtOkwsFN5dA1HQ7LS5gtPk3f61DaP4UR2o4s=
 github.com/gopherjs/gopherjs v1.17.2 h1:fQnZVsXk8uxXIStYb0N4bGk7jeyTalG/wsZjQ25dO0g=
