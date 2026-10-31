@@ -19,7 +19,7 @@ require (
 	github.com/alitto/pond/v2 v2.7.0
 	github.com/andybalholm/brotli v1.2.0
 	github.com/galsondor/go-ascii v0.0.0-20151210013816-e2eb5175fb10
-	github.com/go-chi/chi/v5 v5.3.0
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/goforj/godump v1.9.0
 	github.com/gregdel/pushover v1.4.0
 	github.com/leekchan/accounting v1.0.0
